@@ -552,47 +552,71 @@
     </div>
 </div>
 
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <script>
     // Global variables
     let currentUser = null;
-    let gapi = null;
+    const CLIENT_ID = '386767092153-v5rp0hcbsbujj813ovt44kbiju721oev.apps.googleusercontent.com';
 
     // Initialize the app
     function initializeApp() {
-        // In a real implementation, you would load the Google API
-        // For this demo, we'll simulate the authentication process
-        console.log('App initialized');
-        
-        // Check if user is already signed in (simulate with localStorage)
+        // Initialize Google Identity Services
+        google.accounts.id.initialize({
+            client_id: CLIENT_ID,
+            callback: handleCredentialResponse
+        });
+
+        // Check if user is already signed in
         const savedUser = localStorage.getItem('reunionHillUser');
         if (savedUser) {
             currentUser = JSON.parse(savedUser);
             showMainContent();
+        } else {
+            // Render the sign-in button
+            google.accounts.id.renderButton(
+                document.querySelector('.sign-in-btn'),
+                { theme: 'outline', size: 'large', text: 'signin_with', shape: 'rectangular' }
+            );
         }
     }
 
-    // Sign in function
-    function signIn() {
-        // In a real implementation, this would use Google OAuth
-        // For demo purposes, we'll simulate a successful sign-in
+    // Handle the credential response from Google
+    function handleCredentialResponse(response) {
+        // Decode the JWT token
+        const responsePayload = decodeJwtResponse(response.credential);
         
-        // Simulate Google sign-in
-        const mockUser = {
-            name: 'Family Member',
-            email: 'member@example.com',
-            picture: 'https://via.placeholder.com/50x50/667eea/ffffff?text=FM'
+        currentUser = {
+            name: responsePayload.name,
+            email: responsePayload.email,
+            picture: responsePayload.picture
         };
         
-        currentUser = mockUser;
         localStorage.setItem('reunionHillUser', JSON.stringify(currentUser));
         showMainContent();
     }
 
+    // Decode JWT token
+    function decodeJwtResponse(token) {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+        return JSON.parse(jsonPayload);
+    }
+
+    // Sign in function (fallback)
+    function signIn() {
+        google.accounts.id.prompt();
+    }
+
     // Sign out function
     function signOut() {
+        google.accounts.id.disableAutoSelect();
         currentUser = null;
         localStorage.removeItem('reunionHillUser');
         showAuthSection();
+        location.reload(); // Refresh to show sign-in button again
     }
 
     // Show main content after authentication
