@@ -157,31 +157,39 @@
     }
 
     .modal-content {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
         background: white;
-        padding: 30px;
-        border-radius: 15px;
-        max-width: 90%;
-        max-height: 90%;
+        padding: 20px;
         overflow-y: auto;
-        box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        box-shadow: none;
+        z-index: 1001;
     }
 
     .close-btn {
-        position: absolute;
-        top: 15px;
-        right: 20px;
-        font-size: 24px;
+        position: fixed;
+        top: 20px;
+        right: 30px;
+        font-size: 32px;
         cursor: pointer;
-        background: none;
-        border: none;
-        color: #999;
+        background: #fff;
+        border: 2px solid #ddd;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #666;
+        z-index: 1002;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     }
 
     .close-btn:hover {
+        background: #f0f0f0;
         color: #333;
     }
 
@@ -265,9 +273,23 @@
         display: none;
     }
 
+    .modal-content h2 {
+        margin-top: 60px;
+        margin-bottom: 30px;
+        text-align: center;
+        color: #667eea;
+        font-size: 2.5em;
+    }
+
+    .modal-content h3 {
+        color: #667eea;
+        font-size: 1.8em;
+        margin-bottom: 20px;
+    }
+
     iframe {
         width: 100%;
-        height: 600px;
+        height: calc(100vh - 140px);
         border: none;
         border-radius: 10px;
     }
@@ -343,6 +365,38 @@
             font-size: 14px;
             padding: 8px 15px;
         }
+
+        .modal-content {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            padding: 10px;
+            border-radius: 0;
+        }
+
+        .close-btn {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            font-size: 28px;
+            width: 45px;
+            height: 45px;
+            z-index: 1002;
+        }
+
+        .modal-content h2 {
+            margin-top: 50px;
+            font-size: 2em;
+        }
+
+        iframe {
+            width: 100%;
+            height: calc(100vh - 120px);
+            border: none;
+            border-radius: 5px;
+        }
     }
 </style>
 ```
@@ -365,7 +419,6 @@
                 <div style="font-size: 0.9em; color: #666;" id="userEmail"></div>
             </div>
         </div>
-        <button class="sign-out-btn" onclick="signOut()">Sign Out</button>
     </div>
 
     <!-- Authentication Section -->
@@ -429,6 +482,13 @@
             <h3>Contact Admin</h3>
             <p>Send a message to the administrator</p>
         </div>
+
+        <!-- Sign Out Card -->
+        <div class="feature-card" onclick="signOut()">
+            <div class="feature-icon">🚪</div>
+            <h3>Sign Out</h3>
+            <p>Sign out of your account</p>
+        </div>
     </div>
 </div>
 
@@ -437,14 +497,14 @@
     <div class="modal-content">
         <button class="close-btn" onclick="closeModal('reservationModal')">&times;</button>
         <h2>Make a Reservation</h2>
-        <p style="margin-bottom: 20px;">Use the form below to request your reservation dates:</p>
+        <p style="text-align: center; margin-bottom: 30px; font-size: 1.1em; color: #666;">Use the form below to request your reservation dates:</p>
         <iframe src="https://docs.google.com/forms/d/e/1FjbgkL2A_DDPJeU9BRpjcGMTCsKOV_IBS_wPNRC68G0/viewform?embedded=true"></iframe>
     </div>
 </div>
 
 <!-- Directory Modal -->
 <div class="modal" id="directoryModal">
-    <div class="modal-content" style="max-width: 800px;">
+    <div class="modal-content">
         <button class="close-btn" onclick="closeModal('directoryModal')">&times;</button>
         <h2>Family Directory</h2>
         
@@ -457,24 +517,24 @@
             <button class="family-tab" onclick="showFamily('crawford')">Crawford</button>
         </div>
         
-        <div class="directory-content" id="directoryContent">
-            <p style="text-align: center; color: #666; margin-top: 50px;">
+        <div class="directory-content" id="directoryContent" style="min-height: calc(100vh - 300px);">
+            <p style="text-align: center; color: #666; margin-top: 50px; font-size: 1.2em;">
                 Select a family above to view their directory information
             </p>
         </div>
         
-        <div style="text-align: center; margin-top: 20px;">
-            <button class="submit-btn" onclick="openDirectoryUpdateForm()">Update Directory Information</button>
+        <div style="text-align: center; margin-top: 30px;">
+            <button class="submit-btn" onclick="openDirectoryUpdateForm()" style="font-size: 1.1em; padding: 15px 40px;">Update Directory Information</button>
         </div>
     </div>
 </div>
 
 <!-- Calendar Modal -->
 <div class="modal" id="calendarModal">
-    <div class="modal-content" style="max-width: 900px;">
+    <div class="modal-content">
         <button class="close-btn" onclick="closeModal('calendarModal')">&times;</button>
         <h2>Reunion Hill Calendar</h2>
-        <iframe src="https://calendar.google.com/calendar/embed?src=reunionhill%40gmail.com&ctz=America%2FNew_York" style="height: 600px;"></iframe>
+        <iframe src="https://calendar.google.com/calendar/embed?src=reunionhill%40gmail.com&ctz=America%2FNew_York"></iframe>
     </div>
 </div>
 
@@ -496,12 +556,12 @@
 
 <!-- Photos Modal -->
 <div class="modal" id="photosModal">
-    <div class="modal-content" style="max-width: 900px;">
+    <div class="modal-content">
         <button class="close-btn" onclick="closeModal('photosModal')">&times;</button>
         <h2>Family Photos</h2>
         
         <!-- Upload Section -->
-        <div class="upload-area" onclick="document.getElementById('photoUpload').click()">
+        <div class="upload-area" onclick="document.getElementById('photoUpload').click()" style="margin: 30px 0;">
             <input type="file" id="photoUpload" multiple accept="image/*" onchange="handlePhotoUpload(event)">
             <div class="feature-icon">📷</div>
             <p><strong>Click to upload photos</strong></p>
@@ -509,7 +569,7 @@
         </div>
         
         <!-- Photos Grid -->
-        <div class="photo-grid" id="photoGrid">
+        <div class="photo-grid" id="photoGrid" style="min-height: calc(100vh - 400px);">
             <div class="photo-item">
                 <div class="photo-placeholder">📷</div>
                 <p>Sample Photo 1</p>
@@ -521,6 +581,18 @@
             <div class="photo-item">
                 <div class="photo-placeholder">📷</div>
                 <p>Sample Photo 3</p>
+            </div>
+            <div class="photo-item">
+                <div class="photo-placeholder">📷</div>
+                <p>Sample Photo 4</p>
+            </div>
+            <div class="photo-item">
+                <div class="photo-placeholder">📷</div>
+                <p>Sample Photo 5</p>
+            </div>
+            <div class="photo-item">
+                <div class="photo-placeholder">📷</div>
+                <p>Sample Photo 6</p>
             </div>
         </div>
     </div>
@@ -694,22 +766,31 @@
         // Add active class to clicked tab
         event.target.classList.add('active');
         
-        // Update directory content
+        // Update directory content with placeholder that explains next steps
         const content = document.getElementById('directoryContent');
         content.innerHTML = `
             <h3>${familyName.charAt(0).toUpperCase() + familyName.slice(1)} Family Directory</h3>
             <div style="background: white; padding: 20px; border-radius: 8px; margin-top: 15px;">
-                <p style="color: #666; text-align: center; padding: 40px;">
-                    Directory information for the ${familyName.charAt(0).toUpperCase() + familyName.slice(1)} family will be displayed here.<br><br>
-                    <em>This will be populated from your Google Sheet directory data.</em>
+                <p style="color: #667eea; text-align: center; padding: 20px; font-size: 1.1em;">
+                    <strong>📋 Ready to Connect to Your Google Sheets!</strong>
                 </p>
+                <p style="color: #666; text-align: center; padding: 20px; line-height: 1.6;">
+                    The ${familyName.charAt(0).toUpperCase() + familyName.slice(1)} family directory will display here once we connect it to your Google Sheets.<br><br>
+                    <strong>Next Step:</strong> We need to set up the Google Sheets API connection to pull your family directory data from the "${familyName.charAt(0).toUpperCase() + familyName.slice(1)}" tab in your Google Sheet.
+                </p>
+                <div style="text-align: center; margin-top: 20px;">
+                    <button onclick="alert('To connect your Google Sheets directory data, we need to set up the Google Sheets API. This will be our next step!')" 
+                            style="background: #667eea; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
+                        📊 Set Up Google Sheets Connection
+                    </button>
+                </div>
             </div>
         `;
     }
 
     function openDirectoryUpdateForm() {
-        // This will open a Google Form for directory updates
-        window.open('https://docs.google.com/forms/d/e/FORM_ID_HERE/viewform', '_blank');
+        // Open a new Google Form for directory updates in a new tab
+        window.open('https://docs.google.com/forms/d/e/1FAIpQLSfJ8n7ZGqKvP2wFqZx-PLACEHOLDER-FORM-ID/viewform', '_blank');
     }
 
     // Photo upload function
