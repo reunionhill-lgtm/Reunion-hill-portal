@@ -289,9 +289,10 @@
 
     iframe {
         width: 100%;
-        height: calc(100vh - 140px);
+        flex: 1;
         border: none;
-        border-radius: 10px;
+        border-radius: 5px;
+        min-height: 400px;
     }
 
     .contact-form {
@@ -372,30 +373,33 @@
             left: 0;
             width: 100vw;
             height: 100vh;
-            padding: 10px;
+            padding: 5px;
             border-radius: 0;
+            display: flex;
+            flex-direction: column;
         }
 
         .close-btn {
             position: fixed;
-            top: 10px;
-            right: 10px;
-            font-size: 28px;
-            width: 45px;
-            height: 45px;
+            top: 5px;
+            right: 5px;
+            font-size: 24px;
+            width: 40px;
+            height: 40px;
             z-index: 1002;
         }
 
         .modal-content h2 {
-            margin-top: 50px;
-            font-size: 2em;
+            margin-top: 45px;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+            flex-shrink: 0;
         }
 
         iframe {
-            width: 100%;
-            height: calc(100vh - 120px);
-            border: none;
-            border-radius: 5px;
+            flex: 1;
+            min-height: 300px;
+            border-radius: 3px;
         }
     }
 </style>
@@ -497,8 +501,10 @@
     <div class="modal-content">
         <button class="close-btn" onclick="closeModal('reservationModal')">&times;</button>
         <h2>Make a Reservation</h2>
-        <p style="text-align: center; margin-bottom: 30px; font-size: 1.1em; color: #666;">Use the form below to request your reservation dates:</p>
-        <iframe src="https://docs.google.com/forms/d/e/1FjbgkL2A_DDPJeU9BRpjcGMTCsKOV_IBS_wPNRC68G0/viewform?embedded=true"></iframe>
+        <div class="modal-body">
+            <p style="text-align: center; margin-bottom: 20px; font-size: 1.1em; color: #666;">Use the form below to request your reservation dates:</p>
+            <iframe src="https://docs.google.com/forms/d/e/1FjbgkL2A_DDPJeU9BRpjcGMTCsKOV_IBS_wPNRC68G0/viewform?embedded=true" frameborder="0" marginheight="0" marginwidth="0">Loading...</iframe>
+        </div>
     </div>
 </div>
 
@@ -507,24 +513,25 @@
     <div class="modal-content">
         <button class="close-btn" onclick="closeModal('directoryModal')">&times;</button>
         <h2>Family Directory</h2>
-        
-        <div class="family-tabs">
-            <button class="family-tab active" onclick="showFamily('jennings')">Jennings</button>
-            <button class="family-tab" onclick="showFamily('almeida')">Almeida</button>
-            <button class="family-tab" onclick="showFamily('evans')">Evans</button>
-            <button class="family-tab" onclick="showFamily('patteson')">Patteson</button>
-            <button class="family-tab" onclick="showFamily('riley')">Riley</button>
-            <button class="family-tab" onclick="showFamily('crawford')">Crawford</button>
-        </div>
-        
-        <div class="directory-content" id="directoryContent" style="min-height: calc(100vh - 300px);">
-            <p style="text-align: center; color: #666; margin-top: 50px; font-size: 1.2em;">
-                Select a family above to view their directory information
-            </p>
-        </div>
-        
-        <div style="text-align: center; margin-top: 30px;">
-            <button class="submit-btn" onclick="openDirectoryUpdateForm()" style="font-size: 1.1em; padding: 15px 40px;">Update Directory Information</button>
+        <div class="modal-body">
+            <div class="family-tabs">
+                <button class="family-tab active" onclick="showFamily('jennings')">Jennings</button>
+                <button class="family-tab" onclick="showFamily('almeida')">Almeida</button>
+                <button class="family-tab" onclick="showFamily('evans')">Evans</button>
+                <button class="family-tab" onclick="showFamily('patteson')">Patteson</button>
+                <button class="family-tab" onclick="showFamily('riley')">Riley</button>
+                <button class="family-tab" onclick="showFamily('crawford')">Crawford</button>
+            </div>
+            
+            <div class="directory-content" id="directoryContent" style="flex: 1; min-height: 200px;">
+                <p style="text-align: center; color: #666; margin-top: 50px; font-size: 1.2em;">
+                    Select a family above to view their directory information
+                </p>
+            </div>
+            
+            <div style="text-align: center; margin-top: 20px; padding: 20px 0;">
+                <button class="submit-btn" onclick="openDirectoryUpdateForm()" style="font-size: 1.1em; padding: 15px 40px;">Update Directory Information</button>
+            </div>
         </div>
     </div>
 </div>
@@ -534,7 +541,9 @@
     <div class="modal-content">
         <button class="close-btn" onclick="closeModal('calendarModal')">&times;</button>
         <h2>Reunion Hill Calendar</h2>
-        <iframe src="https://calendar.google.com/calendar/embed?src=reunionhill%40gmail.com&ctz=America%2FNew_York"></iframe>
+        <div class="modal-body">
+            <iframe src="https://calendar.google.com/calendar/embed?src=reunionhill%40gmail.com&ctz=America%2FNew_York" frameborder="0" marginheight="0" marginwidth="0">Loading...</iframe>
+        </div>
     </div>
 </div>
 
