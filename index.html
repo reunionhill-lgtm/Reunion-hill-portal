@@ -544,17 +544,16 @@
             </div>
             
             <div class="directory-content" id="directoryContent">
-                <div style="text-align: center; padding: 40px;">
-                    <div style="font-size: 3em; margin-bottom: 20px;">📋</div>
-                    <h3 style="color: #667eea; margin-bottom: 20px;">Family Directory Access</h3>
-                    <p style="color: #666; line-height: 1.6; margin-bottom: 30px;">
-                        Click on any family name above to view their directory information.<br>
-                        Each family's details will open in a new tab for easy viewing and editing.
-                    </p>
-                    <p style="color: #888; font-size: 0.9em;">
-                        Family members can update their own information directly in the Google Sheet.
-                    </p>
-                </div>
+                <p style="text-align: center; color: #666; margin-top: 50px; font-size: 1.2em;">
+                    Select a family above to view their directory information
+                </p>
+            </div>
+            
+            <div style="text-align: center; margin-top: 30px;">
+                <button class="submit-btn" onclick="openDirectoryUpdateForm()" 
+                        style="font-size: 1.1em; padding: 15px 40px;">
+                    Update Directory Information
+                </button>
             </div>
         </div>
     </div>
@@ -652,84 +651,33 @@
 </div>
 
 <script src="https://accounts.google.com/gsi/client" async defer></script>
-<script src="https://apis.google.com/js/api.js" async defer></script>
 <script>
     const CLIENT_ID = '386767092153-v5rp0hcbsbujj813ovt44kbiju721oev.apps.googleusercontent.com';
-    const API_KEY = 'AIzaSyBh56ghg1HITnM_ejvf-Vyqq12dV98dtZ4'; // Your actual API key
-    const SHEETS_ID = '1Fj6JKLC6fZdEU8QbZXr43JNH__8ec8NjEz0aCDLQRXY';
-    const DISCOVERY_DOC = 'https://sheets.googleapis.com/$discovery/rest?version=v4';
-    const SCOPES = 'https://www.googleapis.com/auth/spreadsheets';
-    
     let currentUser = null;
-    let gisInited = false;
-    let gapiInited = false;
-    let tokenClient;
 
     function initializeApp() {
-        initializeGapi();
-        initializeGis();
-    }
-
-    async function initializeGapi() {
-        if (typeof gapi !== 'undefined') {
-            await gapi.load('client', initializeGapiClient);
-        } else {
-            setTimeout(initializeGapi, 100);
-        }
-    }
-
-    async function initializeGapiClient() {
-        await gapi.client.init({
-            apiKey: API_KEY,
-            discoveryDocs: [DISCOVERY_DOC],
-        });
-        gapiInited = true;
-        maybeEnableButtons();
-    }
-
-    function initializeGis() {
         if (typeof google !== 'undefined' && google.accounts) {
-            // Initialize the sign-in flow
-            google.accounts.id.initialize({
-                client_id: CLIENT_ID,
-                callback: handleCredentialResponse,
-                auto_select: false,
-                cancel_on_tap_outside: false
-            });
-
-            // Initialize the OAuth token client for Sheets access
-            tokenClient = google.accounts.oauth2.initTokenClient({
-                client_id: CLIENT_ID,
-                scope: SCOPES,
-                callback: (tokenResponse) => {
-                    console.log('Got Sheets access token');
-                },
-            });
-
-            gisInited = true;
-            maybeEnableButtons();
-            
-            // Check if user is already signed in
-            const savedUser = localStorage.getItem('reunionHillUser');
-            if (savedUser) {
-                currentUser = JSON.parse(savedUser);
-                showMainContent();
-            } else {
-                renderGoogleSignInButton();
-            }
+            initializeGoogleSignIn();
         } else {
-            setTimeout(initializeGis, 100);
-        }
-    }
-
-    function maybeEnableButtons() {
-        if (gapiInited && gisInited) {
-            console.log('Google APIs initialized');
+            setTimeout(initializeApp, 100);
         }
     }
 
     function initializeGoogleSignIn() {
-        // This function is now handled in initializeGis()
+        google.accounts.id.initialize({
+            client_id: CLIENT_ID,
+            callback: handleCredentialResponse,
+            auto_select: false,
+            cancel_on_tap_outside: false
+        });
+
+        const savedUser = localStorage.getItem('reunionHillUser');
+        if (savedUser) {
+            currentUser = JSON.parse(savedUser);
+            showMainContent();
+        } else {
+            renderGoogleSignInButton();
+        }
     }
 
     function renderGoogleSignInButton() {
@@ -827,186 +775,19 @@
             <h3 style="color: #667eea; margin-bottom: 20px;">
                 ${familyName.charAt(0).toUpperCase() + familyName.slice(1)} Family Directory
             </h3>
-            <div id="loadingMessage" style="text-align: center; padding: 40px;">
-                <div style="font-size: 2em; margin-bottom: 15px;">⏳</div>
-                <p style="color: #666;">Requesting permission to access directory...</p>
-            </div>
-        `;
-        
-        // Automatically try to load data
-        loadFamilyData(familyName);
-    }
-
-    async function loadFamilyData(familyName) {
-        try {
-            const content = document.getElementById('directoryContent');
-            content.innerHTML = `
-                <h3 style="color: #667eea; margin-bottom: 20px;">
-                    ${familyName.charAt(0).toUpperCase() + familyName.slice(1)} Family Directory
-                </h3>
-                <div style="text-align: center; padding: 40px;">
-                    <div style="font-size: 2em; margin-bottom: 15px;">⏳</div>
-                    <p style="color: #666;">Loading family directory...</p>
-                </div>
-            `;
-
-            // Use public Google Sheets CSV export
-            const tabName = familyName.charAt(0).toUpperCase() + familyName.slice(1);
-            
-            // Try to get the sheet ID for the specific tab
-            // Since we don't know the tab IDs, we'll try a different approach
-            const csvUrl = `https://docs.google.com/spreadsheets/d/${SHEETS_ID}/gviz/tq?tqx=out:csv&sheet=${tabName}`;
-            
-            const response = await fetch(csvUrl, {
-                mode: 'cors',
-                headers: {
-                    'Accept': 'text/csv'
-                }
-            });
-            
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-            }
-            
-            const csvText = await response.text();
-            console.log('CSV data received:', csvText.substring(0, 200) + '...');
-            
-            // Parse CSV data
-            const rows = parseCSV(csvText);
-            displayFamilyData(familyName, rows);
-            
-        } catch (error) {
-            console.log('Error loading family data:', error);
-            displaySimpleMessage(familyName);
-        }
-    }
-
-    function parseCSV(csvText) {
-        const rows = [];
-        const lines = csvText.split('\n');
-        
-        for (let line of lines) {
-            if (line.trim()) {
-                // Simple CSV parsing - handles quoted fields
-                const row = [];
-                let current = '';
-                let inQuotes = false;
-                
-                for (let i = 0; i < line.length; i++) {
-                    const char = line[i];
-                    if (char === '"') {
-                        inQuotes = !inQuotes;
-                    } else if (char === ',' && !inQuotes) {
-                        row.push(current.trim());
-                        current = '';
-                    } else {
-                        current += char;
-                    }
-                }
-                row.push(current.trim());
-                rows.push(row);
-            }
-        }
-        return rows;
-    }
-
-    function displaySimpleMessage(familyName) {
-        const content = document.getElementById('directoryContent');
-        content.innerHTML = `
-            <h3 style="color: #667eea; margin-bottom: 20px;">
-                ${familyName.charAt(0).toUpperCase() + familyName.slice(1)} Family Directory
-            </h3>
             <div style="background: white; padding: 30px; border-radius: 10px; text-align: center;">
                 <div style="font-size: 3em; margin-bottom: 20px;">📋</div>
                 <p style="color: #667eea; font-size: 1.2em; font-weight: bold; margin-bottom: 15px;">
-                    Directory Loading...
+                    Ready to Connect Your Google Sheets!
                 </p>
                 <p style="color: #666; line-height: 1.6; margin-bottom: 25px;">
-                    Setting up connection to the ${familyName.charAt(0).toUpperCase() + familyName.slice(1)} family directory.
-                    Make sure the Google Sheet has the correct tab names.
+                    This will display the ${familyName.charAt(0).toUpperCase() + familyName.slice(1)} family directory 
+                    once we connect it to your Google Sheets data.
                 </p>
-                <button onclick="loadFamilyData('${familyName}')" 
+                <button onclick="alert('Next step: Set up Google Sheets API connection!')" 
                         style="background: #667eea; color: white; border: none; padding: 12px 25px; 
                                border-radius: 5px; cursor: pointer; font-size: 1em;">
-                    🔄 Retry
-                </button>
-            </div>
-        `;
-    }
-
-    function displayRestrictedMessage(familyName) {
-        const content = document.getElementById('directoryContent');
-        content.innerHTML = `
-            <h3 style="color: #667eea; margin-bottom: 20px;">
-                ${familyName.charAt(0).toUpperCase() + familyName.slice(1)} Family Directory
-            </h3>
-            <div style="background: white; padding: 30px; border-radius: 10px; text-align: center;">
-                <div style="font-size: 3em; margin-bottom: 20px;">🔐</div>
-                <p style="color: #667eea; font-size: 1.2em; font-weight: bold; margin-bottom: 15px;">
-                    Access Restricted
-                </p>
-                <p style="color: #666; line-height: 1.6; margin-bottom: 25px;">
-                    This directory requires special permission to view. Please contact the administrator 
-                    at reunionhill@gmail.com to request access to the family directory.
-                </p>
-                <p style="color: #666; font-size: 0.9em;">
-                    Only authorized family members can view directory information.
-                </p>
-            </div>
-        `;
-    }
-
-    function displayFamilyData(familyName, values) {
-        const content = document.getElementById('directoryContent');
-        
-        if (!values || values.length === 0) {
-            displayFallbackMessage(familyName);
-            return;
-        }
-
-        let html = `
-            <h3 style="color: #667eea; margin-bottom: 20px;">
-                ${familyName.charAt(0).toUpperCase() + familyName.slice(1)} Family Directory
-            </h3>
-            <div style="background: white; padding: 20px; border-radius: 10px;">
-        `;
-
-        // Display the data in a simple format
-        for (let i = 0; i < values.length; i++) {
-            const row = values[i];
-            if (row && row.length > 0 && row[0] && row[0].trim() !== '') {
-                html += `<div style="margin-bottom: 15px; padding: 10px; border-left: 4px solid #667eea;">`;
-                for (let j = 0; j < row.length; j++) {
-                    if (row[j] && row[j].trim() !== '') {
-                        html += `<div style="margin-bottom: 5px;">${row[j]}</div>`;
-                    }
-                }
-                html += `</div>`;
-            }
-        }
-
-        html += `</div>`;
-        content.innerHTML = html;
-    }
-
-    function displayFallbackMessage(familyName) {
-        const content = document.getElementById('directoryContent');
-        content.innerHTML = `
-            <h3 style="color: #667eea; margin-bottom: 20px;">
-                ${familyName.charAt(0).toUpperCase() + familyName.slice(1)} Family Directory
-            </h3>
-            <div style="background: white; padding: 30px; border-radius: 10px; text-align: center;">
-                <div style="font-size: 3em; margin-bottom: 20px;">🔐</div>
-                <p style="color: #667eea; font-size: 1.2em; font-weight: bold; margin-bottom: 15px;">
-                    Loading Directory...
-                </p>
-                <p style="color: #666; line-height: 1.6; margin-bottom: 25px;">
-                    Please grant permission to access the family directory when prompted.
-                </p>
-                <button onclick="loadFamilyData('${familyName}')" 
-                        style="background: #667eea; color: white; border: none; padding: 12px 25px; 
-                               border-radius: 5px; cursor: pointer; font-size: 1em;">
-                    🔄 Request Access
+                    📊 Connect Google Sheets
                 </button>
             </div>
         `;
