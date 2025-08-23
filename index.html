@@ -136,6 +136,15 @@
         border: 2px solid #667eea;
     }
 
+    .sign-out-btn {
+        background: #dc3545;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
     .modal {
         display: none;
         position: fixed;
@@ -228,6 +237,7 @@
         padding: 20px;
         border-radius: 10px;
         min-height: 300px;
+        flex: 1;
     }
 
     .photo-grid {
@@ -451,6 +461,7 @@
                 <div style="font-size: 0.9em; color: #666;" id="userEmail"></div>
             </div>
         </div>
+        <button class="sign-out-btn" onclick="signOut()">Sign Out</button>
     </div>
 
     <div class="auth-section" id="authSection">
@@ -466,7 +477,7 @@
             Sign in with Google
         </button>
         <p style="margin-top: 15px; font-size: 0.9em; color: #666;">
-            If the button doesn't work, try refreshing the page
+            Only authorized family members can access the portal
         </p>
     </div>
 
@@ -506,12 +517,6 @@
             <h3>Contact Admin</h3>
             <p>Send a message to the administrator</p>
         </div>
-
-        <div class="feature-card" onclick="signOut()">
-            <div class="feature-icon">🚪</div>
-            <h3>Sign Out</h3>
-            <p>Sign out of your account</p>
-        </div>
     </div>
 </div>
 
@@ -544,16 +549,17 @@
             </div>
             
             <div class="directory-content" id="directoryContent">
-                <p style="text-align: center; color: #666; margin-top: 50px; font-size: 1.2em;">
-                    Select a family above to view their directory information
-                </p>
-            </div>
-            
-            <div style="text-align: center; margin-top: 30px;">
-                <button class="submit-btn" onclick="openDirectoryUpdateForm()" 
-                        style="font-size: 1.1em; padding: 15px 40px;">
-                    Update Directory Information
-                </button>
+                <div style="text-align: center; padding: 40px;">
+                    <div style="font-size: 3em; margin-bottom: 20px;">📋</div>
+                    <h3 style="color: #667eea; margin-bottom: 20px;">Family Directory Access</h3>
+                    <p style="color: #666; line-height: 1.6; margin-bottom: 30px;">
+                        Click on any family name above to view their directory information.<br>
+                        Each family's details will open in a new tab for easy viewing and editing.
+                    </p>
+                    <p style="color: #888; font-size: 0.9em;">
+                        Family members can update their own information directly in the Google Sheet.
+                    </p>
+                </div>
             </div>
         </div>
     </div>
@@ -653,6 +659,7 @@
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script>
     const CLIENT_ID = '386767092153-v5rp0hcbsbujj813ovt44kbiju721oev.apps.googleusercontent.com';
+    const SHEETS_ID = '1Fj6JKLC6fZdEU8QbZXr43JNH__8ec8NjEz0aCDLQRXY';
     let currentUser = null;
 
     function initializeApp() {
@@ -764,43 +771,32 @@
     }
 
     function showFamily(familyName) {
-        document.querySelectorAll('.family-tab').forEach(tab => {
-            tab.classList.remove('active');
-        });
+        const sheetUrl = 'https://docs.google.com/spreadsheets/d/1Fj6JKLC6fZdEU8QbZXr43JNH__8ec8NjEz0aCDLQRXY/edit#gid=';
         
-        event.target.classList.add('active');
+        const tabIds = {
+            'jennings': '0',       
+            'almeida': '1',        
+            'evans': '2',          
+            'patteson': '3',       
+            'riley': '4',          
+            'crawford': '5'        
+        };
         
-        const content = document.getElementById('directoryContent');
-        content.innerHTML = `
-            <h3 style="color: #667eea; margin-bottom: 20px;">
-                ${familyName.charAt(0).toUpperCase() + familyName.slice(1)} Family Directory
-            </h3>
-            <div style="background: white; padding: 30px; border-radius: 10px; text-align: center;">
-                <div style="font-size: 3em; margin-bottom: 20px;">📋</div>
-                <p style="color: #667eea; font-size: 1.2em; font-weight: bold; margin-bottom: 15px;">
-                    Ready to Connect Your Google Sheets!
-                </p>
-                <p style="color: #666; line-height: 1.6; margin-bottom: 25px;">
-                    This will display the ${familyName.charAt(0).toUpperCase() + familyName.slice(1)} family directory 
-                    once we connect it to your Google Sheets data.
-                </p>
-                <button onclick="alert('Next step: Set up Google Sheets API connection!')" 
-                        style="background: #667eea; color: white; border: none; padding: 12px 25px; 
-                               border-radius: 5px; cursor: pointer; font-size: 1em;">
-                    📊 Connect Google Sheets
-                </button>
-            </div>
-        `;
-    }
-
-    function openDirectoryUpdateForm() {
-        alert('Directory update form will be created in the next development step.');
+        const tabId = tabIds[familyName.toLowerCase()];
+        
+        if (tabId !== undefined) {
+            window.open(sheetUrl + tabId, '_blank');
+        } else {
+            window.open('https://docs.google.com/spreadsheets/d/1Fj6JKLC6fZdEU8QbZXr43JNH__8ec8NjEz0aCDLQRXY/edit', '_blank');
+        }
+        
+        closeModal('directoryModal');
     }
 
     function handlePhotoUpload(event) {
         const files = event.target.files;
         if (files.length > 0) {
-            alert(`Selected ${files.length} photo(s). Photo upload to Google Drive will be implemented next.`);
+            alert(`Selected ${files.length} photo(s). Photo upload functionality can be added later.`);
             console.log('Photos selected:', Array.from(files).map(f => f.name));
         }
     }
@@ -815,8 +811,8 @@
             message: document.getElementById('messageBody').value
         };
         
-        alert('Message prepared! Email functionality will be implemented next.');
-        console.log('Contact form data:', formData);
+        const mailtoLink = `mailto:reunionhill@gmail.com?subject=${encodeURIComponent(formData.subject)}&body=${encodeURIComponent(`From: ${formData.name} (${formData.email})\n\n${formData.message}`)}`;
+        window.location.href = mailtoLink;
         
         document.getElementById('contactForm').reset();
         closeModal('contactModal');
