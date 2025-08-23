@@ -816,31 +816,200 @@
     }
 
     function showFamily(familyName) {
-        // Open the Google Sheet tab for the selected family
-        const sheetUrl = 'https://docs.google.com/spreadsheets/d/1Fj6JKLC6fZdEU8QbZXr43JNH__8ec8NjEz0aCDLQRXY/edit#gid=';
+        document.querySelectorAll('.family-tab').forEach(tab => {
+            tab.classList.remove('active');
+        });
         
-        // Map family names to their Google Sheet tab IDs (you'll need to get these)
-        const tabIds = {
-            'jennings': '0',       // Replace with actual tab ID
-            'almeida': '1',        // Replace with actual tab ID  
-            'evans': '2',          // Replace with actual tab ID
-            'patteson': '3',       // Replace with actual tab ID
-            'riley': '4',          // Replace with actual tab ID
-            'crawford': '5'        // Replace with actual tab ID
-        };
+        event.target.classList.add('active');
         
-        const tabId = tabIds[familyName.toLowerCase()];
+        const content = document.getElementById('directoryContent');
+        content.innerHTML = `
+            <h3 style="color: #667eea; margin-bottom: 20px;">
+                ${familyName.charAt(0).toUpperCase() + familyName.slice(1)} Family Directory
+            </h3>
+            <div id="loadingMessage" style="text-align: center; padding: 40px;">
+                <div style="font-size: 2em; margin-bottom: 15px;">⏳</div>
+                <p style="color: #666;">Requesting permission to access directory...</p>
+            </div>
+        `;
         
-        if (tabId !== undefined) {
-            // Open the specific tab in a new window
-            window.open(sheetUrl + tabId, '_blank');
-        } else {
-            // Fallback - just open the main sheet
-            window.open('https://docs.google.com/spreadsheets/d/1Fj6JKLC6fZdEU8QbZXr43JNH__8ec8NjEz0aCDLQRXY/edit', '_blank');
+        // Automatically try to load data
+        loadFamilyData(familyName);
+    }
+
+    async function loadFamilyData(familyName) {
+        try {
+            const content = document.getElementById('directoryContent');
+            content.innerHTML = `
+                <h3 style="color: #667eea; margin-bottom: 20px;">
+                    ${familyName.charAt(0).toUpperCase() + familyName.slice(1)} Family Directory
+                </h3>
+                <div style="text-align: center; padding: 40px;">
+                    <div style="font-size: 2em; margin-bottom: 15px;">⏳</div>
+                    <p style="color: #666;">Loading family directory...</p>
+                </div>
+            `;
+
+            // Use public Google Sheets CSV export
+            const tabName = familyName.charAt(0).toUpperCase() + familyName.slice(1);
+            
+            // Try to get the sheet ID for the specific tab
+            // Since we don't know the tab IDs, we'll try a different approach
+            const csvUrl = `https://docs.google.com/spreadsheets/d/${SHEETS_ID}/gviz/tq?tqx=out:csv&sheet=${tabName}`;
+            
+            const response = await fetch(csvUrl, {
+                mode: 'cors',
+                headers: {
+                    'Accept': 'text/csv'
+                }
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
+            const csvText = await response.text();
+            console.log('CSV data received:', csvText.substring(0, 200) + '...');
+            
+            // Parse CSV data
+            const rows = parseCSV(csvText);
+            displayFamilyData(familyName, rows);
+            
+        } catch (error) {
+            console.log('Error loading family data:', error);
+            displaySimpleMessage(familyName);
         }
+    }
+
+    function parseCSV(csvText) {
+        const rows = [];
+        const lines = csvText.split('\n');
         
-        // Close the directory modal
-        closeModal('directoryModal');
+        for (let line of lines) {
+            if (line.trim()) {
+                // Simple CSV parsing - handles quoted fields
+                const row = [];
+                let current = '';
+                let inQuotes = false;
+                
+                for (let i = 0; i < line.length; i++) {
+                    const char = line[i];
+                    if (char === '"') {
+                        inQuotes = !inQuotes;
+                    } else if (char === ',' && !inQuotes) {
+                        row.push(current.trim());
+                        current = '';
+                    } else {
+                        current += char;
+                    }
+                }
+                row.push(current.trim());
+                rows.push(row);
+            }
+        }
+        return rows;
+    }
+
+    function displaySimpleMessage(familyName) {
+        const content = document.getElementById('directoryContent');
+        content.innerHTML = `
+            <h3 style="color: #667eea; margin-bottom: 20px;">
+                ${familyName.charAt(0).toUpperCase() + familyName.slice(1)} Family Directory
+            </h3>
+            <div style="background: white; padding: 30px; border-radius: 10px; text-align: center;">
+                <div style="font-size: 3em; margin-bottom: 20px;">📋</div>
+                <p style="color: #667eea; font-size: 1.2em; font-weight: bold; margin-bottom: 15px;">
+                    Directory Loading...
+                </p>
+                <p style="color: #666; line-height: 1.6; margin-bottom: 25px;">
+                    Setting up connection to the ${familyName.charAt(0).toUpperCase() + familyName.slice(1)} family directory.
+                    Make sure the Google Sheet has the correct tab names.
+                </p>
+                <button onclick="loadFamilyData('${familyName}')" 
+                        style="background: #667eea; color: white; border: none; padding: 12px 25px; 
+                               border-radius: 5px; cursor: pointer; font-size: 1em;">
+                    🔄 Retry
+                </button>
+            </div>
+        `;
+    }
+
+    function displayRestrictedMessage(familyName) {
+        const content = document.getElementById('directoryContent');
+        content.innerHTML = `
+            <h3 style="color: #667eea; margin-bottom: 20px;">
+                ${familyName.charAt(0).toUpperCase() + familyName.slice(1)} Family Directory
+            </h3>
+            <div style="background: white; padding: 30px; border-radius: 10px; text-align: center;">
+                <div style="font-size: 3em; margin-bottom: 20px;">🔐</div>
+                <p style="color: #667eea; font-size: 1.2em; font-weight: bold; margin-bottom: 15px;">
+                    Access Restricted
+                </p>
+                <p style="color: #666; line-height: 1.6; margin-bottom: 25px;">
+                    This directory requires special permission to view. Please contact the administrator 
+                    at reunionhill@gmail.com to request access to the family directory.
+                </p>
+                <p style="color: #666; font-size: 0.9em;">
+                    Only authorized family members can view directory information.
+                </p>
+            </div>
+        `;
+    }
+
+    function displayFamilyData(familyName, values) {
+        const content = document.getElementById('directoryContent');
+        
+        if (!values || values.length === 0) {
+            displayFallbackMessage(familyName);
+            return;
+        }
+
+        let html = `
+            <h3 style="color: #667eea; margin-bottom: 20px;">
+                ${familyName.charAt(0).toUpperCase() + familyName.slice(1)} Family Directory
+            </h3>
+            <div style="background: white; padding: 20px; border-radius: 10px;">
+        `;
+
+        // Display the data in a simple format
+        for (let i = 0; i < values.length; i++) {
+            const row = values[i];
+            if (row && row.length > 0 && row[0] && row[0].trim() !== '') {
+                html += `<div style="margin-bottom: 15px; padding: 10px; border-left: 4px solid #667eea;">`;
+                for (let j = 0; j < row.length; j++) {
+                    if (row[j] && row[j].trim() !== '') {
+                        html += `<div style="margin-bottom: 5px;">${row[j]}</div>`;
+                    }
+                }
+                html += `</div>`;
+            }
+        }
+
+        html += `</div>`;
+        content.innerHTML = html;
+    }
+
+    function displayFallbackMessage(familyName) {
+        const content = document.getElementById('directoryContent');
+        content.innerHTML = `
+            <h3 style="color: #667eea; margin-bottom: 20px;">
+                ${familyName.charAt(0).toUpperCase() + familyName.slice(1)} Family Directory
+            </h3>
+            <div style="background: white; padding: 30px; border-radius: 10px; text-align: center;">
+                <div style="font-size: 3em; margin-bottom: 20px;">🔐</div>
+                <p style="color: #667eea; font-size: 1.2em; font-weight: bold; margin-bottom: 15px;">
+                    Loading Directory...
+                </p>
+                <p style="color: #666; line-height: 1.6; margin-bottom: 25px;">
+                    Please grant permission to access the family directory when prompted.
+                </p>
+                <button onclick="loadFamilyData('${familyName}')" 
+                        style="background: #667eea; color: white; border: none; padding: 12px 25px; 
+                               border-radius: 5px; cursor: pointer; font-size: 1em;">
+                    🔄 Request Access
+                </button>
+            </div>
+        `;
     }
 
     function openDirectoryUpdateForm() {
