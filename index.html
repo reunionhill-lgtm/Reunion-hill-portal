@@ -1,69 +1,4 @@
-/* iPad and larger mobile devices */
-@media (min-width: 481px) and (max-width: 768px) {
-.container {
-padding: 10px;
-}
-
-```
-        .header h1 {
-            font-size: 2em;
-        }
-        
-        .main-content {
-            grid-template-columns: 1fr;
-        }
-        
-        .user-info {
-            flex-direction: column;
-            gap: 15px;
-            text-align: center;
-        }
-        
-        .family-tabs {
-            justify-content: center;
-        }
-        
-        .family-tab {
-            font-size: 14px;
-            padding: 8px 15px;
-        }
-
-        .modal-content {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            padding: 5px;
-            border-radius: 0;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .close-btn {
-            position: fixed;
-            top: 5px;
-            right: 5px;
-            font-size: 24px;
-            width: 40px;
-            height: 40px;
-            z-index: 1002;
-        }
-
-        .modal-content h2 {
-            margin-top: 45px;
-            margin-bottom: 15px;
-            font-size: 1.5em;
-            flex-shrink: 0;
-        }
-
-        iframe {
-            flex: 1;
-            min-height: 300px;
-            border-radius: 3px;
-        }
-    }<!DOCTYPE html>
-```
+<!DOCTYPE html>
 
 <html lang="en">
 <head>
@@ -201,15 +136,6 @@ padding: 10px;
         border: 2px solid #667eea;
     }
 
-    .sign-out-btn {
-        background: #dc3545;
-        color: white;
-        border: none;
-        padding: 8px 16px;
-        border-radius: 5px;
-        cursor: pointer;
-    }
-
     .modal {
         display: none;
         position: fixed;
@@ -226,12 +152,29 @@ padding: 10px;
         top: 0;
         left: 0;
         width: 100%;
-        height: 100%;
+        height: 100vh;
         background: white;
         padding: 20px;
         overflow-y: auto;
-        box-shadow: none;
         z-index: 1001;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .modal-content h2 {
+        margin-top: 60px;
+        margin-bottom: 30px;
+        text-align: center;
+        color: #667eea;
+        font-size: 2.5em;
+        flex-shrink: 0;
+    }
+
+    .modal-body {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
     }
 
     .close-btn {
@@ -338,20 +281,6 @@ padding: 10px;
         display: none;
     }
 
-    .modal-content h2 {
-        margin-top: 60px;
-        margin-bottom: 30px;
-        text-align: center;
-        color: #667eea;
-        font-size: 2.5em;
-    }
-
-    .modal-content h3 {
-        color: #667eea;
-        font-size: 1.8em;
-        margin-bottom: 20px;
-    }
-
     iframe {
         width: 100%;
         flex: 1;
@@ -404,29 +333,56 @@ padding: 10px;
         background: #5a67d8;
     }
 
-    /* iPhone specific fixes */
-    @media (max-width: 480px) {
+    @media (max-width: 768px) {
+        .container {
+            padding: 10px;
+        }
+        
+        .header h1 {
+            font-size: 2em;
+        }
+        
+        .main-content {
+            grid-template-columns: 1fr;
+        }
+        
+        .user-info {
+            flex-direction: column;
+            gap: 15px;
+            text-align: center;
+        }
+        
+        .family-tabs {
+            justify-content: center;
+        }
+        
+        .family-tab {
+            font-size: 14px;
+            padding: 8px 15px;
+        }
+
         .modal-content {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            padding: 0;
-            margin: 0;
-            border-radius: 0;
-            overflow: hidden;
+            padding: 10px;
+        }
+
+        .modal-content h2 {
+            font-size: 2em;
+            margin-top: 50px;
         }
 
         .close-btn {
-            position: fixed;
-            top: 5px;
-            right: 5px;
-            font-size: 20px;
-            width: 35px;
-            height: 35px;
-            z-index: 1003;
-            background: rgba(255, 255, 255, 0.9);
+            top: 10px;
+            right: 15px;
+            font-size: 24px;
+            width: 40px;
+            height: 40px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .modal-content {
+            padding: 0;
+            overflow: hidden;
         }
 
         .modal-content h2 {
@@ -435,12 +391,12 @@ padding: 10px;
             left: 0;
             right: 0;
             margin: 0;
-            padding: 10px 50px 10px 10px;
-            font-size: 1.2em;
+            padding: 15px 50px 15px 15px;
+            font-size: 1.3em;
             background: white;
             z-index: 1002;
             border-bottom: 1px solid #eee;
-            height: 50px;
+            height: 60px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -448,16 +404,28 @@ padding: 10px;
 
         .modal-body {
             position: absolute;
-            top: 50px;
+            top: 60px;
             left: 0;
             right: 0;
             bottom: 0;
-            overflow: hidden;
+            padding: 10px;
+            overflow-y: auto;
+        }
+
+        .close-btn {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            font-size: 20px;
+            width: 35px;
+            height: 35px;
+            z-index: 1003;
+            background: rgba(255, 255, 255, 0.95);
         }
 
         iframe {
             width: 100%;
-            height: 100%;
+            height: calc(100vh - 80px);
             border: none;
             margin: 0;
             padding: 0;
@@ -475,7 +443,6 @@ padding: 10px;
         </div>
 
 ```
-    <!-- User Info Section -->
     <div class="user-info" id="userInfo">
         <div class="user-profile">
             <img class="user-avatar" id="userAvatar" src="" alt="User">
@@ -486,7 +453,6 @@ padding: 10px;
         </div>
     </div>
 
-    <!-- Authentication Section -->
     <div class="auth-section" id="authSection">
         <h2>Welcome to the Reunion Hill Family Portal</h2>
         <p style="margin: 20px 0;">Please sign in with your Google account to access family resources</p>
@@ -500,55 +466,47 @@ padding: 10px;
             Sign in with Google
         </button>
         <p style="margin-top: 15px; font-size: 0.9em; color: #666;">
-            If the button above doesn't work, try refreshing the page or enabling cookies
+            If the button doesn't work, try refreshing the page
         </p>
     </div>
 
-    <!-- Main Content -->
     <div class="main-content" id="mainContent">
-        <!-- Reservations Card -->
         <div class="feature-card" onclick="openModal('reservationModal')">
             <div class="feature-icon">📅</div>
             <h3>Make a Reservation</h3>
             <p>Reserve your dates at Reunion Hill</p>
         </div>
 
-        <!-- Directory Card -->
         <div class="feature-card" onclick="openModal('directoryModal')">
             <div class="feature-icon">👨‍👩‍👧‍👦</div>
             <h3>Family Directory</h3>
             <p>View and update family member information</p>
         </div>
 
-        <!-- Calendar Card -->
         <div class="feature-card" onclick="openModal('calendarModal')">
             <div class="feature-icon">🗓️</div>
             <h3>Family Calendar</h3>
             <p>View upcoming events and reservations</p>
         </div>
 
-        <!-- Documents Card -->
         <div class="feature-card" onclick="openModal('documentsModal')">
             <div class="feature-icon">📋</div>
             <h3>LLC Documents</h3>
             <p>Access official business documents</p>
         </div>
 
-        <!-- Photos Card -->
         <div class="feature-card" onclick="openModal('photosModal')">
             <div class="feature-icon">📸</div>
             <h3>Family Photos</h3>
             <p>View and upload family memories</p>
         </div>
 
-        <!-- Contact Card -->
         <div class="feature-card" onclick="openModal('contactModal')">
             <div class="feature-icon">✉️</div>
             <h3>Contact Admin</h3>
             <p>Send a message to the administrator</p>
         </div>
 
-        <!-- Sign Out Card -->
         <div class="feature-card" onclick="signOut()">
             <div class="feature-icon">🚪</div>
             <h3>Sign Out</h3>
@@ -557,19 +515,20 @@ padding: 10px;
     </div>
 </div>
 
-<!-- Reservation Modal -->
 <div class="modal" id="reservationModal">
     <div class="modal-content">
         <button class="close-btn" onclick="closeModal('reservationModal')">&times;</button>
         <h2>Make a Reservation</h2>
         <div class="modal-body">
-            <p style="text-align: center; margin-bottom: 20px; font-size: 1.1em; color: #666;">Use the form below to request your reservation dates:</p>
-            <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSexq82ADg5c-l7JBg7HT9vfPzqpg2whpQZrjIzZ91r6fV4MFw/viewform?embedded=true" frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>
+            <p style="text-align: center; margin-bottom: 20px; font-size: 1.1em; color: #666;">
+                Use the form below to request your reservation dates:
+            </p>
+            <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSexq82ADg5c-l7JBg7HT9vfPzqpg2whpQZrjIzZ91r6fV4MFw/viewform?embedded=true" 
+                    frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>
         </div>
     </div>
 </div>
 
-<!-- Directory Modal -->
 <div class="modal" id="directoryModal">
     <div class="modal-content">
         <button class="close-btn" onclick="closeModal('directoryModal')">&times;</button>
@@ -584,139 +543,127 @@ padding: 10px;
                 <button class="family-tab" onclick="showFamily('crawford')">Crawford</button>
             </div>
             
-            <div class="directory-content" id="directoryContent" style="flex: 1; min-height: 200px;">
+            <div class="directory-content" id="directoryContent">
                 <p style="text-align: center; color: #666; margin-top: 50px; font-size: 1.2em;">
                     Select a family above to view their directory information
                 </p>
             </div>
             
-            <div style="text-align: center; margin-top: 20px; padding: 20px 0;">
-                <button class="submit-btn" onclick="openDirectoryUpdateForm()" style="font-size: 1.1em; padding: 15px 40px;">Update Directory Information</button>
+            <div style="text-align: center; margin-top: 30px;">
+                <button class="submit-btn" onclick="openDirectoryUpdateForm()" 
+                        style="font-size: 1.1em; padding: 15px 40px;">
+                    Update Directory Information
+                </button>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Calendar Modal -->
 <div class="modal" id="calendarModal">
     <div class="modal-content">
         <button class="close-btn" onclick="closeModal('calendarModal')">&times;</button>
         <h2>Reunion Hill Calendar</h2>
         <div class="modal-body">
-            <iframe src="https://calendar.google.com/calendar/embed?src=reunionhill%40gmail.com&ctz=America%2FNew_York" frameborder="0" marginheight="0" marginwidth="0">Loading...</iframe>
+            <iframe src="https://calendar.google.com/calendar/embed?src=reunionhill%40gmail.com&ctz=America%2FNew_York" 
+                    frameborder="0" marginheight="0" marginwidth="0">Loading calendar...</iframe>
         </div>
     </div>
 </div>
 
-<!-- Documents Modal -->
 <div class="modal" id="documentsModal">
     <div class="modal-content">
         <button class="close-btn" onclick="closeModal('documentsModal')">&times;</button>
         <h2>LLC Business Documents</h2>
-        <p style="margin-bottom: 20px; text-align: center; color: #666;">
-            Access to official LLC documents requires administrator approval.<br>
-            Please contact reunionhill@gmail.com for access.
-        </p>
-        <div style="text-align: center; padding: 40px;">
-            <div class="feature-icon">🔒</div>
-            <p>Document access coming soon...</p>
+        <div class="modal-body">
+            <p style="text-align: center; color: #666; margin-bottom: 30px; font-size: 1.1em;">
+                Access to official LLC documents requires administrator approval.<br>
+                Please contact reunionhill@gmail.com for access.
+            </p>
+            <div style="text-align: center; padding: 60px;">
+                <div class="feature-icon">🔒</div>
+                <p style="font-size: 1.2em; color: #666;">Document access coming soon...</p>
+            </div>
         </div>
     </div>
 </div>
 
-<!-- Photos Modal -->
 <div class="modal" id="photosModal">
     <div class="modal-content">
         <button class="close-btn" onclick="closeModal('photosModal')">&times;</button>
         <h2>Family Photos</h2>
-        
-        <!-- Upload Section -->
-        <div class="upload-area" onclick="document.getElementById('photoUpload').click()" style="margin: 30px 0;">
-            <input type="file" id="photoUpload" multiple accept="image/*" onchange="handlePhotoUpload(event)">
-            <div class="feature-icon">📷</div>
-            <p><strong>Click to upload photos</strong></p>
-            <p style="font-size: 0.9em; color: #666;">Select one or more image files</p>
-        </div>
-        
-        <!-- Photos Grid -->
-        <div class="photo-grid" id="photoGrid" style="min-height: calc(100vh - 400px);">
-            <div class="photo-item">
-                <div class="photo-placeholder">📷</div>
-                <p>Sample Photo 1</p>
+        <div class="modal-body">
+            <div class="upload-area" onclick="document.getElementById('photoUpload').click()" 
+                 style="margin-bottom: 30px;">
+                <input type="file" id="photoUpload" multiple accept="image/*" onchange="handlePhotoUpload(event)">
+                <div class="feature-icon">📷</div>
+                <p><strong>Click to upload photos</strong></p>
+                <p style="font-size: 0.9em; color: #666; margin-top: 10px;">
+                    Select one or more image files
+                </p>
             </div>
-            <div class="photo-item">
-                <div class="photo-placeholder">📷</div>
-                <p>Sample Photo 2</p>
-            </div>
-            <div class="photo-item">
-                <div class="photo-placeholder">📷</div>
-                <p>Sample Photo 3</p>
-            </div>
-            <div class="photo-item">
-                <div class="photo-placeholder">📷</div>
-                <p>Sample Photo 4</p>
-            </div>
-            <div class="photo-item">
-                <div class="photo-placeholder">📷</div>
-                <p>Sample Photo 5</p>
-            </div>
-            <div class="photo-item">
-                <div class="photo-placeholder">📷</div>
-                <p>Sample Photo 6</p>
+            
+            <div class="photo-grid" id="photoGrid">
+                <div class="photo-item">
+                    <div class="photo-placeholder">📷</div>
+                    <p>Sample Photo 1</p>
+                </div>
+                <div class="photo-item">
+                    <div class="photo-placeholder">📷</div>
+                    <p>Sample Photo 2</p>
+                </div>
+                <div class="photo-item">
+                    <div class="photo-placeholder">📷</div>
+                    <p>Sample Photo 3</p>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Contact Modal -->
 <div class="modal" id="contactModal">
     <div class="modal-content">
         <button class="close-btn" onclick="closeModal('contactModal')">&times;</button>
         <h2>Contact Administrator</h2>
-        <div class="contact-form">
-            <form id="contactForm" onsubmit="sendMessage(event)">
-                <div class="form-group">
-                    <label for="senderName">Your Name</label>
-                    <input type="text" id="senderName" required>
-                </div>
-                <div class="form-group">
-                    <label for="senderEmail">Your Email</label>
-                    <input type="email" id="senderEmail" required>
-                </div>
-                <div class="form-group">
-                    <label for="messageSubject">Subject</label>
-                    <input type="text" id="messageSubject" required>
-                </div>
-                <div class="form-group">
-                    <label for="messageBody">Message</label>
-                    <textarea id="messageBody" required placeholder="Type your message here..."></textarea>
-                </div>
-                <button type="submit" class="submit-btn">Send Message</button>
-            </form>
+        <div class="modal-body">
+            <div class="contact-form">
+                <form id="contactForm" onsubmit="sendMessage(event)">
+                    <div class="form-group">
+                        <label for="senderName">Your Name</label>
+                        <input type="text" id="senderName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="senderEmail">Your Email</label>
+                        <input type="email" id="senderEmail" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="messageSubject">Subject</label>
+                        <input type="text" id="messageSubject" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="messageBody">Message</label>
+                        <textarea id="messageBody" required placeholder="Type your message here..."></textarea>
+                    </div>
+                    <button type="submit" class="submit-btn">Send Message</button>
+                </form>
+            </div>
         </div>
     </div>
 </div>
 
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script>
-    // Global variables
-    let currentUser = null;
     const CLIENT_ID = '386767092153-v5rp0hcbsbujj813ovt44kbiju721oev.apps.googleusercontent.com';
+    let currentUser = null;
 
-    // Initialize the app
     function initializeApp() {
-        // Wait for Google script to load
         if (typeof google !== 'undefined' && google.accounts) {
             initializeGoogleSignIn();
         } else {
-            // Retry after a short delay if Google hasn't loaded yet
             setTimeout(initializeApp, 100);
         }
     }
 
-    // Initialize Google Sign-In
     function initializeGoogleSignIn() {
-        // Initialize Google Identity Services
         google.accounts.id.initialize({
             client_id: CLIENT_ID,
             callback: handleCredentialResponse,
@@ -724,38 +671,33 @@ padding: 10px;
             cancel_on_tap_outside: false
         });
 
-        // Check if user is already signed in
         const savedUser = localStorage.getItem('reunionHillUser');
         if (savedUser) {
             currentUser = JSON.parse(savedUser);
             showMainContent();
         } else {
-            // Render the sign-in button using JavaScript
-            const signInButton = document.querySelector('.sign-in-btn');
-            signInButton.style.display = 'none'; // Hide the original button
-            
-            // Create a container for the Google button
-            const googleButtonContainer = document.createElement('div');
-            googleButtonContainer.id = 'google-signin-button';
-            signInButton.parentNode.insertBefore(googleButtonContainer, signInButton);
-            
-            // Render the Google button
-            google.accounts.id.renderButton(
-                googleButtonContainer,
-                { 
-                    theme: 'outline', 
-                    size: 'large', 
-                    text: 'signin_with',
-                    shape: 'rectangular',
-                    width: 300
-                }
-            );
+            renderGoogleSignInButton();
         }
     }
 
-    // Handle the credential response from Google
+    function renderGoogleSignInButton() {
+        const signInButton = document.querySelector('.sign-in-btn');
+        signInButton.style.display = 'none';
+        
+        const googleButtonContainer = document.createElement('div');
+        googleButtonContainer.id = 'google-signin-button';
+        signInButton.parentNode.insertBefore(googleButtonContainer, signInButton);
+        
+        google.accounts.id.renderButton(googleButtonContainer, {
+            theme: 'outline',
+            size: 'large',
+            text: 'signin_with',
+            shape: 'rectangular',
+            width: 300
+        });
+    }
+
     function handleCredentialResponse(response) {
-        // Decode the JWT token
         const responsePayload = decodeJwtResponse(response.credential);
         
         currentUser = {
@@ -768,7 +710,6 @@ padding: 10px;
         showMainContent();
     }
 
-    // Decode JWT token
     function decodeJwtResponse(token) {
         const base64Url = token.split('.')[1];
         const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
@@ -778,44 +719,40 @@ padding: 10px;
         return JSON.parse(jsonPayload);
     }
 
-    // Sign in function (fallback for manual trigger)
     function signIn() {
         if (typeof google !== 'undefined' && google.accounts) {
             google.accounts.id.prompt();
         } else {
-            alert('Google Sign-In is loading, please wait a moment and try again.');
+            alert('Google Sign-In is loading, please wait and try again.');
         }
     }
 
-    // Sign out function
     function signOut() {
-        google.accounts.id.disableAutoSelect();
+        if (typeof google !== 'undefined' && google.accounts) {
+            google.accounts.id.disableAutoSelect();
+        }
         currentUser = null;
         localStorage.removeItem('reunionHillUser');
         showAuthSection();
-        location.reload(); // Refresh to show sign-in button again
+        location.reload();
     }
 
-    // Show main content after authentication
     function showMainContent() {
         document.getElementById('authSection').style.display = 'none';
         document.getElementById('mainContent').style.display = 'grid';
         document.getElementById('userInfo').style.display = 'flex';
         
-        // Update user info
         document.getElementById('userName').textContent = currentUser.name;
         document.getElementById('userEmail').textContent = currentUser.email;
         document.getElementById('userAvatar').src = currentUser.picture;
     }
 
-    // Show authentication section
     function showAuthSection() {
         document.getElementById('authSection').style.display = 'block';
         document.getElementById('mainContent').style.display = 'none';
         document.getElementById('userInfo').style.display = 'none';
     }
 
-    // Modal functions
     function openModal(modalId) {
         document.getElementById(modalId).style.display = 'block';
         document.body.style.overflow = 'hidden';
@@ -826,74 +763,65 @@ padding: 10px;
         document.body.style.overflow = 'auto';
     }
 
-    // Family directory functions
     function showFamily(familyName) {
-        // Remove active class from all tabs
         document.querySelectorAll('.family-tab').forEach(tab => {
             tab.classList.remove('active');
         });
         
-        // Add active class to clicked tab
         event.target.classList.add('active');
         
-        // Update directory content with placeholder that explains next steps
         const content = document.getElementById('directoryContent');
         content.innerHTML = `
-            <h3>${familyName.charAt(0).toUpperCase() + familyName.slice(1)} Family Directory</h3>
-            <div style="background: white; padding: 20px; border-radius: 8px; margin-top: 15px;">
-                <p style="color: #667eea; text-align: center; padding: 20px; font-size: 1.1em;">
-                    <strong>📋 Ready to Connect to Your Google Sheets!</strong>
+            <h3 style="color: #667eea; margin-bottom: 20px;">
+                ${familyName.charAt(0).toUpperCase() + familyName.slice(1)} Family Directory
+            </h3>
+            <div style="background: white; padding: 30px; border-radius: 10px; text-align: center;">
+                <div style="font-size: 3em; margin-bottom: 20px;">📋</div>
+                <p style="color: #667eea; font-size: 1.2em; font-weight: bold; margin-bottom: 15px;">
+                    Ready to Connect Your Google Sheets!
                 </p>
-                <p style="color: #666; text-align: center; padding: 20px; line-height: 1.6;">
-                    The ${familyName.charAt(0).toUpperCase() + familyName.slice(1)} family directory will display here once we connect it to your Google Sheets.<br><br>
-                    <strong>Next Step:</strong> We need to set up the Google Sheets API connection to pull your family directory data from the "${familyName.charAt(0).toUpperCase() + familyName.slice(1)}" tab in your Google Sheet.
+                <p style="color: #666; line-height: 1.6; margin-bottom: 25px;">
+                    This will display the ${familyName.charAt(0).toUpperCase() + familyName.slice(1)} family directory 
+                    once we connect it to your Google Sheets data.
                 </p>
-                <div style="text-align: center; margin-top: 20px;">
-                    <button onclick="alert('To connect your Google Sheets directory data, we need to set up the Google Sheets API. This will be our next step!')" 
-                            style="background: #667eea; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
-                        📊 Set Up Google Sheets Connection
-                    </button>
-                </div>
+                <button onclick="alert('Next step: Set up Google Sheets API connection!')" 
+                        style="background: #667eea; color: white; border: none; padding: 12px 25px; 
+                               border-radius: 5px; cursor: pointer; font-size: 1em;">
+                    📊 Connect Google Sheets
+                </button>
             </div>
         `;
     }
 
     function openDirectoryUpdateForm() {
-        // Open a new Google Form for directory updates in a new tab
-        window.open('https://docs.google.com/forms/d/e/1FAIpQLSfJ8n7ZGqKvP2wFqZx-PLACEHOLDER-FORM-ID/viewform', '_blank');
+        alert('Directory update form will be created in the next development step.');
     }
 
-    // Photo upload function
     function handlePhotoUpload(event) {
         const files = event.target.files;
         if (files.length > 0) {
-            alert(`Selected ${files.length} photo(s) for upload. In the full implementation, these would be uploaded to Google Drive.`);
-            
-            // In a real implementation, you would upload to Google Drive here
-            console.log('Photos to upload:', Array.from(files).map(f => f.name));
+            alert(`Selected ${files.length} photo(s). Photo upload to Google Drive will be implemented next.`);
+            console.log('Photos selected:', Array.from(files).map(f => f.name));
         }
     }
 
-    // Contact form submission
     function sendMessage(event) {
         event.preventDefault();
         
-        const name = document.getElementById('senderName').value;
-        const email = document.getElementById('senderEmail').value;
-        const subject = document.getElementById('messageSubject').value;
-        const message = document.getElementById('messageBody').value;
+        const formData = {
+            name: document.getElementById('senderName').value,
+            email: document.getElementById('senderEmail').value,
+            subject: document.getElementById('messageSubject').value,
+            message: document.getElementById('messageBody').value
+        };
         
-        // In a real implementation, this would send an email via Google Apps Script
-        alert('Message sent to administrator! You will receive a confirmation email shortly.');
+        alert('Message prepared! Email functionality will be implemented next.');
+        console.log('Contact form data:', formData);
         
-        // Clear form
         document.getElementById('contactForm').reset();
         closeModal('contactModal');
-        
-        console.log('Message details:', { name, email, subject, message });
     }
 
-    // Close modals when clicking outside
     window.addEventListener('click', function(event) {
         if (event.target.classList.contains('modal')) {
             event.target.style.display = 'none';
@@ -901,7 +829,6 @@ padding: 10px;
         }
     });
 
-    // Initialize the app when page loads
     document.addEventListener('DOMContentLoaded', initializeApp);
 </script>
 ```
