@@ -321,6 +321,31 @@
         background: #5a67d8;
     }
 
+    /* New styles for better sheet embedding */
+    .sheet-controls {
+        position: absolute;
+        top: 60px;
+        right: 10px;
+        z-index: 1003;
+        display: flex;
+        gap: 10px;
+    }
+
+    .sheet-btn {
+        background: #667eea;
+        color: white;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 12px;
+        transition: background 0.3s;
+    }
+
+    .sheet-btn:hover {
+        background: #5a67d8;
+    }
+
     @media (max-width: 768px) {
         .container {
             padding: 10px;
@@ -358,6 +383,11 @@
             font-size: 24px;
             width: 40px;
             height: 40px;
+        }
+
+        .sheet-controls {
+            top: 50px;
+            right: 5px;
         }
     }
 
@@ -411,6 +441,10 @@
             border: none;
             margin: 0;
             padding: 0;
+        }
+
+        .sheet-controls {
+            display: none; /* Hide on mobile for cleaner look */
         }
     }
 </style>
@@ -634,7 +668,7 @@
         
         const tabGids = {
             'jennings': '983585983',       
-            'almeida': '125647568',   // You'll need to get actual gids
+            'almeida': '125647568',
             'evans': '157418657',     
             'patteson': '157772354',  
             'riley': '341548763',     
@@ -642,17 +676,28 @@
         };
         
         const gid = tabGids[familyName.toLowerCase()] || '0';
-        const embedUrl = `https://docs.google.com/spreadsheets/d/${SHEETS_ID}/edit?usp=sharing&single=true&gid=${gid}&widget=true&headers=true&rm=minimal`;
+        
+        // FIXED: Using pubhtml for better embedding that stays in-app
+        const embedUrl = `https://docs.google.com/spreadsheets/d/${SHEETS_ID}/pubhtml?gid=${gid}&single=true&widget=true&headers=false`;
+        
+        // Alternative embed URL if the above doesn't work:
+        // const embedUrl = `https://docs.google.com/spreadsheets/d/e/2PACX-${SHEETS_ID}/pubhtml?gid=${gid}&single=true&widget=true&headers=false`;
         
         sheetModal.innerHTML = `
             <div class="modal-content" style="padding: 0; margin: 0;">
                 <button class="close-btn" onclick="closeSheetModal()" style="z-index: 1003;">&times;</button>
+                <div class="sheet-controls">
+                    <button class="sheet-btn" onclick="openSheetInNewTab('${familyName}')">Edit in New Tab</button>
+                    <button class="sheet-btn" onclick="refreshSheet()">Refresh</button>
+                </div>
                 <div style="position: fixed; top: 0; left: 0; width: 100vw; height: 60px; background: #667eea; z-index: 1002; display: flex; align-items: center; justify-content: center; color: white;">
                     <h2 style="margin: 0; font-size: 1.5em;">${familyName.charAt(0).toUpperCase() + familyName.slice(1)} Family Directory</h2>
                 </div>
                 <iframe src="${embedUrl}" 
+                        id="sheetFrame"
                         style="position: absolute; top: 60px; left: 0; width: 100%; height: calc(100vh - 60px); border: none; margin: 0; padding: 0;"
-                        frameborder="0" marginheight="0" marginwidth="0">
+                        frameborder="0" marginheight="0" marginwidth="0"
+                        allow="fullscreen">
                     Loading family directory...
                 </iframe>
             </div>
@@ -660,6 +705,9 @@
         
         document.body.appendChild(sheetModal);
         document.body.style.overflow = 'hidden';
+
+        // Store current family for refresh function
+        window.currentFamily = familyName;
     }
 
     function closeSheetModal() {
@@ -669,6 +717,39 @@
         }
         document.body.style.overflow = 'auto';
         openModal('directoryModal');
+    }
+
+    function openSheetInNewTab(familyName) {
+        const tabGids = {
+            'jennings': '983585983',       
+            'almeida': '125647568',
+            'evans': '157418657',     
+            'patteson': '157772354',  
+            'riley': '341548763',     
+            'crawford': '213369466'   
+        };
+        
+        const gid = tabGids[familyName.toLowerCase()] || '0';
+        const editUrl = `https://docs.google.com/spreadsheets/d/${SHEETS_ID}/edit?usp=sharing&gid=${gid}`;
+        window.open(editUrl, '_blank');
+    }
+
+    function refreshSheet() {
+        const iframe = document.getElementById('sheetFrame');
+        if (iframe && window.currentFamily) {
+            const tabGids = {
+                'jennings': '983585983',       
+                'almeida': '125647568',
+                'evans': '157418657',     
+                'patteson': '157772354',  
+                'riley': '341548763',     
+                'crawford': '213369466'   
+            };
+            
+            const gid = tabGids[window.currentFamily.toLowerCase()] || '0';
+            const embedUrl = `https://docs.google.com/spreadsheets/d/${SHEETS_ID}/pubhtml?gid=${gid}&single=true&widget=true&headers=false&rm=minimal&chrome=false&timestamp=${Date.now()}`;
+            iframe.src = embedUrl;
+        }
     }
 
     function openLLCDocuments() {
@@ -742,57 +823,5 @@
         
         const samplePhotos = [
             { name: 'Family Reunion 2024.jpg', id: 'photo1' },
-            { name: 'House Exterior.jpg', id: 'photo2' },
-            { name: 'Kitchen Renovation.jpg', id: 'photo3' },
-            { name: 'Christmas 2023.jpg', id: 'photo4' },
-            { name: 'Summer Gathering.jpg', id: 'photo5' },
-            { name: 'New Deck.jpg', id: 'photo6' },
-            { name: 'Garden View.jpg', id: 'photo7' },
-            { name: 'Living Room.jpg', id: 'photo8' }
-        ];
-        
-        samplePhotos.forEach(photo => {
-            const photoItem = document.createElement('div');
-            photoItem.className = 'photo-item';
-            photoItem.onclick = () => openPhotoViewer(photo);
-            photoItem.innerHTML = `
-                <div class="photo-placeholder">📷</div>
-                <p>${photo.name}</p>
-                <p style="font-size: 0.8em; color: #999;">From Google Drive</p>
-            `;
-            photoGrid.appendChild(photoItem);
-        });
-    }
-
-    function openPhotoViewer(photo) {
-        alert(`Opening ${photo.name}. Full photo viewer will be implemented next.`);
-    }
-
-    function sendMessage(event) {
-        event.preventDefault();
-        
-        const formData = {
-            name: document.getElementById('senderName').value,
-            email: document.getElementById('senderEmail').value,
-            subject: document.getElementById('messageSubject').value,
-            message: document.getElementById('messageBody').value
-        };
-        
-        const mailtoLink = `mailto:reunionhill@gmail.com?subject=${encodeURIComponent(formData.subject)}&body=${encodeURIComponent(`From: ${formData.name} (${formData.email})\n\n${formData.message}`)}`;
-        window.location.href = mailtoLink;
-        
-        document.getElementById('contactForm').reset();
-        closeModal('contactModal');
-    }
-
-    window.addEventListener('click', function(event) {
-        if (event.target.classList.contains('modal')) {
-            event.target.style.display = 'none';
-            document.body.style.overflow = 'auto';
-        }
-    });
-</script>
+            { name: 'House Exterior.jpg', i
 ```
-
-</body>
-</html>
