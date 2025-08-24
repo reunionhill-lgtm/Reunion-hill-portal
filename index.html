@@ -500,7 +500,7 @@
             <p>View upcoming events and reservations</p>
         </div>
 
-        <div class="feature-card" onclick="openModal('documentsModal')">
+        <div class="feature-card" onclick="openLLCDocuments()">
             <div class="feature-icon">📋</div>
             <h3>LLC Documents</h3>
             <p>Access official business documents</p>
@@ -609,17 +609,9 @@
             </div>
             
             <div class="photo-grid" id="photoGrid">
-                <div class="photo-item">
-                    <div class="photo-placeholder">📷</div>
-                    <p>Sample Photo 1</p>
-                </div>
-                <div class="photo-item">
-                    <div class="photo-placeholder">📷</div>
-                    <p>Sample Photo 2</p>
-                </div>
-                <div class="photo-item">
-                    <div class="photo-placeholder">📷</div>
-                    <p>Sample Photo 3</p>
+                <div style="text-align: center; padding: 40px; grid-column: 1 / -1;">
+                    <div style="font-size: 2em; margin-bottom: 15px;">⏳</div>
+                    <p style="color: #666;">Loading photos from Google Drive...</p>
                 </div>
             </div>
         </div>
@@ -763,41 +755,10 @@
     function openModal(modalId) {
         document.getElementById(modalId).style.display = 'block';
         document.body.style.overflow = 'hidden';
-    }
-
-    function closeModal(modalId) {
-        document.getElementById(modalId).style.display = 'none';
-        document.body.style.overflow = 'auto';
-    }
-
-    function showFamily(familyName) {
-        const sheetUrl = 'https://docs.google.com/spreadsheets/d/1Fj6JKLC6fZdEU8QbZXr43JNH__8ec8NjEz0aCDLQRXY/edit#gid=';
         
-        const tabIds = {
-            'jennings': '0',       
-            'almeida': '1',        
-            'evans': '2',          
-            'patteson': '3',       
-            'riley': '4',          
-            'crawford': '5'        
-        };
-        
-        const tabId = tabIds[familyName.toLowerCase()];
-        
-        if (tabId !== undefined) {
-            window.open(sheetUrl + tabId, '_blank');
-        } else {
-            window.open('https://docs.google.com/spreadsheets/d/1Fj6JKLC6fZdEU8QbZXr43JNH__8ec8NjEz0aCDLQRXY/edit', '_blank');
-        }
-        
-        closeModal('directoryModal');
-    }
-
-    function handlePhotoUpload(event) {
-        const files = event.target.files;
-        if (files.length > 0) {
-            alert(`Selected ${files.length} photo(s). Photo upload functionality can be added later.`);
-            console.log('Photos selected:', Array.from(files).map(f => f.name));
+        // Load photos when photos modal opens
+        if (modalId === 'photosModal') {
+            setTimeout(loadPhotosFromDrive, 500);
         }
     }
 
@@ -816,6 +777,163 @@
         
         document.getElementById('contactForm').reset();
         closeModal('contactModal');
+    }
+
+    function closeModal(modalId) {
+        document.getElementById(modalId).style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+
+    function showFamily(familyName) {
+        // Close the directory modal and open embedded sheet view
+        closeModal('directoryModal');
+        
+        // Create embedded sheet modal
+        const sheetModal = document.createElement('div');
+        sheetModal.className = 'modal';
+        sheetModal.id = 'sheetModal';
+        sheetModal.style.display = 'block';
+        
+        // Map family names to their Google Sheet tab gids
+        const tabGids = {
+            'jennings': '983585983',       
+            'almeida': '125647568',   // You'll need to get actual gids
+            'evans': '157418657',     
+            'patteson': '157772354',  
+            'riley': '341548763',     
+            'crawford': '213369466'   
+        };
+        
+        const gid = tabGids[familyName.toLowerCase()] || '0';
+        const embedUrl = `https://docs.google.com/spreadsheets/d/${SHEETS_ID}/edit?usp=sharing&single=true&gid=${gid}&widget=true&headers=true&rm=minimal`;
+        
+        sheetModal.innerHTML = `
+            <div class="modal-content" style="padding: 0; margin: 0;">
+                <button class="close-btn" onclick="closeSheetModal()" style="z-index: 1003;">&times;</button>
+                <div style="position: fixed; top: 0; left: 0; width: 100vw; height: 60px; background: #667eea; z-index: 1002; display: flex; align-items: center; justify-content: center; color: white;">
+                    <h2 style="margin: 0; font-size: 1.5em;">${familyName.charAt(0).toUpperCase() + familyName.slice(1)} Family Directory</h2>
+                </div>
+                <iframe src="${embedUrl}" 
+                        style="position: absolute; top: 60px; left: 0; width: 100%; height: calc(100vh - 60px); border: none; margin: 0; padding: 0;"
+                        frameborder="0" marginheight="0" marginwidth="0">
+                    Loading family directory...
+                </iframe>
+            </div>
+        `;
+        
+        document.body.appendChild(sheetModal);
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeSheetModal() {
+        const sheetModal = document.getElementById('sheetModal');
+        if (sheetModal) {
+            sheetModal.remove();
+        }
+        document.body.style.overflow = 'auto';
+        // Reopen the directory modal
+        openModal('directoryModal');
+    }
+
+    function openLLCDocuments() {
+        // Create embedded Drive folder view
+        const driveModal = document.createElement('div');
+        driveModal.className = 'modal';
+        driveModal.id = 'driveModal';
+        driveModal.style.display = 'block';
+        
+        // LLC Business folder ID - you'll need to get this from your Google Drive
+        const FOLDER_ID = 1cNkv_tVhwPBEhB43CvTeM2J-KDfMDumo; // Replace with actual folder ID
+        const embedUrl = `https://drive.google.com/embeddedfolderview?id=${FOLDER_ID}#grid`;
+        
+        driveModal.innerHTML = `
+            <div class="modal-content" style="padding: 0; margin: 0;">
+                <button class="close-btn" onclick="closeDriveModal()" style="z-index: 1003;">&times;</button>
+                <div style="position: fixed; top: 0; left: 0; width: 100vw; height: 60px; background: #667eea; z-index: 1002; display: flex; align-items: center; justify-content: center; color: white;">
+                    <h2 style="margin: 0; font-size: 1.5em;">LLC Business Documents</h2>
+                </div>
+                <iframe src="${embedUrl}" 
+                        style="position: absolute; top: 60px; left: 0; width: 100%; height: calc(100vh - 60px); border: none; margin: 0; padding: 0;"
+                        frameborder="0" marginheight="0" marginwidth="0">
+                    Loading LLC documents...
+                </iframe>
+            </div>
+        `;
+        
+        document.body.appendChild(driveModal);
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeDriveModal() {
+        const driveModal = document.getElementById('driveModal');
+        if (driveModal) {
+            driveModal.remove();
+        }
+        document.body.style.overflow = 'auto';
+    }
+
+    function handlePhotoUpload(event) {
+        const files = event.target.files;
+        if (files.length > 0) {
+            // For now, show upload simulation
+            alert(`Selected ${files.length} photo(s). These will be uploaded to the Google Drive Photos folder.`);
+            
+            // In a real implementation, you would use Google Drive API to upload
+            // For now, we'll simulate the upload process
+            const photoGrid = document.getElementById('photoGrid');
+            
+            Array.from(files).forEach((file, index) => {
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const photoItem = document.createElement('div');
+                        photoItem.className = 'photo-item';
+                        photoItem.innerHTML = `
+                            <img src="${e.target.result}" 
+                                 style="width: 100%; height: 150px; object-fit: cover; border-radius: 8px; margin-bottom: 10px;"
+                                 alt="Uploaded photo">
+                            <p>${file.name}</p>
+                            <p style="font-size: 0.8em; color: #999;">Uploading...</p>
+                        `;
+                        photoGrid.appendChild(photoItem);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+            
+            console.log('Photos to upload:', Array.from(files).map(f => f.name));
+        }
+    }
+
+    function loadPhotosFromDrive() {
+        // Simulate loading photos from Google Drive Photos folder
+        const photoGrid = document.getElementById('photoGrid');
+        photoGrid.innerHTML = '';
+        
+        // Sample photos - in real implementation, these would come from Google Drive API
+        const samplePhotos = [
+            { name: 'Family Reunion 2024.jpg', id: 'photo1' },
+            { name: 'House Exterior.jpg', id: 'photo2' },
+            { name: 'Kitchen Renovation.jpg', id: 'photo3' },
+            { name: 'Christmas 2023.jpg', id: 'photo4' },
+            { name: 'Summer Gathering.jpg', id: 'photo5' },
+            { name: 'New Deck.jpg', id: 'photo6' }
+        ];
+        
+        samplePhotos.forEach(photo => {
+            const photoItem = document.createElement('div');
+            photoItem.className = 'photo-item';
+            photoItem.onclick = () => openPhotoViewer(photo);
+            photoItem.innerHTML = `
+                <div class="photo-placeholder">📷</div>
+                <p>${photo.name}</p>
+            `;
+            photoGrid.appendChild(photoItem);
+        });
+    }
+
+    function openPhotoViewer(photo) {
+        alert(`Opening ${photo.name}. In full implementation, this would show a larger view of the photo from Google Drive.`);
     }
 
     window.addEventListener('click', function(event) {
