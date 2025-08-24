@@ -55,8 +55,8 @@
         margin-bottom: 30px;
     }
 
-    .enter-btn {
-        background: #667eea;
+    .sign-in-btn {
+        background: #4285f4;
         color: white;
         border: none;
         padding: 15px 30px;
@@ -69,8 +69,8 @@
         gap: 10px;
     }
 
-    .enter-btn:hover {
-        background: #5a67d8;
+    .sign-in-btn:hover {
+        background: #3367d6;
     }
 
     .main-content {
@@ -120,7 +120,29 @@
         margin-bottom: 20px;
         display: none;
         align-items: center;
-        justify-content: center;
+        justify-content: space-between;
+    }
+
+    .user-profile {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .user-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        border: 2px solid #667eea;
+    }
+
+    .sign-out-btn {
+        background: #dc3545;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 5px;
+        cursor: pointer;
     }
 
     .modal {
@@ -206,7 +228,7 @@
         transition: background 0.3s;
     }
 
-    .family-tab:hover {
+    .family-tab:hover, .family-tab.active {
         background: #5a67d8;
     }
 
@@ -334,6 +356,12 @@
             grid-template-columns: 1fr;
         }
         
+        .user-info {
+            flex-direction: column;
+            gap: 15px;
+            text-align: center;
+        }
+        
         .family-tabs {
             justify-content: center;
         }
@@ -426,23 +454,30 @@
 
 ```
     <div class="user-info" id="userInfo">
-        <div style="text-align: center;">
-            <strong>👨‍👩‍👧‍👦 Welcome to the Family Portal</strong>
-            <div style="font-size: 0.9em; color: #666;">reunionhill@gmail.com</div>
+        <div class="user-profile">
+            <img class="user-avatar" id="userAvatar" src="" alt="User">
+            <div>
+                <strong id="userName"></strong>
+                <div style="font-size: 0.9em; color: #666;" id="userEmail"></div>
+            </div>
         </div>
+        <button class="sign-out-btn" onclick="signOut()">Sign Out</button>
     </div>
 
     <div class="auth-section" id="authSection">
         <h2>Welcome to the Reunion Hill Family Portal</h2>
-        <p style="margin: 20px 0;">Access your family's resources and information</p>
-        <button class="enter-btn" onclick="enterPortal()">
+        <p style="margin: 20px 0;">Please sign in with your Google account to access family resources</p>
+        <button class="sign-in-btn" onclick="signIn()">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
             </svg>
-            Enter Family Portal
+            Sign in with Google
         </button>
         <p style="margin-top: 15px; font-size: 0.9em; color: #666;">
-            Family members and authorized users
+            Only authorized family members can access the portal
         </p>
     </div>
 
@@ -485,7 +520,6 @@
     </div>
 </div>
 
-<!-- Reservation Modal -->
 <div class="modal" id="reservationModal">
     <div class="modal-content">
         <button class="close-btn" onclick="closeModal('reservationModal')">&times;</button>
@@ -500,14 +534,13 @@
     </div>
 </div>
 
-<!-- Directory Modal -->
 <div class="modal" id="directoryModal">
     <div class="modal-content">
         <button class="close-btn" onclick="closeModal('directoryModal')">&times;</button>
         <h2>Family Directory</h2>
         <div class="modal-body">
             <div class="family-tabs">
-                <button class="family-tab" onclick="showFamily('jennings')">Jennings</button>
+                <button class="family-tab active" onclick="showFamily('jennings')">Jennings</button>
                 <button class="family-tab" onclick="showFamily('almeida')">Almeida</button>
                 <button class="family-tab" onclick="showFamily('evans')">Evans</button>
                 <button class="family-tab" onclick="showFamily('patteson')">Patteson</button>
@@ -521,10 +554,10 @@
                     <h3 style="color: #667eea; margin-bottom: 20px;">Family Directory Access</h3>
                     <p style="color: #666; line-height: 1.6; margin-bottom: 30px;">
                         Click on any family name above to view their directory information.<br>
-                        Each family's details will open within the app for easy viewing and editing.
+                        Each family's details will open in a new tab for easy viewing and editing.
                     </p>
                     <p style="color: #888; font-size: 0.9em;">
-                        Family members can update their own information directly.
+                        Family members can update their own information directly in the Google Sheet.
                     </p>
                 </div>
             </div>
@@ -532,7 +565,6 @@
     </div>
 </div>
 
-<!-- Calendar Modal -->
 <div class="modal" id="calendarModal">
     <div class="modal-content">
         <button class="close-btn" onclick="closeModal('calendarModal')">&times;</button>
@@ -544,7 +576,23 @@
     </div>
 </div>
 
-<!-- Photos Modal -->
+<div class="modal" id="documentsModal">
+    <div class="modal-content">
+        <button class="close-btn" onclick="closeModal('documentsModal')">&times;</button>
+        <h2>LLC Business Documents</h2>
+        <div class="modal-body">
+            <p style="text-align: center; color: #666; margin-bottom: 30px; font-size: 1.1em;">
+                Access to official LLC documents requires administrator approval.<br>
+                Please contact reunionhill@gmail.com for access.
+            </p>
+            <div style="text-align: center; padding: 60px;">
+                <div class="feature-icon">🔒</div>
+                <p style="font-size: 1.2em; color: #666;">Document access coming soon...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="modal" id="photosModal">
     <div class="modal-content">
         <button class="close-btn" onclick="closeModal('photosModal')">&times;</button>
@@ -570,7 +618,6 @@
     </div>
 </div>
 
-<!-- Contact Modal -->
 <div class="modal" id="contactModal">
     <div class="modal-content">
         <button class="close-btn" onclick="closeModal('contactModal')">&times;</button>
@@ -601,22 +648,135 @@
     </div>
 </div>
 
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <script>
+    const CLIENT_ID = '386767092153-v5rp0hcbsbujj813ovt44kbiju721oev.apps.googleusercontent.com';
     const SHEETS_ID = '1Fj6JKLC6fZdEU8QbZXr43JNH__8ec8NjEz0aCDLQRXY';
+    let currentUser = null;
 
-    function enterPortal() {
+    function initializeApp() {
+        if (typeof google !== 'undefined' && google.accounts) {
+            initializeGoogleSignIn();
+        } else {
+            setTimeout(initializeApp, 100);
+        }
+    }
+
+    function initializeGoogleSignIn() {
+        google.accounts.id.initialize({
+            client_id: CLIENT_ID,
+            callback: handleCredentialResponse,
+            auto_select: false,
+            cancel_on_tap_outside: false
+        });
+
+        const savedUser = localStorage.getItem('reunionHillUser');
+        if (savedUser) {
+            currentUser = JSON.parse(savedUser);
+            showMainContent();
+        } else {
+            renderGoogleSignInButton();
+        }
+    }
+
+    function renderGoogleSignInButton() {
+        const signInButton = document.querySelector('.sign-in-btn');
+        signInButton.style.display = 'none';
+        
+        const googleButtonContainer = document.createElement('div');
+        googleButtonContainer.id = 'google-signin-button';
+        signInButton.parentNode.insertBefore(googleButtonContainer, signInButton);
+        
+        google.accounts.id.renderButton(googleButtonContainer, {
+            theme: 'outline',
+            size: 'large',
+            text: 'signin_with',
+            shape: 'rectangular',
+            width: 300
+        });
+    }
+
+    function handleCredentialResponse(response) {
+        const responsePayload = decodeJwtResponse(response.credential);
+        
+        currentUser = {
+            name: responsePayload.name,
+            email: responsePayload.email,
+            picture: responsePayload.picture
+        };
+        
+        localStorage.setItem('reunionHillUser', JSON.stringify(currentUser));
+        showMainContent();
+    }
+
+    function decodeJwtResponse(token) {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+        return JSON.parse(jsonPayload);
+    }
+
+    function signIn() {
+        if (typeof google !== 'undefined' && google.accounts) {
+            google.accounts.id.prompt();
+        } else {
+            alert('Google Sign-In is loading, please wait and try again.');
+        }
+    }
+
+    function signOut() {
+        if (typeof google !== 'undefined' && google.accounts) {
+            google.accounts.id.disableAutoSelect();
+        }
+        currentUser = null;
+        localStorage.removeItem('reunionHillUser');
+        showAuthSection();
+        location.reload();
+    }
+
+    function showMainContent() {
         document.getElementById('authSection').style.display = 'none';
         document.getElementById('mainContent').style.display = 'grid';
         document.getElementById('userInfo').style.display = 'flex';
+        
+        document.getElementById('userName').textContent = currentUser.name;
+        document.getElementById('userEmail').textContent = currentUser.email;
+        document.getElementById('userAvatar').src = currentUser.picture;
+    }
+
+    function showAuthSection() {
+        document.getElementById('authSection').style.display = 'block';
+        document.getElementById('mainContent').style.display = 'none';
+        document.getElementById('userInfo').style.display = 'none';
     }
 
     function openModal(modalId) {
         document.getElementById(modalId).style.display = 'block';
         document.body.style.overflow = 'hidden';
         
+        // Load photos when photos modal opens
         if (modalId === 'photosModal') {
             setTimeout(loadPhotosFromDrive, 500);
         }
+    }
+
+    function sendMessage(event) {
+        event.preventDefault();
+        
+        const formData = {
+            name: document.getElementById('senderName').value,
+            email: document.getElementById('senderEmail').value,
+            subject: document.getElementById('messageSubject').value,
+            message: document.getElementById('messageBody').value
+        };
+        
+        const mailtoLink = `mailto:reunionhill@gmail.com?subject=${encodeURIComponent(formData.subject)}&body=${encodeURIComponent(`From: ${formData.name} (${formData.email})\n\n${formData.message}`)}`;
+        window.location.href = mailtoLink;
+        
+        document.getElementById('contactForm').reset();
+        closeModal('contactModal');
     }
 
     function closeModal(modalId) {
@@ -625,16 +785,19 @@
     }
 
     function showFamily(familyName) {
+        // Close the directory modal and open embedded sheet view
         closeModal('directoryModal');
         
+        // Create embedded sheet modal
         const sheetModal = document.createElement('div');
         sheetModal.className = 'modal';
         sheetModal.id = 'sheetModal';
         sheetModal.style.display = 'block';
         
+        // Map family names to their Google Sheet tab gids
         const tabGids = {
             'jennings': '0',       
-            'almeida': '123456',   
+            'almeida': '123456',   // You'll need to get actual gids
             'evans': '234567',     
             'patteson': '345678',  
             'riley': '456789',     
@@ -668,16 +831,19 @@
             sheetModal.remove();
         }
         document.body.style.overflow = 'auto';
+        // Reopen the directory modal
         openModal('directoryModal');
     }
 
     function openLLCDocuments() {
+        // Create embedded Drive folder view
         const driveModal = document.createElement('div');
         driveModal.className = 'modal';
         driveModal.id = 'driveModal';
         driveModal.style.display = 'block';
         
-        const FOLDER_ID = 'YOUR_LLC_FOLDER_ID';
+        // LLC Business folder ID - you'll need to get this from your Google Drive
+        const FOLDER_ID = 'YOUR_LLC_FOLDER_ID'; // Replace with actual folder ID
         const embedUrl = `https://drive.google.com/embeddedfolderview?id=${FOLDER_ID}#grid`;
         
         driveModal.innerHTML = `
@@ -709,11 +875,14 @@
     function handlePhotoUpload(event) {
         const files = event.target.files;
         if (files.length > 0) {
+            // For now, show upload simulation
             alert(`Selected ${files.length} photo(s). These will be uploaded to the Google Drive Photos folder.`);
             
+            // In a real implementation, you would use Google Drive API to upload
+            // For now, we'll simulate the upload process
             const photoGrid = document.getElementById('photoGrid');
             
-            Array.from(files).forEach((file) => {
+            Array.from(files).forEach((file, index) => {
                 if (file.type.startsWith('image/')) {
                     const reader = new FileReader();
                     reader.onload = function(e) {
@@ -724,7 +893,7 @@
                                  style="width: 100%; height: 150px; object-fit: cover; border-radius: 8px; margin-bottom: 10px;"
                                  alt="Uploaded photo">
                             <p>${file.name}</p>
-                            <p style="font-size: 0.8em; color: #999;">Uploaded ✓</p>
+                            <p style="font-size: 0.8em; color: #999;">Uploading...</p>
                         `;
                         photoGrid.appendChild(photoItem);
                     };
@@ -737,18 +906,18 @@
     }
 
     function loadPhotosFromDrive() {
+        // Simulate loading photos from Google Drive Photos folder
         const photoGrid = document.getElementById('photoGrid');
         photoGrid.innerHTML = '';
         
+        // Sample photos - in real implementation, these would come from Google Drive API
         const samplePhotos = [
             { name: 'Family Reunion 2024.jpg', id: 'photo1' },
             { name: 'House Exterior.jpg', id: 'photo2' },
             { name: 'Kitchen Renovation.jpg', id: 'photo3' },
             { name: 'Christmas 2023.jpg', id: 'photo4' },
             { name: 'Summer Gathering.jpg', id: 'photo5' },
-            { name: 'New Deck.jpg', id: 'photo6' },
-            { name: 'Garden View.jpg', id: 'photo7' },
-            { name: 'Living Room.jpg', id: 'photo8' }
+            { name: 'New Deck.jpg', id: 'photo6' }
         ];
         
         samplePhotos.forEach(photo => {
@@ -758,31 +927,13 @@
             photoItem.innerHTML = `
                 <div class="photo-placeholder">📷</div>
                 <p>${photo.name}</p>
-                <p style="font-size: 0.8em; color: #999;">From Google Drive</p>
             `;
             photoGrid.appendChild(photoItem);
         });
     }
 
     function openPhotoViewer(photo) {
-        alert(`Opening ${photo.name}. Full photo viewer will be implemented next.`);
-    }
-
-    function sendMessage(event) {
-        event.preventDefault();
-        
-        const formData = {
-            name: document.getElementById('senderName').value,
-            email: document.getElementById('senderEmail').value,
-            subject: document.getElementById('messageSubject').value,
-            message: document.getElementById('messageBody').value
-        };
-        
-        const mailtoLink = `mailto:reunionhill@gmail.com?subject=${encodeURIComponent(formData.subject)}&body=${encodeURIComponent(`From: ${formData.name} (${formData.email})\n\n${formData.message}`)}`;
-        window.location.href = mailtoLink;
-        
-        document.getElementById('contactForm').reset();
-        closeModal('contactModal');
+        alert(`Opening ${photo.name}. In full implementation, this would show a larger view of the photo from Google Drive.`);
     }
 
     window.addEventListener('click', function(event) {
@@ -791,6 +942,8 @@
             document.body.style.overflow = 'auto';
         }
     });
+
+    document.addEventListener('DOMContentLoaded', initializeApp);
 </script>
 ```
 
