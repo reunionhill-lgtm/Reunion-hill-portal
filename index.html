@@ -579,7 +579,8 @@
             
             var gid = tabGids[familyName.toLowerCase()] || '0';
             var SHEETS_ID = '1Fj6JKLC6fZdEU8QbZXr43JNH__8ec8NjEz0aCDLQRXY';
-            var embedUrl = 'https://docs.google.com/spreadsheets/d/' + SHEETS_ID + '/pubhtml?gid=' + gid + '&single=true&widget=true&headers=false';
+            // FIXED: Back to /edit URL with proper embedding parameters that work
+            var embedUrl = 'https://docs.google.com/spreadsheets/d/' + SHEETS_ID + '/edit?usp=sharing&single=true&gid=' + gid + '&widget=true&headers=true&rm=minimal';
             
             sheetModal.innerHTML = '<div class="modal-content" style="padding: 0; margin: 0;">' +
                 '<button class="close-btn" onclick="closeSheetModal()" style="z-index: 1003;">&times;</button>' +
