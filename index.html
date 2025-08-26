@@ -67,10 +67,17 @@
         display: inline-flex;
         align-items: center;
         gap: 10px;
+        text-decoration: none;
+        border: 2px solid transparent;
     }
 
     .enter-btn:hover {
         background: #5a67d8;
+        transform: translateY(-2px);
+    }
+
+    .enter-btn:active {
+        transform: translateY(0);
     }
 
     .main-content {
@@ -321,7 +328,6 @@
         background: #5a67d8;
     }
 
-    /* New styles for better sheet embedding */
     .sheet-controls {
         position: absolute;
         top: 60px;
@@ -444,7 +450,7 @@
         }
 
         .sheet-controls {
-            display: none; /* Hide on mobile for cleaner look */
+            display: none;
         }
     }
 </style>
@@ -469,7 +475,7 @@
     <div class="auth-section" id="authSection">
         <h2>Welcome to the Reunion Hill Family Portal</h2>
         <p style="margin: 20px 0;">Access your family's resources and information</p>
-        <button class="enter-btn" onclick="enterPortal()">
+        <button class="enter-btn" id="enterBtn">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
             </svg>
@@ -638,10 +644,28 @@
 <script>
     const SHEETS_ID = '1Fj6JKLC6fZdEU8QbZXr43JNH__8ec8NjEz0aCDLQRXY';
 
+    // Wait for page to load, then add event listener
+    document.addEventListener('DOMContentLoaded', function() {
+        const enterBtn = document.getElementById('enterBtn');
+        if (enterBtn) {
+            enterBtn.addEventListener('click', enterPortal);
+        }
+    });
+
     function enterPortal() {
-        document.getElementById('authSection').style.display = 'none';
-        document.getElementById('mainContent').style.display = 'grid';
-        document.getElementById('userInfo').style.display = 'flex';
+        const authSection = document.getElementById('authSection');
+        const mainContent = document.getElementById('mainContent');
+        const userInfo = document.getElementById('userInfo');
+        
+        if (authSection) {
+            authSection.style.display = 'none';
+        }
+        if (mainContent) {
+            mainContent.style.display = 'grid';
+        }
+        if (userInfo) {
+            userInfo.style.display = 'flex';
+        }
     }
 
     function openModal(modalId) {
@@ -677,11 +701,8 @@
         
         const gid = tabGids[familyName.toLowerCase()] || '0';
         
-        // FIXED: Using pubhtml for better embedding that stays in-app
+        // Using pubhtml for better embedding that stays in-app
         const embedUrl = `https://docs.google.com/spreadsheets/d/${SHEETS_ID}/pubhtml?gid=${gid}&single=true&widget=true&headers=false`;
-        
-        // Alternative embed URL if the above doesn't work:
-        // const embedUrl = `https://docs.google.com/spreadsheets/d/e/2PACX-${SHEETS_ID}/pubhtml?gid=${gid}&single=true&widget=true&headers=false`;
         
         sheetModal.innerHTML = `
             <div class="modal-content" style="padding: 0; margin: 0;">
@@ -705,8 +726,6 @@
         
         document.body.appendChild(sheetModal);
         document.body.style.overflow = 'hidden';
-
-        // Store current family for refresh function
         window.currentFamily = familyName;
     }
 
@@ -823,5 +842,8 @@
         
         const samplePhotos = [
             { name: 'Family Reunion 2024.jpg', id: 'photo1' },
-            { name: 'House Exterior.jpg', i
+            { name: 'House Exterior.jpg', id: 'photo2' },
+            { name: 'Kitchen Renovation.jpg', id: 'photo3' },
+            { name: 'Christmas 2023.jpg', id: 'photo4' },
+            { name: 'Summer Gathering.jpg', id: 'photo5' },
 ```
