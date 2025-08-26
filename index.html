@@ -63,21 +63,16 @@
         font-size: 18px;
         border-radius: 8px;
         cursor: pointer;
-        transition: background 0.3s;
+        transition: all 0.3s ease;
         display: inline-flex;
         align-items: center;
         gap: 10px;
         text-decoration: none;
-        border: 2px solid transparent;
     }
 
     .enter-btn:hover {
         background: #5a67d8;
         transform: translateY(-2px);
-    }
-
-    .enter-btn:active {
-        transform: translateY(0);
     }
 
     .main-content {
@@ -475,7 +470,7 @@
     <div class="auth-section" id="authSection">
         <h2>Welcome to the Reunion Hill Family Portal</h2>
         <p style="margin: 20px 0;">Access your family's resources and information</p>
-        <button class="enter-btn" id="enterBtn">
+        <button class="enter-btn" onclick="enterPortal()">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
             </svg>
@@ -644,28 +639,11 @@
 <script>
     const SHEETS_ID = '1Fj6JKLC6fZdEU8QbZXr43JNH__8ec8NjEz0aCDLQRXY';
 
-    // Wait for page to load, then add event listener
-    document.addEventListener('DOMContentLoaded', function() {
-        const enterBtn = document.getElementById('enterBtn');
-        if (enterBtn) {
-            enterBtn.addEventListener('click', enterPortal);
-        }
-    });
-
+    // SIMPLE, DIRECT APPROACH - No complex event listeners
     function enterPortal() {
-        const authSection = document.getElementById('authSection');
-        const mainContent = document.getElementById('mainContent');
-        const userInfo = document.getElementById('userInfo');
-        
-        if (authSection) {
-            authSection.style.display = 'none';
-        }
-        if (mainContent) {
-            mainContent.style.display = 'grid';
-        }
-        if (userInfo) {
-            userInfo.style.display = 'flex';
-        }
+        document.getElementById('authSection').style.display = 'none';
+        document.getElementById('mainContent').style.display = 'grid';
+        document.getElementById('userInfo').style.display = 'flex';
     }
 
     function openModal(modalId) {
@@ -831,8 +809,6 @@
                     reader.readAsDataURL(file);
                 }
             });
-            
-            console.log('Photos to upload:', Array.from(files).map(f => f.name));
         }
     }
 
@@ -846,4 +822,17 @@
             { name: 'Kitchen Renovation.jpg', id: 'photo3' },
             { name: 'Christmas 2023.jpg', id: 'photo4' },
             { name: 'Summer Gathering.jpg', id: 'photo5' },
+            { name: 'New Deck.jpg', id: 'photo6' },
+            { name: 'Garden View.jpg', id: 'photo7' },
+            { name: 'Living Room.jpg', id: 'photo8' }
+        ];
+        
+        samplePhotos.forEach(photo => {
+            const photoItem = document.createElement('div');
+            photoItem.className = 'photo-item';
+            photoItem.onclick = () => openPhotoViewer(photo);
+            photoItem.innerHTML = `
+                <div class="photo-placeholder">📷</div>
+                <p>${photo.name}</p>
+                <p style="font-size: 0.8em; color: #999;">From Google Drive</p>
 ```
