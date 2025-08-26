@@ -67,7 +67,6 @@
         display: inline-flex;
         align-items: center;
         gap: 10px;
-        text-decoration: none;
     }
 
     .enter-btn:hover {
@@ -220,65 +219,6 @@
         flex: 1;
     }
 
-    .photo-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-        gap: 15px;
-        padding: 20px 0;
-    }
-
-    .photo-item {
-        background: #f8f9fa;
-        border-radius: 10px;
-        padding: 15px;
-        text-align: center;
-        cursor: pointer;
-        transition: transform 0.3s;
-    }
-
-    .photo-item:hover {
-        transform: scale(1.05);
-    }
-
-    .photo-placeholder {
-        width: 100%;
-        height: 150px;
-        background: #ddd;
-        border-radius: 8px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 2em;
-        color: #999;
-        margin-bottom: 10px;
-    }
-
-    .upload-area {
-        border: 2px dashed #667eea;
-        border-radius: 10px;
-        padding: 40px;
-        text-align: center;
-        background: #f8f9fa;
-        cursor: pointer;
-        transition: background 0.3s;
-    }
-
-    .upload-area:hover {
-        background: #e9ecef;
-    }
-
-    .upload-area input[type="file"] {
-        display: none;
-    }
-
-    iframe {
-        width: 100%;
-        flex: 1;
-        border: none;
-        border-radius: 5px;
-        min-height: 400px;
-    }
-
     .contact-form {
         max-width: 500px;
         margin: 0 auto;
@@ -323,28 +263,12 @@
         background: #5a67d8;
     }
 
-    .sheet-controls {
-        position: absolute;
-        top: 60px;
-        right: 10px;
-        z-index: 1003;
-        display: flex;
-        gap: 10px;
-    }
-
-    .sheet-btn {
-        background: #667eea;
-        color: white;
+    iframe {
+        width: 100%;
+        flex: 1;
         border: none;
-        padding: 8px 15px;
         border-radius: 5px;
-        cursor: pointer;
-        font-size: 12px;
-        transition: background 0.3s;
-    }
-
-    .sheet-btn:hover {
-        background: #5a67d8;
+        min-height: 400px;
     }
 
     @media (max-width: 768px) {
@@ -384,11 +308,6 @@
             font-size: 24px;
             width: 40px;
             height: 40px;
-        }
-
-        .sheet-controls {
-            top: 50px;
-            right: 5px;
         }
     }
 
@@ -442,10 +361,6 @@
             border: none;
             margin: 0;
             padding: 0;
-        }
-
-        .sheet-controls {
-            display: none;
         }
     }
 </style>
@@ -504,12 +419,6 @@
             <div class="feature-icon">📋</div>
             <h3>LLC Documents</h3>
             <p>Access official business documents</p>
-        </div>
-
-        <div class="feature-card" onclick="openModal('photosModal')">
-            <div class="feature-icon">📸</div>
-            <h3>Family Photos</h3>
-            <p>View and upload family memories</p>
         </div>
 
         <div class="feature-card" onclick="openModal('contactModal')">
@@ -579,32 +488,6 @@
     </div>
 </div>
 
-<!-- Photos Modal -->
-<div class="modal" id="photosModal">
-    <div class="modal-content">
-        <button class="close-btn" onclick="closeModal('photosModal')">&times;</button>
-        <h2>Family Photos</h2>
-        <div class="modal-body">
-            <div class="upload-area" onclick="document.getElementById('photoUpload').click()" 
-                 style="margin-bottom: 30px;">
-                <input type="file" id="photoUpload" multiple accept="image/*" onchange="handlePhotoUpload(event)">
-                <div class="feature-icon">📷</div>
-                <p><strong>Click to upload photos</strong></p>
-                <p style="font-size: 0.9em; color: #666; margin-top: 10px;">
-                    Select one or more image files
-                </p>
-            </div>
-            
-            <div class="photo-grid" id="photoGrid">
-                <div style="text-align: center; padding: 40px; grid-column: 1 / -1;">
-                    <div style="font-size: 2em; margin-bottom: 15px;">⏳</div>
-                    <p style="color: #666;">Loading photos from Google Drive...</p>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
 <!-- Contact Modal -->
 <div class="modal" id="contactModal">
     <div class="modal-content">
@@ -637,104 +520,55 @@
 </div>
 
 <script>
-    const SHEETS_ID = '1Fj6JKLC6fZdEU8QbZXr43JNH__8ec8NjEz0aCDLQRXY';
-
-    // SIMPLE, DIRECT APPROACH - No complex event listeners
+    // FIXED: Simple, clean JavaScript with proper error handling
     function enterPortal() {
-        document.getElementById('authSection').style.display = 'none';
-        document.getElementById('mainContent').style.display = 'grid';
-        document.getElementById('userInfo').style.display = 'flex';
+        try {
+            var authSection = document.getElementById('authSection');
+            var mainContent = document.getElementById('mainContent');
+            var userInfo = document.getElementById('userInfo');
+            
+            if (authSection) authSection.style.display = 'none';
+            if (mainContent) mainContent.style.display = 'grid';
+            if (userInfo) userInfo.style.display = 'flex';
+        } catch (error) {
+            alert('Error entering portal. Please refresh the page.');
+        }
     }
 
     function openModal(modalId) {
-        document.getElementById(modalId).style.display = 'block';
-        document.body.style.overflow = 'hidden';
-        
-        if (modalId === 'photosModal') {
-            setTimeout(loadPhotosFromDrive, 500);
+        try {
+            var modal = document.getElementById(modalId);
+            if (modal) {
+                modal.style.display = 'block';
+                document.body.style.overflow = 'hidden';
+            }
+        } catch (error) {
+            alert('Error opening modal. Please refresh the page.');
         }
     }
 
     function closeModal(modalId) {
-        document.getElementById(modalId).style.display = 'none';
-        document.body.style.overflow = 'auto';
+        try {
+            var modal = document.getElementById(modalId);
+            if (modal) {
+                modal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+        } catch (error) {
+            alert('Error closing modal. Please refresh the page.');
+        }
     }
 
     function showFamily(familyName) {
-        closeModal('directoryModal');
-        
-        const sheetModal = document.createElement('div');
-        sheetModal.className = 'modal';
-        sheetModal.id = 'sheetModal';
-        sheetModal.style.display = 'block';
-        
-        const tabGids = {
-            'jennings': '983585983',       
-            'almeida': '125647568',
-            'evans': '157418657',     
-            'patteson': '157772354',  
-            'riley': '341548763',     
-            'crawford': '213369466'   
-        };
-        
-        const gid = tabGids[familyName.toLowerCase()] || '0';
-        
-        // Using pubhtml for better embedding that stays in-app
-        const embedUrl = `https://docs.google.com/spreadsheets/d/${SHEETS_ID}/pubhtml?gid=${gid}&single=true&widget=true&headers=false`;
-        
-        sheetModal.innerHTML = `
-            <div class="modal-content" style="padding: 0; margin: 0;">
-                <button class="close-btn" onclick="closeSheetModal()" style="z-index: 1003;">&times;</button>
-                <div class="sheet-controls">
-                    <button class="sheet-btn" onclick="openSheetInNewTab('${familyName}')">Edit in New Tab</button>
-                    <button class="sheet-btn" onclick="refreshSheet()">Refresh</button>
-                </div>
-                <div style="position: fixed; top: 0; left: 0; width: 100vw; height: 60px; background: #667eea; z-index: 1002; display: flex; align-items: center; justify-content: center; color: white;">
-                    <h2 style="margin: 0; font-size: 1.5em;">${familyName.charAt(0).toUpperCase() + familyName.slice(1)} Family Directory</h2>
-                </div>
-                <iframe src="${embedUrl}" 
-                        id="sheetFrame"
-                        style="position: absolute; top: 60px; left: 0; width: 100%; height: calc(100vh - 60px); border: none; margin: 0; padding: 0;"
-                        frameborder="0" marginheight="0" marginwidth="0"
-                        allow="fullscreen">
-                    Loading family directory...
-                </iframe>
-            </div>
-        `;
-        
-        document.body.appendChild(sheetModal);
-        document.body.style.overflow = 'hidden';
-        window.currentFamily = familyName;
-    }
-
-    function closeSheetModal() {
-        const sheetModal = document.getElementById('sheetModal');
-        if (sheetModal) {
-            sheetModal.remove();
-        }
-        document.body.style.overflow = 'auto';
-        openModal('directoryModal');
-    }
-
-    function openSheetInNewTab(familyName) {
-        const tabGids = {
-            'jennings': '983585983',       
-            'almeida': '125647568',
-            'evans': '157418657',     
-            'patteson': '157772354',  
-            'riley': '341548763',     
-            'crawford': '213369466'   
-        };
-        
-        const gid = tabGids[familyName.toLowerCase()] || '0';
-        const editUrl = `https://docs.google.com/spreadsheets/d/${SHEETS_ID}/edit?usp=sharing&gid=${gid}`;
-        window.open(editUrl, '_blank');
-    }
-
-    function refreshSheet() {
-        const iframe = document.getElementById('sheetFrame');
-        if (iframe && window.currentFamily) {
-            const tabGids = {
+        try {
+            closeModal('directoryModal');
+            
+            var sheetModal = document.createElement('div');
+            sheetModal.className = 'modal';
+            sheetModal.id = 'sheetModal';
+            sheetModal.style.display = 'block';
+            
+            var tabGids = {
                 'jennings': '983585983',       
                 'almeida': '125647568',
                 'evans': '157418657',     
@@ -743,96 +577,117 @@
                 'crawford': '213369466'   
             };
             
-            const gid = tabGids[window.currentFamily.toLowerCase()] || '0';
-            const embedUrl = `https://docs.google.com/spreadsheets/d/${SHEETS_ID}/pubhtml?gid=${gid}&single=true&widget=true&headers=false&rm=minimal&chrome=false&timestamp=${Date.now()}`;
-            iframe.src = embedUrl;
+            var gid = tabGids[familyName.toLowerCase()] || '0';
+            var SHEETS_ID = '1Fj6JKLC6fZdEU8QbZXr43JNH__8ec8NjEz0aCDLQRXY';
+            var embedUrl = 'https://docs.google.com/spreadsheets/d/' + SHEETS_ID + '/pubhtml?gid=' + gid + '&single=true&widget=true&headers=false';
+            
+            sheetModal.innerHTML = '<div class="modal-content" style="padding: 0; margin: 0;">' +
+                '<button class="close-btn" onclick="closeSheetModal()" style="z-index: 1003;">&times;</button>' +
+                '<div style="position: fixed; top: 0; left: 0; width: 100vw; height: 60px; background: #667eea; z-index: 1002; display: flex; align-items: center; justify-content: center; color: white;">' +
+                '<h2 style="margin: 0; font-size: 1.5em;">' + familyName.charAt(0).toUpperCase() + familyName.slice(1) + ' Family Directory</h2>' +
+                '</div>' +
+                '<iframe src="' + embedUrl + '" ' +
+                'id="sheetFrame" ' +
+                'style="position: absolute; top: 60px; left: 0; width: 100%; height: calc(100vh - 60px); border: none; margin: 0; padding: 0;" ' +
+                'frameborder="0" marginheight="0" marginwidth="0">' +
+                'Loading family directory...' +
+                '</iframe>' +
+                '</div>';
+            
+            document.body.appendChild(sheetModal);
+            document.body.style.overflow = 'hidden';
+        } catch (error) {
+            alert('Error loading family directory. Please try again.');
+        }
+    }
+
+    function closeSheetModal() {
+        try {
+            var sheetModal = document.getElementById('sheetModal');
+            if (sheetModal) {
+                sheetModal.remove();
+            }
+            document.body.style.overflow = 'auto';
+            openModal('directoryModal');
+        } catch (error) {
+            document.body.style.overflow = 'auto';
         }
     }
 
     function openLLCDocuments() {
-        const driveModal = document.createElement('div');
-        driveModal.className = 'modal';
-        driveModal.id = 'driveModal';
-        driveModal.style.display = 'block';
-        
-        const FOLDER_ID = '1cNkv_tVhwPBEhB43CvTeM2J-KDfMDumo';
-        const embedUrl = `https://drive.google.com/embeddedfolderview?id=${FOLDER_ID}#grid`;
-        
-        driveModal.innerHTML = `
-            <div class="modal-content" style="padding: 0; margin: 0;">
-                <button class="close-btn" onclick="closeDriveModal()" style="z-index: 1003;">&times;</button>
-                <div style="position: fixed; top: 0; left: 0; width: 100vw; height: 60px; background: #667eea; z-index: 1002; display: flex; align-items: center; justify-content: center; color: white;">
-                    <h2 style="margin: 0; font-size: 1.5em;">LLC Business Documents</h2>
-                </div>
-                <iframe src="${embedUrl}" 
-                        style="position: absolute; top: 60px; left: 0; width: 100%; height: calc(100vh - 60px); border: none; margin: 0; padding: 0;"
-                        frameborder="0" marginheight="0" marginwidth="0">
-                    Loading LLC documents...
-                </iframe>
-            </div>
-        `;
-        
-        document.body.appendChild(driveModal);
-        document.body.style.overflow = 'hidden';
+        try {
+            var driveModal = document.createElement('div');
+            driveModal.className = 'modal';
+            driveModal.id = 'driveModal';
+            driveModal.style.display = 'block';
+            
+            var FOLDER_ID = '1cNkv_tVhwPBEhB43CvTeM2J-KDfMDumo';
+            var embedUrl = 'https://drive.google.com/embeddedfolderview?id=' + FOLDER_ID + '#grid';
+            
+            driveModal.innerHTML = '<div class="modal-content" style="padding: 0; margin: 0;">' +
+                '<button class="close-btn" onclick="closeDriveModal()" style="z-index: 1003;">&times;</button>' +
+                '<div style="position: fixed; top: 0; left: 0; width: 100vw; height: 60px; background: #667eea; z-index: 1002; display: flex; align-items: center; justify-content: center; color: white;">' +
+                '<h2 style="margin: 0; font-size: 1.5em;">LLC Business Documents</h2>' +
+                '</div>' +
+                '<iframe src="' + embedUrl + '" ' +
+                'style="position: absolute; top: 60px; left: 0; width: 100%; height: calc(100vh - 60px); border: none; margin: 0; padding: 0;" ' +
+                'frameborder="0" marginheight="0" marginwidth="0">' +
+                'Loading LLC documents...' +
+                '</iframe>' +
+                '</div>';
+            
+            document.body.appendChild(driveModal);
+            document.body.style.overflow = 'hidden';
+        } catch (error) {
+            alert('Error loading LLC documents. Please try again.');
+        }
     }
 
     function closeDriveModal() {
-        const driveModal = document.getElementById('driveModal');
-        if (driveModal) {
-            driveModal.remove();
-        }
-        document.body.style.overflow = 'auto';
-    }
-
-    function handlePhotoUpload(event) {
-        const files = event.target.files;
-        if (files.length > 0) {
-            alert(`Selected ${files.length} photo(s). These will be uploaded to the Google Drive Photos folder.`);
-            
-            const photoGrid = document.getElementById('photoGrid');
-            
-            Array.from(files).forEach((file) => {
-                if (file.type.startsWith('image/')) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        const photoItem = document.createElement('div');
-                        photoItem.className = 'photo-item';
-                        photoItem.innerHTML = `
-                            <img src="${e.target.result}" 
-                                 style="width: 100%; height: 150px; object-fit: cover; border-radius: 8px; margin-bottom: 10px;"
-                                 alt="Uploaded photo">
-                            <p>${file.name}</p>
-                            <p style="font-size: 0.8em; color: #999;">Uploaded ✓</p>
-                        `;
-                        photoGrid.appendChild(photoItem);
-                    };
-                    reader.readAsDataURL(file);
-                }
-            });
+        try {
+            var driveModal = document.getElementById('driveModal');
+            if (driveModal) {
+                driveModal.remove();
+            }
+            document.body.style.overflow = 'auto';
+        } catch (error) {
+            document.body.style.overflow = 'auto';
         }
     }
 
-    function loadPhotosFromDrive() {
-        const photoGrid = document.getElementById('photoGrid');
-        photoGrid.innerHTML = '';
-        
-        const samplePhotos = [
-            { name: 'Family Reunion 2024.jpg', id: 'photo1' },
-            { name: 'House Exterior.jpg', id: 'photo2' },
-            { name: 'Kitchen Renovation.jpg', id: 'photo3' },
-            { name: 'Christmas 2023.jpg', id: 'photo4' },
-            { name: 'Summer Gathering.jpg', id: 'photo5' },
-            { name: 'New Deck.jpg', id: 'photo6' },
-            { name: 'Garden View.jpg', id: 'photo7' },
-            { name: 'Living Room.jpg', id: 'photo8' }
-        ];
-        
-        samplePhotos.forEach(photo => {
-            const photoItem = document.createElement('div');
-            photoItem.className = 'photo-item';
-            photoItem.onclick = () => openPhotoViewer(photo);
-            photoItem.innerHTML = `
-                <div class="photo-placeholder">📷</div>
-                <p>${photo.name}</p>
-                <p style="font-size: 0.8em; color: #999;">From Google Drive</p>
+    function sendMessage(event) {
+        try {
+            event.preventDefault();
+            
+            var name = document.getElementById('senderName').value;
+            var email = document.getElementById('senderEmail').value;
+            var subject = document.getElementById('messageSubject').value;
+            var message = document.getElementById('messageBody').value;
+            
+            var mailtoLink = 'mailto:reunionhill@gmail.com?subject=' + encodeURIComponent(subject) + 
+                '&body=' + encodeURIComponent('From: ' + name + ' (' + email + ')\n\n' + message);
+            window.location.href = mailtoLink;
+            
+            document.getElementById('contactForm').reset();
+            closeModal('contactModal');
+        } catch (error) {
+            alert('Error sending message. Please try again.');
+        }
+    }
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        try {
+            if (event.target.classList && event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+        } catch (error) {
+            // Ignore errors here
+        }
+    }
+</script>
 ```
+
+</body>
+</html>
