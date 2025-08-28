@@ -1,4 +1,3 @@
-Reunion Hill WebApp
 <!DOCTYPE html>
 
 <html lang="en">
@@ -526,11 +525,11 @@ Reunion Hill WebApp
         try {
             var authSection = document.getElementById('authSection');
             var mainContent = document.getElementById('mainContent');
-            var userInfo = document.getElementById('userInfo');
             
             if (authSection) authSection.style.display = 'none';
             if (mainContent) mainContent.style.display = 'grid';
-            if (userInfo) userInfo.style.display = 'flex';
+            // REMOVED: Line that shows userInfo tile - no longer displays the welcome tile
+            // if (userInfo) userInfo.style.display = 'flex';
         } catch (error) {
             alert('Error entering portal. Please refresh the page.');
         }
