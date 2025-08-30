@@ -427,6 +427,12 @@
             <p>Share a photo when a new memory is made at Montreat.</p>
         </div>
 
+        <div class="feature-card" onclick="openViewPhotos()">
+            <div class="feature-icon">🖼️</div>
+            <h3>View Photos</h3>
+            <p>Browse family memories and photos from Montreat.</p>
+        </div>
+
         <div class="feature-card" onclick="openModal('contactModal')">
             <div class="feature-icon">✉️</div>
             <h3>Contact Admin</h3>
@@ -733,6 +739,48 @@
             var photoModal = document.getElementById('photoModal');
             if (photoModal) {
                 photoModal.remove();
+            }
+            document.body.style.overflow = 'auto';
+        } catch (error) {
+            document.body.style.overflow = 'auto';
+        }
+    }
+
+    // NEW: View Photos Function - opens Google Drive photo folder in modal
+    function openViewPhotos() {
+        try {
+            var viewPhotosModal = document.createElement('div');
+            viewPhotosModal.className = 'modal';
+            viewPhotosModal.id = 'viewPhotosModal';
+            viewPhotosModal.style.display = 'block';
+            
+            var PHOTOS_FOLDER_ID = '1AVMRyaWUk74A-XAdjHa5CU686ys3j-D7QRdxA9Gz6bKaS8aXGjkdgWdOa8IpDnWmKNPnZy6p';
+            var embedUrl = 'https://drive.google.com/embeddedfolderview?id=' + PHOTOS_FOLDER_ID + '#grid';
+            
+            viewPhotosModal.innerHTML = '<div class="modal-content" style="padding: 0; margin: 0;">' +
+                '<button class="close-btn" onclick="closeViewPhotosModal()" style="z-index: 1003;">&times;</button>' +
+                '<div style="position: fixed; top: 0; left: 0; width: 100vw; height: 60px; background: #667eea; z-index: 1002; display: flex; align-items: center; justify-content: center; color: white;">' +
+                '<h2 style="margin: 0; font-size: 1.5em;">🖼️ Family Photos</h2>' +
+                '</div>' +
+                '<iframe src="' + embedUrl + '" ' +
+                'style="position: absolute; top: 60px; left: 0; width: 100%; height: calc(100vh - 60px); border: none; margin: 0; padding: 0;" ' +
+                'frameborder="0" marginheight="0" marginwidth="0">' +
+                'Loading family photos...' +
+                '</iframe>' +
+                '</div>';
+            
+            document.body.appendChild(viewPhotosModal);
+            document.body.style.overflow = 'hidden';
+        } catch (error) {
+            alert('Error loading family photos. Please try again.');
+        }
+    }
+
+    function closeViewPhotosModal() {
+        try {
+            var viewPhotosModal = document.getElementById('viewPhotosModal');
+            if (viewPhotosModal) {
+                viewPhotosModal.remove();
             }
             document.body.style.overflow = 'auto';
         } catch (error) {
