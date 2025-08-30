@@ -682,12 +682,42 @@
         }
     }
 
-    // NEW: Photo Upload Function - opens Google Form in new tab
+    // NEW: Photo Upload Function - opens Google Form in modal window
     function openPhotoUpload() {
         try {
-            window.open('https://docs.google.com/forms/d/19L1l9PSbsnNQXAf6bWFznuKC55ncFzEfGPfV0CiuOYE/viewform', '_blank');
+            var photoModal = document.createElement('div');
+            photoModal.className = 'modal';
+            photoModal.id = 'photoModal';
+            photoModal.style.display = 'block';
+            
+            photoModal.innerHTML = '<div class="modal-content" style="padding: 0; margin: 0;">' +
+                '<button class="close-btn" onclick="closePhotoModal()" style="z-index: 1003;">&times;</button>' +
+                '<div style="position: fixed; top: 0; left: 0; width: 100vw; height: 60px; background: #667eea; z-index: 1002; display: flex; align-items: center; justify-content: center; color: white;">' +
+                '<h2 style="margin: 0; font-size: 1.5em;">Photo Upload</h2>' +
+                '</div>' +
+                '<iframe src="https://docs.google.com/forms/d/19L1l9PSbsnNQXAf6bWFznuKC55ncFzEfGPfV0CiuOYE/viewform" ' +
+                'style="position: absolute; top: 60px; left: 0; width: 100%; height: calc(100vh - 60px); border: none; margin: 0; padding: 0;" ' +
+                'frameborder="0" marginheight="0" marginwidth="0">' +
+                'Loading photo upload form...' +
+                '</iframe>' +
+                '</div>';
+            
+            document.body.appendChild(photoModal);
+            document.body.style.overflow = 'hidden';
         } catch (error) {
             alert('Error opening photo upload form. Please try again.');
+        }
+    }
+
+    function closePhotoModal() {
+        try {
+            var photoModal = document.getElementById('photoModal');
+            if (photoModal) {
+                photoModal.remove();
+            }
+            document.body.style.overflow = 'auto';
+        } catch (error) {
+            document.body.style.overflow = 'auto';
         }
     }
 
