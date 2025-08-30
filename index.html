@@ -591,8 +591,14 @@
             
             var gid = tabGids[familyName.toLowerCase()] || '0';
             var SHEETS_ID = '1Fj6JKLC6fZdEU8QbZXr43JNH__8ec8NjEz0aCDLQRXY';
-            // FIXED: Back to /edit URL with proper embedding parameters that work
-            var embedUrl = 'https://docs.google.com/spreadsheets/d/' + SHEETS_ID + '/edit?usp=sharing&single=true&gid=' + gid + '&widget=true&headers=true&rm=minimal';
+            
+            // Try multiple URL formats to ensure compatibility
+            var embedUrl = 'https://docs.google.com/spreadsheets/d/' + SHEETS_ID + '/edit#gid=' + gid;
+            
+            // Alternative: try the pubhtml format which sometimes works better for specific tabs
+            // var embedUrl = 'https://docs.google.com/spreadsheets/d/' + SHEETS_ID + '/pubhtml?gid=' + gid + '&single=true';
+            
+            console.log('Opening family:', familyName, 'with GID:', gid, 'URL:', embedUrl);
             
             sheetModal.innerHTML = '<div class="modal-content" style="padding: 0; margin: 0;">' +
                 '<button class="close-btn" onclick="closeSheetModal()" style="z-index: 1003;">&times;</button>' +
@@ -602,7 +608,9 @@
                 '<iframe src="' + embedUrl + '" ' +
                 'id="sheetFrame" ' +
                 'style="position: absolute; top: 60px; left: 0; width: 100%; height: calc(100vh - 60px); border: none; margin: 0; padding: 0;" ' +
-                'frameborder="0" marginheight="0" marginwidth="0">' +
+                'frameborder="0" marginheight="0" marginwidth="0" ' +
+                'onload="console.log(\'Sheet loaded successfully\')" ' +
+                'onerror="console.log(\'Error loading sheet\')">' +
                 'Loading family directory...' +
                 '</iframe>' +
                 '</div>';
@@ -610,7 +618,8 @@
             document.body.appendChild(sheetModal);
             document.body.style.overflow = 'hidden';
         } catch (error) {
-            alert('Error loading family directory. Please try again.');
+            console.error('Error in showFamily:', error);
+            alert('Error loading family directory: ' + error.message + '. Please try again.');
         }
     }
 
