@@ -219,7 +219,7 @@
         flex: 1;
     }
 
-    .contact-form, .upload-form {
+    .contact-form {
         max-width: 500px;
         margin: 0 auto;
     }
@@ -261,69 +261,6 @@
 
     .submit-btn:hover {
         background: #5a67d8;
-    }
-
-    .file-upload-area {
-        border: 2px dashed #667eea;
-        border-radius: 10px;
-        padding: 40px;
-        text-align: center;
-        margin-bottom: 20px;
-        background: #f8f9fa;
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
-
-    .file-upload-area:hover {
-        border-color: #5a67d8;
-        background: #f0f0f0;
-    }
-
-    .file-upload-area.dragover {
-        border-color: #5a67d8;
-        background: #e6f3ff;
-    }
-
-    .upload-icon {
-        font-size: 3em;
-        color: #667eea;
-        margin-bottom: 15px;
-    }
-
-    .upload-text {
-        color: #666;
-        margin-bottom: 10px;
-    }
-
-    .file-input {
-        display: none;
-    }
-
-    .photo-preview {
-        max-width: 100%;
-        max-height: 300px;
-        border-radius: 5px;
-        margin: 10px 0;
-        display: none;
-    }
-
-    .upload-status {
-        margin-top: 15px;
-        padding: 10px;
-        border-radius: 5px;
-        display: none;
-    }
-
-    .upload-status.success {
-        background: #d4edda;
-        border: 1px solid #c3e6cb;
-        color: #155724;
-    }
-
-    .upload-status.error {
-        background: #f8d7da;
-        border: 1px solid #f5c6cb;
-        color: #721c24;
     }
 
     iframe {
@@ -425,14 +362,6 @@
             margin: 0;
             padding: 0;
         }
-
-        .file-upload-area {
-            padding: 20px;
-        }
-
-        .upload-icon {
-            font-size: 2em;
-        }
     }
 </style>
 ```
@@ -492,7 +421,7 @@
             <p>Access official business documents</p>
         </div>
 
-        <div class="feature-card" onclick="openModal('photoUploadModal')">
+        <div class="feature-card" onclick="openPhotoUpload()">
             <div class="feature-icon">📸</div>
             <h3>Photo Upload</h3>
             <p>Share a photo when a new memory is made at Montreat.</p>
@@ -565,108 +494,6 @@
     </div>
 </div>
 
-<!-- Photo Upload Modal -->
-<div class="modal" id="photoUploadModal">
-    <div class="modal-content">
-        <button class="close-btn" onclick="closeModal('photoUploadModal')">&times;</button>
-        <h2>Photo Upload</h2>
-        <div class="modal-body">
-            <div class="upload-form">
-                <p style="text-align: center; margin-bottom: 30px; font-size: 1.1em; color: #666;">
-                    Share a photo when a new memory is made at Montreat.
-                </p>
-                
-                <div class="file-upload-area" onclick="document.getElementById('photoFile').click()" 
-                     ondrop="handleDrop(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
-                    <div class="upload-icon">📸</div>
-                    <div class="upload-text">
-                        <strong>Click to upload a photo</strong><br>
-                        or drag and drop your image here
-                    </div>
-                    <div style="font-size: 0.9em; color: #888; margin-top: 10px;">
-                        Supports JPG, PNG, GIF files up to 10MB
-                    </div>
-                </div>
-
-                <input type="file" id="photoFile" class="file-input" accept="image/*" onchange="handleFileSelect(event)">
-                
-                <img id="photoPreview" class="photo-preview" alt="Photo preview">
-                
-                <form id="uploadForm" onsubmit="uploadPhoto(event)" style="display: none;">
-                    <div class="form-group">
-                        <label for="photoTitle">Photo Title (optional)</label>
-                        <input type="text" id="photoTitle" placeholder="Enter a title for your photo">
-                    </div>
-                    <div class="form-group">
-                        <label for="photoDescription">Description (optional)</label>
-                        <textarea id="photoDescription" placeholder="Add a description or memory about this photo"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="uploaderName">Your Name</label>
-                        <input type="text" id="uploaderName" required placeholder="Enter your name">
-                    </div>
-                    <button type="submit" class="submit-btn" id="uploadBtn">
-                        Upload Photo to Family Drive
-                    </button>
-                </form>
-
-                <div id="uploadStatus" class="upload-status"></div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Photo Upload Modal -->
-<div class="modal" id="photoUploadModal">
-    <div class="modal-content">
-        <button class="close-btn" onclick="closeModal('photoUploadModal')">&times;</button>
-        <h2>Photo Upload</h2>
-        <div class="modal-body">
-            <div class="upload-form">
-                <p style="text-align: center; margin-bottom: 30px; font-size: 1.1em; color: #666;">
-                    Share a photo when a new memory is made at Montreat.
-                </p>
-                
-                <div class="file-upload-area" onclick="document.getElementById('photoFile').click()" 
-                     ondrop="handleDrop(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
-                    <div class="upload-icon">📸</div>
-                    <div class="upload-text">
-                        <strong>Click to upload a photo</strong><br>
-                        or drag and drop your image here
-                    </div>
-                    <div style="font-size: 0.9em; color: #888; margin-top: 10px;">
-                        Supports JPG, PNG, GIF files up to 10MB
-                    </div>
-                </div>
-
-                <input type="file" id="photoFile" class="file-input" accept="image/*" onchange="handleFileSelect(event)">
-                
-                <img id="photoPreview" class="photo-preview" alt="Photo preview">
-                
-                <form id="uploadForm" onsubmit="uploadPhoto(event)" style="display: none;">
-                    <div class="form-group">
-                        <label for="photoTitle">Photo Title (optional)</label>
-                        <input type="text" id="photoTitle" placeholder="Enter a title for your photo">
-                    </div>
-                    <div class="form-group">
-                        <label for="photoDescription">Description (optional)</label>
-                        <textarea id="photoDescription" placeholder="Add a description or memory about this photo"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="uploaderName">Your Name</label>
-                        <input type="text" id="uploaderName" required placeholder="Enter your name">
-                    </div>
-                    <button type="submit" class="submit-btn" id="uploadBtn">
-                        Upload Photo to Family Drive
-                    </button>
-                </form>
-
-                <div id="uploadStatus" class="upload-status"></div>
-            </div>
-        </div>
-    </div>
-</div>
-
 <!-- Contact Modal -->
 <div class="modal" id="contactModal">
     <div class="modal-content">
@@ -732,11 +559,6 @@
             if (modal) {
                 modal.style.display = 'none';
                 document.body.style.overflow = 'auto';
-            }
-            
-            // Reset upload form when closing photo upload modal
-            if (modalId === 'photoUploadModal') {
-                resetUploadForm();
             }
         } catch (error) {
             alert('Error closing modal. Please refresh the page.');
@@ -860,42 +682,28 @@
         }
     }
 
-    // Photo Upload Functions
-    function handleDragOver(event) {
-        event.preventDefault();
-        event.currentTarget.classList.add('dragover');
-    }
-
-    function handleDragLeave(event) {
-        event.currentTarget.classList.remove('dragover');
-    }
-
-    function handleDrop(event) {
-        event.preventDefault();
-        event.currentTarget.classList.remove('dragover');
-        
-        var files = event.dataTransfer.files;
-        if (files.length > 0) {
-            handleFile(files[0]);
-        }
-    }
-
-    function handleFileSelect(event) {
-        var file = event.target.files[0];
-        if (file) {
-            handleFile(file);
-        }
-    }
-
-    function handleFile(file) {
+    // NEW: Photo Upload Function - opens Google Form in new tab
+    function openPhotoUpload() {
         try {
-            // Validate file type
-            if (!file.type.startsWith('image/')) {
-                showUploadStatus('Please select an image file (JPG, PNG, GIF).', 'error');
-                return;
-            }
+            window.open('https://docs.google.com/forms/d/19L1l9PSbsnNQXAf6bWFznuKC55ncFzEfGPfV0CiuOYE/viewform', '_blank');
+        } catch (error) {
+            alert('Error opening photo upload form. Please try again.');
+        }
+    }
 
-            // Validate file size (10MB limit)
-            if (file.size > 10 * 1024 * 1024) {
-                showUploadStatus('File size must be
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        try {
+            if (event.target.classList && event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+        } catch (error) {
+            // Ignore errors here
+        }
+    }
+</script>
 ```
+
+</body>
+</html>
