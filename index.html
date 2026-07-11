@@ -1,815 +1,1096 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reunion Hill Family Portal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.34.1/dist/tabler-icons.min.css" rel="stylesheet">
     <style>
+        :root {
+            --mint: #EEF4F2;
+            --teal: #1D9E75;
+            --teal-dark: #157A5B;
+            --pine: #1D5C55;
+            --sage: #5C8B84;
+            --card-border: #D3E2DE;
+            --tint: #E1F5EE;
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
-```
-    body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        min-height: 100vh;
-        color: #333;
-    }
+        body {
+            font-family: 'Nunito', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--mint);
+            min-height: 100vh;
+            color: #2A3B38;
+        }
 
-    .container {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 20px;
-    }
-
-    .header {
-        text-align: center;
-        margin-bottom: 40px;
-        background: white;
-        padding: 30px;
-        border-radius: 15px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-    }
-
-    .header h1 {
-        color: #667eea;
-        font-size: 2.5em;
-        margin-bottom: 10px;
-    }
-
-    .header p {
-        color: #666;
-        font-size: 1.1em;
-    }
-
-    .auth-section {
-        text-align: center;
-        background: white;
-        padding: 40px;
-        border-radius: 15px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        margin-bottom: 30px;
-    }
-
-    .enter-btn {
-        background: #667eea;
-        color: white;
-        border: none;
-        padding: 15px 30px;
-        font-size: 18px;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        display: inline-flex;
-        align-items: center;
-        gap: 10px;
-    }
-
-    .enter-btn:hover {
-        background: #5a67d8;
-        transform: translateY(-2px);
-    }
-
-    .main-content {
-        display: none;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 20px;
-        margin-top: 30px;
-    }
-
-    .feature-card {
-        background: white;
-        padding: 25px;
-        border-radius: 15px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        transition: transform 0.3s, box-shadow 0.3s;
-        cursor: pointer;
-        text-align: center;
-    }
-
-    .feature-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 20px 40px rgba(0,0,0,0.15);
-    }
-
-    .feature-icon {
-        font-size: 3em;
-        margin-bottom: 15px;
-        color: #667eea;
-    }
-
-    .feature-card h3 {
-        margin-bottom: 10px;
-        color: #333;
-        font-size: 1.3em;
-    }
-
-    .feature-card p {
-        color: #666;
-        line-height: 1.5;
-    }
-
-    .user-info {
-        background: white;
-        padding: 20px;
-        border-radius: 15px;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        margin-bottom: 20px;
-        display: none;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .modal {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0,0,0,0.5);
-        z-index: 1000;
-    }
-
-    .modal-content {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100vh;
-        background: white;
-        padding: 20px;
-        overflow-y: auto;
-        z-index: 1001;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .modal-content h2 {
-        margin-top: 60px;
-        margin-bottom: 30px;
-        text-align: center;
-        color: #667eea;
-        font-size: 2.5em;
-        flex-shrink: 0;
-    }
-
-    .modal-body {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        min-height: 0;
-    }
-
-    .close-btn {
-        position: fixed;
-        top: 20px;
-        right: 30px;
-        font-size: 32px;
-        cursor: pointer;
-        background: #fff;
-        border: 2px solid #ddd;
-        border-radius: 50%;
-        width: 50px;
-        height: 50px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #666;
-        z-index: 1002;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-
-    .close-btn:hover {
-        background: #f0f0f0;
-        color: #333;
-    }
-
-    .family-tabs {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-        margin-bottom: 20px;
-        justify-content: center;
-    }
-
-    .family-tab {
-        background: #667eea;
-        color: white;
-        border: none;
-        padding: 10px 20px;
-        border-radius: 25px;
-        cursor: pointer;
-        transition: background 0.3s;
-    }
-
-    .family-tab:hover {
-        background: #5a67d8;
-    }
-
-    .directory-content {
-        background: #f8f9fa;
-        padding: 20px;
-        border-radius: 10px;
-        min-height: 300px;
-        flex: 1;
-    }
-
-    .contact-form {
-        max-width: 500px;
-        margin: 0 auto;
-    }
-
-    .form-group {
-        margin-bottom: 20px;
-    }
-
-    .form-group label {
-        display: block;
-        margin-bottom: 5px;
-        font-weight: bold;
-    }
-
-    .form-group input,
-    .form-group textarea {
-        width: 100%;
-        padding: 12px;
-        border: 1px solid #ddd;
-        border-radius: 5px;
-        font-size: 16px;
-    }
-
-    .form-group textarea {
-        height: 120px;
-        resize: vertical;
-    }
-
-    .submit-btn {
-        background: #667eea;
-        color: white;
-        border: none;
-        padding: 12px 30px;
-        border-radius: 5px;
-        cursor: pointer;
-        font-size: 16px;
-        width: 100%;
-    }
-
-    .submit-btn:hover {
-        background: #5a67d8;
-    }
-
-    iframe {
-        width: 100%;
-        flex: 1;
-        border: none;
-        border-radius: 5px;
-        min-height: 400px;
-    }
-
-    @media (max-width: 768px) {
         .container {
-            padding: 10px;
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 24px 20px 48px;
         }
-        
+
+        .header {
+            text-align: center;
+            margin-bottom: 28px;
+            background: white;
+            padding: 36px 30px;
+            border-radius: 20px;
+            border: 1px solid var(--card-border);
+        }
+
         .header h1 {
-            font-size: 2em;
+            color: var(--pine);
+            font-size: 2.4em;
+            font-weight: 800;
+            margin-bottom: 6px;
+            letter-spacing: -0.5px;
         }
-        
+
+        .header p {
+            color: var(--sage);
+            font-size: 1.1em;
+        }
+
+        .auth-section {
+            text-align: center;
+            background: white;
+            padding: 40px 30px;
+            border-radius: 20px;
+            border: 1px solid var(--card-border);
+            margin-bottom: 30px;
+        }
+
+        .auth-section h2 {
+            color: var(--pine);
+            font-weight: 800;
+        }
+
+        .login-form {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .login-form input[type="email"] {
+            width: 100%;
+            padding: 15px 18px;
+            font-size: 16px;
+            font-family: inherit;
+            border: 1.5px solid var(--card-border);
+            background: #F2F7F6;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            color: #2A3B38;
+        }
+
+        .login-form input[type="email"]::placeholder {
+            color: #9BB5AF;
+        }
+
+        .login-form input[type="email"]:focus {
+            outline: none;
+            border-color: var(--teal);
+            background: white;
+        }
+
+        .login-error {
+            display: none;
+            background: #FDF0EE;
+            color: #A63A2B;
+            padding: 12px 16px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            font-size: 0.95em;
+            line-height: 1.4;
+            text-align: left;
+        }
+
+        .login-error a {
+            color: #A63A2B;
+            font-weight: 700;
+        }
+
+        .enter-btn {
+            background: var(--teal);
+            color: white;
+            border: none;
+            padding: 15px 32px;
+            font-size: 17px;
+            font-family: inherit;
+            font-weight: 700;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background 0.2s ease, transform 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .enter-btn:hover {
+            background: var(--teal-dark);
+            transform: translateY(-1px);
+        }
+
+        .enter-btn:disabled {
+            opacity: 0.6;
+            cursor: wait;
+        }
+
         .main-content {
-            grid-template-columns: 1fr;
+            display: none;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 18px;
         }
-        
-        .family-tabs {
+
+        .feature-card {
+            background: white;
+            padding: 28px 22px;
+            border-radius: 18px;
+            border: 1px solid var(--card-border);
+            transition: transform 0.2s ease, border-color 0.2s ease;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--teal);
+        }
+
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--tint);
+            color: var(--teal);
+            font-size: 28px;
+            display: inline-flex;
+            align-items: center;
             justify-content: center;
-        }
-        
-        .family-tab {
-            font-size: 14px;
-            padding: 8px 15px;
+            margin-bottom: 15px;
         }
 
-        .modal-content {
-            padding: 10px;
+        .feature-card h3 {
+            margin-bottom: 8px;
+            color: var(--pine);
+            font-size: 1.25em;
+            font-weight: 800;
         }
 
-        .modal-content h2 {
-            font-size: 2em;
-            margin-top: 50px;
+        .feature-card p {
+            color: var(--sage);
+            line-height: 1.5;
+            font-size: 0.95em;
         }
 
-        .close-btn {
-            top: 10px;
-            right: 15px;
-            font-size: 24px;
-            width: 40px;
-            height: 40px;
-        }
-    }
-
-    @media (max-width: 480px) {
-        .modal-content {
-            padding: 0;
-            overflow: hidden;
+        .user-info {
+            background: white;
+            padding: 12px 20px;
+            border-radius: 14px;
+            border: 1px solid var(--card-border);
+            margin-bottom: 20px;
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
         }
 
-        .modal-content h2 {
+        .user-info strong {
+            color: var(--pine);
+        }
+
+        .signout-btn {
+            background: none;
+            border: 1.5px solid var(--card-border);
+            color: var(--sage);
+            padding: 6px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.85em;
+            font-family: inherit;
+            font-weight: 700;
+        }
+
+        .signout-btn:hover {
+            border-color: var(--teal);
+            color: var(--teal);
+        }
+
+        .open-tab-link {
+            display: inline-block;
+            background: var(--teal);
+            color: white;
+            text-decoration: none;
+            padding: 10px 22px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            font-size: 0.95em;
+            font-weight: 700;
+        }
+
+        .open-tab-link:hover {
+            background: var(--teal-dark);
+        }
+
+        .modal {
+            display: none;
             position: fixed;
             top: 0;
             left: 0;
-            right: 0;
-            margin: 0;
-            padding: 15px 50px 15px 15px;
-            font-size: 1.3em;
-            background: white;
-            z-index: 1002;
-            border-bottom: 1px solid #eee;
-            height: 60px;
+            width: 100%;
+            height: 100%;
+            background: rgba(29, 92, 85, 0.45);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: var(--mint);
+            padding: 20px;
+            overflow-y: auto;
+            z-index: 1001;
             display: flex;
-            align-items: center;
-            justify-content: center;
+            flex-direction: column;
+        }
+
+        .modal-content h2 {
+            margin-top: 60px;
+            margin-bottom: 30px;
+            text-align: center;
+            color: var(--pine);
+            font-size: 2.2em;
+            font-weight: 800;
+            flex-shrink: 0;
         }
 
         .modal-body {
-            position: absolute;
-            top: 60px;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            padding: 10px;
-            overflow-y: auto;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
         }
 
         .close-btn {
             position: fixed;
-            top: 10px;
-            right: 10px;
-            font-size: 20px;
-            width: 35px;
-            height: 35px;
-            z-index: 1003;
-            background: rgba(255, 255, 255, 0.95);
+            top: 20px;
+            right: 30px;
+            font-size: 28px;
+            cursor: pointer;
+            background: #fff;
+            border: 1.5px solid var(--card-border);
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--sage);
+            z-index: 1002;
+        }
+
+        .close-btn:hover {
+            border-color: var(--teal);
+            color: var(--teal);
+        }
+
+        .modal-topbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 60px;
+            background: var(--teal);
+            z-index: 1002;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .modal-topbar h2 {
+            margin: 0;
+            font-size: 1.4em;
+            font-weight: 800;
+            color: white;
+        }
+
+        .family-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+
+        .family-tab {
+            background: white;
+            color: var(--pine);
+            border: 1.5px solid var(--card-border);
+            padding: 10px 22px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 700;
+            font-size: 15px;
+            transition: all 0.2s;
+        }
+
+        .family-tab:hover {
+            background: var(--teal);
+            border-color: var(--teal);
+            color: white;
+        }
+
+        .directory-content {
+            background: white;
+            border: 1px solid var(--card-border);
+            padding: 20px;
+            border-radius: 16px;
+            min-height: 300px;
+            flex: 1;
+        }
+
+        .contact-form {
+            max-width: 500px;
+            width: 100%;
+            margin: 0 auto;
+            background: white;
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 26px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 700;
+            color: var(--pine);
+            font-size: 0.95em;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1.5px solid var(--card-border);
+            background: #F2F7F6;
+            border-radius: 10px;
+            font-size: 16px;
+            font-family: inherit;
+            color: #2A3B38;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--teal);
+            background: white;
+        }
+
+        .form-group textarea {
+            height: 120px;
+            resize: vertical;
+        }
+
+        .submit-btn {
+            background: var(--teal);
+            color: white;
+            border: none;
+            padding: 13px 30px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 16px;
+            font-family: inherit;
+            font-weight: 700;
+            width: 100%;
+        }
+
+        .submit-btn:hover {
+            background: var(--teal-dark);
         }
 
         iframe {
             width: 100%;
-            height: calc(100vh - 80px);
+            flex: 1;
             border: none;
-            margin: 0;
-            padding: 0;
+            border-radius: 12px;
+            min-height: 400px;
+            background: white;
         }
-    }
-</style>
-```
 
+        @media (max-width: 768px) {
+            .container {
+                padding: 12px 12px 40px;
+            }
+
+            .header {
+                padding: 26px 18px;
+            }
+
+            .header h1 {
+                font-size: 1.9em;
+            }
+
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .family-tab {
+                font-size: 14px;
+                padding: 8px 16px;
+            }
+
+            .modal-content {
+                padding: 10px;
+            }
+
+            .modal-content h2 {
+                font-size: 1.8em;
+                margin-top: 50px;
+            }
+
+            .close-btn {
+                top: 10px;
+                right: 15px;
+                font-size: 22px;
+                width: 40px;
+                height: 40px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .modal-content {
+                padding: 0;
+                overflow: hidden;
+            }
+
+            .modal-content h2 {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                margin: 0;
+                padding: 15px 50px 15px 15px;
+                font-size: 1.25em;
+                background: white;
+                border-bottom: 1px solid var(--card-border);
+                z-index: 1002;
+                height: 60px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .modal-body {
+                position: absolute;
+                top: 60px;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                padding: 10px;
+                overflow-y: auto;
+            }
+
+            .close-btn {
+                position: fixed;
+                top: 10px;
+                right: 10px;
+                font-size: 18px;
+                width: 36px;
+                height: 36px;
+                z-index: 1003;
+                background: rgba(255, 255, 255, 0.95);
+            }
+
+            iframe {
+                width: 100%;
+                height: calc(100vh - 80px);
+                border: none;
+                margin: 0;
+                padding: 0;
+                border-radius: 0;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>🏡 Reunion Hill Family Portal</h1>
-            <p>A place for the Family to reunite and make memories</p>
+            <h1>Reunion Hill</h1>
+            <p>Where the family gathers · Montreat, North Carolina</p>
         </div>
 
-```
-    <div class="user-info" id="userInfo">
-        <div style="text-align: center;">
-            <strong>👨‍👩‍👧‍👦 Welcome to the Family Portal</strong>
-            <div style="font-size: 0.9em; color: #666;">reunionhill@gmail.com</div>
-        </div>
-    </div>
-
-    <div class="auth-section" id="authSection">
-        <h2>Welcome to the Reunion Hill Family Portal</h2>
-        <p style="margin: 20px 0;">Access your family's resources and information</p>
-        <button class="enter-btn" onclick="enterPortal()">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
-            </svg>
-            Enter Family Portal
-        </button>
-        <p style="margin-top: 15px; font-size: 0.9em; color: #666;">
-            Family members and authorized users
-        </p>
-    </div>
-
-    <div class="main-content" id="mainContent">
-        <div class="feature-card" onclick="openModal('reservationModal')">
-            <div class="feature-icon">📅</div>
-            <h3>Make a Reservation</h3>
-            <p>Reserve your dates at Reunion Hill</p>
-        </div>
-
-        <div class="feature-card" onclick="openModal('directoryModal')">
-            <div class="feature-icon">👨‍👩‍👧‍👦</div>
-            <h3>Family Directory</h3>
-            <p>View and update family member information</p>
-        </div>
-
-        <div class="feature-card" onclick="openModal('calendarModal')">
-            <div class="feature-icon">🗓️</div>
-            <h3>Family Calendar</h3>
-            <p>View upcoming events and reservations</p>
-        </div>
-
-        <div class="feature-card" onclick="openLLCDocuments()">
-            <div class="feature-icon">📋</div>
-            <h3>LLC Documents</h3>
-            <p>Access official business documents</p>
-        </div>
-
-        <div class="feature-card" onclick="openPhotoUpload()">
-            <div class="feature-icon">📸</div>
-            <h3>Photo Upload</h3>
-            <p>Share a photo when a new memory is made at Montreat.</p>
-        </div>
-
-        <div class="feature-card" onclick="openViewPhotos()">
-            <div class="feature-icon">🖼️</div>
-            <h3>View Photos</h3>
-            <p>Browse family memories and photos from Montreat.</p>
-        </div>
-
-        <div class="feature-card" onclick="openModal('contactModal')">
-            <div class="feature-icon">✉️</div>
-            <h3>Contact Admin</h3>
-            <p>Send a message to the administrator</p>
-        </div>
-    </div>
-</div>
-
-<!-- Reservation Modal -->
-<div class="modal" id="reservationModal">
-    <div class="modal-content">
-        <button class="close-btn" onclick="closeModal('reservationModal')">&times;</button>
-        <h2>Make a Reservation</h2>
-        <div class="modal-body">
-            <p style="text-align: center; margin-bottom: 20px; font-size: 1.1em; color: #666;">
-                Use the form below to request your reservation dates:
-            </p>
-            <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSexq82ADg5c-l7JBg7HT9vfPzqpg2whpQZrjIzZ91r6fV4MFw/viewform?embedded=true" 
-                    frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>
-        </div>
-    </div>
-</div>
-
-<!-- Directory Modal -->
-<div class="modal" id="directoryModal">
-    <div class="modal-content">
-        <button class="close-btn" onclick="closeModal('directoryModal')">&times;</button>
-        <h2>Family Directory</h2>
-        <div class="modal-body">
-            <div class="family-tabs">
-                <button class="family-tab" onclick="showFamily('jennings')">Jennings</button>
-                <button class="family-tab" onclick="showFamily('almeida')">Almeida</button>
-                <button class="family-tab" onclick="showFamily('evans')">Evans</button>
-                <button class="family-tab" onclick="showFamily('patteson')">Patteson</button>
-                <button class="family-tab" onclick="showFamily('riley')">Riley</button>
-                <button class="family-tab" onclick="showFamily('crawford')">Crawford</button>
+        <div class="user-info" id="userInfo">
+            <div>
+                <strong><i class="ti ti-user-check" style="vertical-align: -2px;"></i> Signed in:</strong>
+                <span id="signedInEmail" style="color: var(--sage);"></span>
             </div>
-            
-            <div class="directory-content" id="directoryContent">
-                <div style="text-align: center; padding: 40px;">
-                    <div style="font-size: 3em; margin-bottom: 20px;">📋</div>
-                    <h3 style="color: #667eea; margin-bottom: 20px;">Family Directory Access</h3>
-                    <p style="color: #666; line-height: 1.6; margin-bottom: 30px;">
-                        Click on any family name above to view their directory information.<br>
-                        Each family's details will open within the app for easy viewing and editing.
-                    </p>
-                    <p style="color: #888; font-size: 0.9em;">
-                        Family members can update their own information directly.
-                    </p>
+            <button class="signout-btn" onclick="signOut()">Sign out</button>
+        </div>
+
+        <div class="auth-section" id="authSection">
+            <h2>Welcome to the family portal</h2>
+            <p style="margin: 16px 0 24px; color: var(--sage);">Enter your email address to come on in</p>
+            <form class="login-form" onsubmit="attemptLogin(event)">
+                <input type="email" id="loginEmail" placeholder="your.email@example.com" required autocomplete="email">
+                <div class="login-error" id="loginError">
+                    That email isn't on the family list. Please check the spelling, or
+                    email <a href="mailto:reunionhill@gmail.com">reunionhill@gmail.com</a> to request access.
+                </div>
+                <button type="submit" class="enter-btn" id="loginBtn">
+                    <i class="ti ti-door-enter" style="font-size: 20px;"></i>
+                    Come on in
+                </button>
+            </form>
+            <p style="margin-top: 18px; font-size: 0.9em; color: var(--sage);">
+                Family members and authorized users only
+            </p>
+        </div>
+
+        <div class="main-content" id="mainContent">
+            <div class="feature-card" onclick="openModal('reservationModal')">
+                <div class="feature-icon"><i class="ti ti-calendar-plus"></i></div>
+                <h3>Make a reservation</h3>
+                <p>Reserve your dates at Reunion Hill</p>
+            </div>
+
+            <div class="feature-card" onclick="openModal('directoryModal')">
+                <div class="feature-icon"><i class="ti ti-users"></i></div>
+                <h3>Family directory</h3>
+                <p>View and update family member information</p>
+            </div>
+
+            <div class="feature-card" onclick="openModal('calendarModal')">
+                <div class="feature-icon"><i class="ti ti-calendar-event"></i></div>
+                <h3>Family calendar</h3>
+                <p>View upcoming events and reservations</p>
+            </div>
+
+            <div class="feature-card" onclick="openLLCDocuments()">
+                <div class="feature-icon"><i class="ti ti-file-text"></i></div>
+                <h3>LLC documents</h3>
+                <p>Access official business documents</p>
+            </div>
+
+            <div class="feature-card" onclick="openPhotoUpload()">
+                <div class="feature-icon"><i class="ti ti-camera"></i></div>
+                <h3>Photo upload</h3>
+                <p>Share a photo when a new memory is made at Montreat</p>
+            </div>
+
+            <div class="feature-card" onclick="openViewPhotos()">
+                <div class="feature-icon"><i class="ti ti-photo"></i></div>
+                <h3>View photos</h3>
+                <p>Browse family memories and photos from Montreat</p>
+            </div>
+
+            <div class="feature-card" onclick="openModal('contactModal')">
+                <div class="feature-icon"><i class="ti ti-mail"></i></div>
+                <h3>Contact admin</h3>
+                <p>Send a message to the administrator</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reservation Modal -->
+    <div class="modal" id="reservationModal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal('reservationModal')"><i class="ti ti-x"></i></button>
+            <h2>Make a reservation</h2>
+            <div class="modal-body">
+                <p style="text-align: center; margin-bottom: 15px; font-size: 1.05em; color: var(--sage);">
+                    Use the form below to request your reservation dates:
+                </p>
+                <p style="text-align: center;">
+                    <a class="open-tab-link" href="https://docs.google.com/forms/d/e/1FAIpQLSexq82ADg5c-l7JBg7HT9vfPzqpg2whpQZrjIzZ91r6fV4MFw/viewform" target="_blank" rel="noopener">
+                        Trouble seeing the form? Open it in a new tab <i class="ti ti-external-link" style="vertical-align: -2px;"></i>
+                    </a>
+                </p>
+                <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSexq82ADg5c-l7JBg7HT9vfPzqpg2whpQZrjIzZ91r6fV4MFw/viewform?embedded=true"
+                        frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>
+            </div>
+        </div>
+    </div>
+
+    <!-- Directory Modal -->
+    <div class="modal" id="directoryModal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal('directoryModal')"><i class="ti ti-x"></i></button>
+            <h2>Family directory</h2>
+            <div class="modal-body">
+                <div class="family-tabs">
+                    <button class="family-tab" onclick="showFamily('jennings')">Jennings</button>
+                    <button class="family-tab" onclick="showFamily('almeida')">Almeida</button>
+                    <button class="family-tab" onclick="showFamily('evans')">Evans</button>
+                    <button class="family-tab" onclick="showFamily('patteson')">Patteson</button>
+                    <button class="family-tab" onclick="showFamily('riley')">Riley</button>
+                    <button class="family-tab" onclick="showFamily('crawford')">Crawford</button>
+                </div>
+
+                <div class="directory-content" id="directoryContent">
+                    <div style="text-align: center; padding: 40px;">
+                        <div class="feature-icon" style="margin-bottom: 20px;"><i class="ti ti-address-book"></i></div>
+                        <h3 style="color: var(--pine); margin-bottom: 20px; font-weight: 800;">Family directory access</h3>
+                        <p style="color: var(--sage); line-height: 1.6; margin-bottom: 30px;">
+                            Click on any family name above to view their directory information.<br>
+                            Each family's details will open within the app for easy viewing and editing.
+                        </p>
+                        <p style="color: var(--sage); font-size: 0.9em;">
+                            Family members can update their own information directly.
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Calendar Modal -->
-<div class="modal" id="calendarModal">
-    <div class="modal-content">
-        <button class="close-btn" onclick="closeModal('calendarModal')">&times;</button>
-        <h2>Reunion Hill Calendar</h2>
-        <div class="modal-body">
-            <iframe src="https://calendar.google.com/calendar/embed?src=reunionhill%40gmail.com&ctz=America%2FNew_York" 
-                    frameborder="0" marginheight="0" marginwidth="0">Loading calendar...</iframe>
-        </div>
-    </div>
-</div>
-
-<!-- Contact Modal -->
-<div class="modal" id="contactModal">
-    <div class="modal-content">
-        <button class="close-btn" onclick="closeModal('contactModal')">&times;</button>
-        <h2>Contact Administrator</h2>
-        <div class="modal-body">
-            <div class="contact-form">
-                <form id="contactForm" onsubmit="sendMessage(event)">
-                    <div class="form-group">
-                        <label for="senderName">Your Name</label>
-                        <input type="text" id="senderName" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="senderEmail">Your Email</label>
-                        <input type="email" id="senderEmail" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="messageSubject">Subject</label>
-                        <input type="text" id="messageSubject" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="messageBody">Message</label>
-                        <textarea id="messageBody" required placeholder="Type your message here..."></textarea>
-                    </div>
-                    <button type="submit" class="submit-btn">Send Message</button>
-                </form>
+    <!-- Calendar Modal -->
+    <div class="modal" id="calendarModal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal('calendarModal')"><i class="ti ti-x"></i></button>
+            <h2>Reunion Hill calendar</h2>
+            <div class="modal-body">
+                <p style="text-align: center;">
+                    <a class="open-tab-link" href="https://calendar.google.com/calendar/embed?src=reunionhill%40gmail.com&ctz=America%2FNew_York" target="_blank" rel="noopener">
+                        Trouble seeing the calendar? Open it in a new tab <i class="ti ti-external-link" style="vertical-align: -2px;"></i>
+                    </a>
+                </p>
+                <iframe src="https://calendar.google.com/calendar/embed?src=reunionhill%40gmail.com&ctz=America%2FNew_York"
+                        frameborder="0" marginheight="0" marginwidth="0">Loading calendar...</iframe>
             </div>
         </div>
     </div>
-</div>
 
-<script>
-    // FIXED: Simple, clean JavaScript with proper error handling
-    function enterPortal() {
-        try {
-            var authSection = document.getElementById('authSection');
-            var mainContent = document.getElementById('mainContent');
-            
-            if (authSection) authSection.style.display = 'none';
-            if (mainContent) mainContent.style.display = 'grid';
-            // REMOVED: Line that shows userInfo tile - no longer displays the welcome tile
-            // if (userInfo) userInfo.style.display = 'flex';
-        } catch (error) {
-            alert('Error entering portal. Please refresh the page.');
+    <!-- Contact Modal -->
+    <div class="modal" id="contactModal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal('contactModal')"><i class="ti ti-x"></i></button>
+            <h2>Contact administrator</h2>
+            <div class="modal-body">
+                <div class="contact-form">
+                    <form id="contactForm" onsubmit="sendMessage(event)">
+                        <div class="form-group">
+                            <label for="senderName">Your name</label>
+                            <input type="text" id="senderName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="senderEmail">Your email</label>
+                            <input type="email" id="senderEmail" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="messageSubject">Subject</label>
+                            <input type="text" id="messageSubject" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="messageBody">Message</label>
+                            <textarea id="messageBody" required placeholder="Type your message here..."></textarea>
+                        </div>
+                        <button type="submit" class="submit-btn">Send message</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================
+        // LOGIN: email allowlist (hashed).
+        // Emails are stored as SHA-256 hashes so they are not readable
+        // in this file. To add a family member:
+        //   1. Open the portal in Chrome/Safari on a computer
+        //   2. Open the browser console (View > Developer > JavaScript Console)
+        //   3. Type:  hashEmail('newperson@example.com')  and press Enter
+        //   4. Copy the printed hash into the ALLOWED_HASHES list below
+        // NOTE: This is a light privacy gate, not bank-grade security.
+        // Keep the underlying Google Sheets/Drive/Calendar sharing
+        // settings restricted for real protection.
+        // ============================================================
+        var HASH_SALT = 'reunion-hill-portal';
+        var ALLOWED_HASHES = [
+            '32e7e29d646f8a9bfe6b175db7833d2a8a1cc132c2248ffb5dab66b1e237c716', // bob***
+            '7e7fd47f57a6666758830090a561dce58fe7d5859af96e5cbe47dd0b694912ee', // reu*** (admin)
+            'db0e5ab92d7bcd61c600ac7325b529039838eb9bfe6d10e468aee1ce912d5371', // nan***
+            '661fda5203bf00083302699a6d8ced4298f604ad2dc89bf39c4f39f46602290e', // kkt***
+            'fe7f0902d7e0ea31bd39d5429d7e4df2b6f6099cfd49e2b892a458927a7fd930', // nan***
+            'b04f53f080ec0616dd4c0bb8e559c37f0bf565f2cb0c843eaa1ac19c404560bb', // ben***
+            '94c18b2958e42d9ab4a02542ca53b44dec92d46c5669263d9e39db6ac6f55206', // lee***
+            '7c98211b2b845a14ed4a9446d7f95b3f12bd7ab90a9fb8c9ffe967a40b83fca4', // emi***
+            '26da631196b4e7c0d42728b49e70f8abefc95ed33073f844f9552e4df955d2f1', // wmp***
+            '92e03b6222a4dc761749a31bcbf742fed395ba2668442df05e93500f34053528', // jos***
+            'a768be8944f5857236d5e70d59757509bceaa6bf4bfb662174ac1736a1a3ee42', // kal***
+            '48de30a126dec439928735b0863d47488f2f404ccd6ffded59f489636596eb79', // gin***
+            'dc5b6c40ef3b0d1da1ba50919b6eb3a38dce05ac1ec31429c7e9b64139986ca2', // ale***
+            'ff64afb23c444315e4b703dd022628f634af34473d1eee2f02b644438f2cfc53', // san***
+            '563dbc233834f57d9e6a0ed19bd94b329b8ba89db4463b7a9001aa632002c28b', // kat***
+            '75140e519d274b5cfdae9352040fc1fe5ab654287f382bca3c59485a3b22b214', // mar***
+            'ccc26adae760521865ea6eee2ba1933cc5cd54e3ea216425cd05502c33779e61', // gin***
+            '308a6a6b875a2a26d2406a69a0de6fc385a5aa1f4c62241012ed439fe9d58f89', // gre***
+            'f2e9df4bae93c195e1eb60579d76bfeecce6c9f054c9f24cae939175022f40ef', // eli***
+            '481cdb39673b0ca8d0d17480ad13e2eefebd618ce12b916e1cef7861094a354f', // tlp***
+            '75d33347854f2958c2852f17cefd8c7d95c83f96585137a4f4d6de8a237e1a92', // reb***
+            '0d3872b9c1de2292df82a779f5d127ddc3a12fcddca2387217bb30b26d618f01', // sri***
+            'e7337aec4dfb3446d320e743e5771f510a1649734a75fbb5987f8ac006bb5675', // joh*** (g)
+            'a5579e2b69c0595093de64834a9b3cd5bb7969dfc4aa0cb57e0abb6cdaa48fcf', // tay***
+            '1db0bd6ae99b87f329dd096772223ad515de447734090a59e64920b3eb4c55f6', // eve***
+            '4301802da3bedb981846e78490ccc5351aaa5a4c65c3f02ae6d2f3b7d71f733e', // joh*** (c)
+            '652fbed593f4d6ff0d72dd0207276904bee94055d1936567209aeb7276432974', // kat*** (c)
+            'c4954fa3ba1b8b0817fc55b42a7f3ada8f1a6409f1d12dc671c381d1599d48d6'  // mar*** (c)
+            // ADD MORE FAMILY EMAIL HASHES HERE (one per line, in quotes, comma-separated)
+        ];
+        var STORAGE_KEY = 'rh_portal_user';
+
+        async function sha256Hex(text) {
+            var data = new TextEncoder().encode(text);
+            var buf = await crypto.subtle.digest('SHA-256', data);
+            return Array.prototype.map.call(new Uint8Array(buf), function (b) {
+                return b.toString(16).padStart(2, '0');
+            }).join('');
         }
-    }
 
-    function openModal(modalId) {
-        try {
-            var modal = document.getElementById(modalId);
-            if (modal) {
-                modal.style.display = 'block';
+        async function hashEmail(email) {
+            var h = await sha256Hex(HASH_SALT + String(email).trim().toLowerCase());
+            console.log('Hash for ' + email + ':\n' + h);
+            return h;
+        }
+
+        async function isAllowed(email) {
+            var h = await sha256Hex(HASH_SALT + String(email).trim().toLowerCase());
+            return ALLOWED_HASHES.indexOf(h) !== -1;
+        }
+
+        function showPortal(email) {
+            document.getElementById('authSection').style.display = 'none';
+            document.getElementById('mainContent').style.display = 'grid';
+            var userInfo = document.getElementById('userInfo');
+            document.getElementById('signedInEmail').textContent = email;
+            userInfo.style.display = 'flex';
+        }
+
+        function showLogin() {
+            document.getElementById('authSection').style.display = 'block';
+            document.getElementById('mainContent').style.display = 'none';
+            document.getElementById('userInfo').style.display = 'none';
+        }
+
+        async function attemptLogin(event) {
+            if (event) event.preventDefault();
+            var emailInput = document.getElementById('loginEmail');
+            var errorBox = document.getElementById('loginError');
+            var btn = document.getElementById('loginBtn');
+            var email = emailInput.value.trim().toLowerCase();
+            if (!email) return;
+
+            btn.disabled = true;
+            try {
+                if (await isAllowed(email)) {
+                    errorBox.style.display = 'none';
+                    try {
+                        localStorage.setItem(STORAGE_KEY, email);
+                    } catch (e) { /* private browsing - session only */ }
+                    showPortal(email);
+                } else {
+                    errorBox.style.display = 'block';
+                }
+            } catch (e) {
+                alert('Login check failed. Please make sure you are using the https:// address of the portal and try again.');
+            }
+            btn.disabled = false;
+        }
+
+        function signOut() {
+            try {
+                localStorage.removeItem(STORAGE_KEY);
+            } catch (e) { /* ignore */ }
+            document.getElementById('loginEmail').value = '';
+            showLogin();
+        }
+
+        // On page load: if this device logged in before AND the email is
+        // still on the allowlist, go straight in.
+        (async function restoreSession() {
+            var saved = null;
+            try {
+                saved = localStorage.getItem(STORAGE_KEY);
+            } catch (e) { /* ignore */ }
+            if (saved) {
+                try {
+                    if (await isAllowed(saved)) {
+                        showPortal(saved);
+                        return;
+                    }
+                    localStorage.removeItem(STORAGE_KEY); // was removed from list
+                } catch (e) { /* fall through to login */ }
+            }
+        })();
+
+        // ============================================================
+        // PORTAL FEATURES
+        // ============================================================
+        function openModal(modalId) {
+            try {
+                var modal = document.getElementById(modalId);
+                if (modal) {
+                    modal.style.display = 'block';
+                    document.body.style.overflow = 'hidden';
+                }
+            } catch (error) {
+                alert('Error opening modal. Please refresh the page.');
+            }
+        }
+
+        function closeModal(modalId) {
+            try {
+                var modal = document.getElementById(modalId);
+                if (modal) {
+                    modal.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                }
+            } catch (error) {
+                alert('Error closing modal. Please refresh the page.');
+            }
+        }
+
+        function showFamily(familyName) {
+            try {
+                closeModal('directoryModal');
+
+                var sheetModal = document.createElement('div');
+                sheetModal.className = 'modal';
+                sheetModal.id = 'sheetModal';
+                sheetModal.style.display = 'block';
+
+                var tabGids = {
+                    'jennings': '983585983',
+                    'almeida': '125647568',
+                    'evans': '157418657',
+                    'patteson': '1577721354',
+                    'riley': '341548763',
+                    'crawford': '213369466'
+                };
+
+                var gid = tabGids[familyName.toLowerCase()] || '0';
+                var SHEETS_ID = '1Fj6JKLC6fZdEU8QbZXr43JNH__8ec8NjEz0aCDLQRXY';
+
+                var embedUrl = 'https://docs.google.com/spreadsheets/d/' + SHEETS_ID + '/edit#gid=' + gid;
+
+                sheetModal.innerHTML = '<div class="modal-content" style="padding: 0; margin: 0;">' +
+                    '<button class="close-btn" onclick="closeSheetModal()" style="z-index: 1003;"><i class="ti ti-x"></i></button>' +
+                    '<div class="modal-topbar">' +
+                    '<h2>' + familyName.charAt(0).toUpperCase() + familyName.slice(1) + ' family directory</h2>' +
+                    '</div>' +
+                    '<iframe src="' + embedUrl + '" ' +
+                    'id="sheetFrame" ' +
+                    'style="position: absolute; top: 60px; left: 0; width: 100%; height: calc(100vh - 60px); border: none; margin: 0; padding: 0; border-radius: 0;" ' +
+                    'frameborder="0" marginheight="0" marginwidth="0">' +
+                    'Loading family directory...' +
+                    '</iframe>' +
+                    '</div>';
+
+                document.body.appendChild(sheetModal);
                 document.body.style.overflow = 'hidden';
+            } catch (error) {
+                console.error('Error in showFamily:', error);
+                alert('Error loading family directory: ' + error.message + '. Please try again.');
             }
-        } catch (error) {
-            alert('Error opening modal. Please refresh the page.');
         }
-    }
 
-    function closeModal(modalId) {
-        try {
-            var modal = document.getElementById(modalId);
-            if (modal) {
-                modal.style.display = 'none';
+        function closeSheetModal() {
+            try {
+                var sheetModal = document.getElementById('sheetModal');
+                if (sheetModal) {
+                    sheetModal.remove();
+                }
+                document.body.style.overflow = 'auto';
+                openModal('directoryModal');
+            } catch (error) {
                 document.body.style.overflow = 'auto';
             }
-        } catch (error) {
-            alert('Error closing modal. Please refresh the page.');
         }
-    }
 
-    function showFamily(familyName) {
-        try {
-            closeModal('directoryModal');
-            
-            var sheetModal = document.createElement('div');
-            sheetModal.className = 'modal';
-            sheetModal.id = 'sheetModal';
-            sheetModal.style.display = 'block';
-            
-            var tabGids = {
-                'jennings': '983585983',       
-                'almeida': '125647568',
-                'evans': '157418657',     
-                'patteson': '1577721354',  
-                'riley': '341548763',     
-                'crawford': '213369466'   
-            };
-            
-            var gid = tabGids[familyName.toLowerCase()] || '0';
-            var SHEETS_ID = '1Fj6JKLC6fZdEU8QbZXr43JNH__8ec8NjEz0aCDLQRXY';
-            
-            // Try multiple URL formats to ensure compatibility
-            var embedUrl = 'https://docs.google.com/spreadsheets/d/' + SHEETS_ID + '/edit#gid=' + gid;
-            
-            // Alternative: try the pubhtml format which sometimes works better for specific tabs
-            // var embedUrl = 'https://docs.google.com/spreadsheets/d/' + SHEETS_ID + '/pubhtml?gid=' + gid + '&single=true';
-            
-            console.log('Opening family:', familyName, 'with GID:', gid, 'URL:', embedUrl);
-            
-            sheetModal.innerHTML = '<div class="modal-content" style="padding: 0; margin: 0;">' +
-                '<button class="close-btn" onclick="closeSheetModal()" style="z-index: 1003;">&times;</button>' +
-                '<div style="position: fixed; top: 0; left: 0; width: 100vw; height: 60px; background: #667eea; z-index: 1002; display: flex; align-items: center; justify-content: center; color: white;">' +
-                '<h2 style="margin: 0; font-size: 1.5em;">' + familyName.charAt(0).toUpperCase() + familyName.slice(1) + ' Family Directory</h2>' +
-                '</div>' +
-                '<iframe src="' + embedUrl + '" ' +
-                'id="sheetFrame" ' +
-                'style="position: absolute; top: 60px; left: 0; width: 100%; height: calc(100vh - 60px); border: none; margin: 0; padding: 0;" ' +
-                'frameborder="0" marginheight="0" marginwidth="0" ' +
-                'onload="console.log(\'Sheet loaded successfully\')" ' +
-                'onerror="console.log(\'Error loading sheet\')">' +
-                'Loading family directory...' +
-                '</iframe>' +
-                '</div>';
-            
-            document.body.appendChild(sheetModal);
-            document.body.style.overflow = 'hidden';
-        } catch (error) {
-            console.error('Error in showFamily:', error);
-            alert('Error loading family directory: ' + error.message + '. Please try again.');
-        }
-    }
+        function openLLCDocuments() {
+            try {
+                var driveModal = document.createElement('div');
+                driveModal.className = 'modal';
+                driveModal.id = 'driveModal';
+                driveModal.style.display = 'block';
 
-    function closeSheetModal() {
-        try {
-            var sheetModal = document.getElementById('sheetModal');
-            if (sheetModal) {
-                sheetModal.remove();
+                var FOLDER_ID = '1cNkv_tVhwPBEhB43CvTeM2J-KDfMDumo';
+                var embedUrl = 'https://drive.google.com/embeddedfolderview?id=' + FOLDER_ID + '#grid';
+
+                driveModal.innerHTML = '<div class="modal-content" style="padding: 0; margin: 0;">' +
+                    '<button class="close-btn" onclick="closeDriveModal()" style="z-index: 1003;"><i class="ti ti-x"></i></button>' +
+                    '<div class="modal-topbar">' +
+                    '<h2>LLC business documents</h2>' +
+                    '</div>' +
+                    '<iframe src="' + embedUrl + '" ' +
+                    'style="position: absolute; top: 60px; left: 0; width: 100%; height: calc(100vh - 60px); border: none; margin: 0; padding: 0; border-radius: 0;" ' +
+                    'frameborder="0" marginheight="0" marginwidth="0">' +
+                    'Loading LLC documents...' +
+                    '</iframe>' +
+                    '</div>';
+
+                document.body.appendChild(driveModal);
+                document.body.style.overflow = 'hidden';
+            } catch (error) {
+                alert('Error loading LLC documents. Please try again.');
             }
-            document.body.style.overflow = 'auto';
-            openModal('directoryModal');
-        } catch (error) {
-            document.body.style.overflow = 'auto';
         }
-    }
 
-    function openLLCDocuments() {
-        try {
-            var driveModal = document.createElement('div');
-            driveModal.className = 'modal';
-            driveModal.id = 'driveModal';
-            driveModal.style.display = 'block';
-            
-            var FOLDER_ID = '1cNkv_tVhwPBEhB43CvTeM2J-KDfMDumo';
-            var embedUrl = 'https://drive.google.com/embeddedfolderview?id=' + FOLDER_ID + '#grid';
-            
-            driveModal.innerHTML = '<div class="modal-content" style="padding: 0; margin: 0;">' +
-                '<button class="close-btn" onclick="closeDriveModal()" style="z-index: 1003;">&times;</button>' +
-                '<div style="position: fixed; top: 0; left: 0; width: 100vw; height: 60px; background: #667eea; z-index: 1002; display: flex; align-items: center; justify-content: center; color: white;">' +
-                '<h2 style="margin: 0; font-size: 1.5em;">LLC Business Documents</h2>' +
-                '</div>' +
-                '<iframe src="' + embedUrl + '" ' +
-                'style="position: absolute; top: 60px; left: 0; width: 100%; height: calc(100vh - 60px); border: none; margin: 0; padding: 0;" ' +
-                'frameborder="0" marginheight="0" marginwidth="0">' +
-                'Loading LLC documents...' +
-                '</iframe>' +
-                '</div>';
-            
-            document.body.appendChild(driveModal);
-            document.body.style.overflow = 'hidden';
-        } catch (error) {
-            alert('Error loading LLC documents. Please try again.');
-        }
-    }
-
-    function closeDriveModal() {
-        try {
-            var driveModal = document.getElementById('driveModal');
-            if (driveModal) {
-                driveModal.remove();
-            }
-            document.body.style.overflow = 'auto';
-        } catch (error) {
-            document.body.style.overflow = 'auto';
-        }
-    }
-
-    function sendMessage(event) {
-        try {
-            event.preventDefault();
-            
-            var name = document.getElementById('senderName').value;
-            var email = document.getElementById('senderEmail').value;
-            var subject = document.getElementById('messageSubject').value;
-            var message = document.getElementById('messageBody').value;
-            
-            var mailtoLink = 'mailto:reunionhill@gmail.com?subject=' + encodeURIComponent(subject) + 
-                '&body=' + encodeURIComponent('From: ' + name + ' (' + email + ')\n\n' + message);
-            window.location.href = mailtoLink;
-            
-            document.getElementById('contactForm').reset();
-            closeModal('contactModal');
-        } catch (error) {
-            alert('Error sending message. Please try again.');
-        }
-    }
-
-    // NEW: Photo Upload Function - opens modal with form link
-    function openPhotoUpload() {
-        try {
-            var photoModal = document.createElement('div');
-            photoModal.className = 'modal';
-            photoModal.id = 'photoModal';
-            photoModal.style.display = 'block';
-            
-            photoModal.innerHTML = '<div class="modal-content">' +
-                '<button class="close-btn" onclick="closePhotoModal()">&times;</button>' +
-                '<h2>Photo Upload</h2>' +
-                '<div class="modal-body">' +
-                '<div style="text-align: center; padding: 40px;">' +
-                '<div style="font-size: 4em; margin-bottom: 20px; color: #667eea;">📸</div>' +
-                '<h3 style="color: #667eea; margin-bottom: 20px;">Share Your Montreat Memories</h3>' +
-                '<p style="color: #666; line-height: 1.6; margin-bottom: 30px; font-size: 1.1em;">' +
-                'Share a photo when a new memory is made at Montreat.' +
-                '</p>' +
-                '<p style="color: #888; margin-bottom: 30px; font-size: 0.95em;">' +
-                'Click the button below to open our photo upload form. After uploading your photo, you can return here by closing that tab.' +
-                '</p>' +
-                '<button onclick="openPhotoForm()" style="background: #667eea; color: white; border: none; padding: 15px 30px; font-size: 18px; border-radius: 8px; cursor: pointer; margin-bottom: 20px;">' +
-                'Open Photo Upload Form' +
-                '</button>' +
-                '<br>' +
-                '<button onclick="closePhotoModal()" style="background: #6c757d; color: white; border: none; padding: 10px 20px; font-size: 14px; border-radius: 5px; cursor: pointer;">' +
-                'Cancel' +
-                '</button>' +
-                '</div>' +
-                '</div>' +
-                '</div>';
-            
-            document.body.appendChild(photoModal);
-            document.body.style.overflow = 'hidden';
-        } catch (error) {
-            alert('Error opening photo upload. Please try again.');
-        }
-    }
-
-    function openPhotoForm() {
-        // Open the form in a new tab
-        window.open('https://docs.google.com/forms/d/19L1l9PSbsnNQXAf6bWFznuKC55ncFzEfGPfV0CiuOYE/viewform', '_blank');
-        // Close the modal
-        closePhotoModal();
-    }
-
-    function closePhotoModal() {
-        try {
-            var photoModal = document.getElementById('photoModal');
-            if (photoModal) {
-                photoModal.remove();
-            }
-            document.body.style.overflow = 'auto';
-        } catch (error) {
-            document.body.style.overflow = 'auto';
-        }
-    }
-
-    // NEW: View Photos Function - opens Google Drive photo folder in modal
-    function openViewPhotos() {
-        try {
-            var viewPhotosModal = document.createElement('div');
-            viewPhotosModal.className = 'modal';
-            viewPhotosModal.id = 'viewPhotosModal';
-            viewPhotosModal.style.display = 'block';
-            
-            var PHOTOS_FOLDER_ID = '1AVMRyaWUk74A-XAdjHa5CU686ys3j-D7QRdxA9Gz6bKaS8aXGjkdgWdOa8IpDnWmKNPnZy6p';
-            var embedUrl = 'https://drive.google.com/embeddedfolderview?id=' + PHOTOS_FOLDER_ID + '#grid';
-            
-            viewPhotosModal.innerHTML = '<div class="modal-content" style="padding: 0; margin: 0;">' +
-                '<button class="close-btn" onclick="closeViewPhotosModal()" style="z-index: 1003;">&times;</button>' +
-                '<div style="position: fixed; top: 0; left: 0; width: 100vw; height: 60px; background: #667eea; z-index: 1002; display: flex; align-items: center; justify-content: center; color: white;">' +
-                '<h2 style="margin: 0; font-size: 1.5em;">🖼️ Family Photos</h2>' +
-                '</div>' +
-                '<iframe src="' + embedUrl + '" ' +
-                'style="position: absolute; top: 60px; left: 0; width: 100%; height: calc(100vh - 60px); border: none; margin: 0; padding: 0;" ' +
-                'frameborder="0" marginheight="0" marginwidth="0">' +
-                'Loading family photos...' +
-                '</iframe>' +
-                '</div>';
-            
-            document.body.appendChild(viewPhotosModal);
-            document.body.style.overflow = 'hidden';
-        } catch (error) {
-            alert('Error loading family photos. Please try again.');
-        }
-    }
-
-    function closeViewPhotosModal() {
-        try {
-            var viewPhotosModal = document.getElementById('viewPhotosModal');
-            if (viewPhotosModal) {
-                viewPhotosModal.remove();
-            }
-            document.body.style.overflow = 'auto';
-        } catch (error) {
-            document.body.style.overflow = 'auto';
-        }
-    }
-
-    // Close modal when clicking outside
-    window.onclick = function(event) {
-        try {
-            if (event.target.classList && event.target.classList.contains('modal')) {
-                event.target.style.display = 'none';
+        function closeDriveModal() {
+            try {
+                var driveModal = document.getElementById('driveModal');
+                if (driveModal) {
+                    driveModal.remove();
+                }
+                document.body.style.overflow = 'auto';
+            } catch (error) {
                 document.body.style.overflow = 'auto';
             }
-        } catch (error) {
-            // Ignore errors here
         }
-    }
-</script>
-```
 
+        function sendMessage(event) {
+            try {
+                event.preventDefault();
+
+                var name = document.getElementById('senderName').value;
+                var email = document.getElementById('senderEmail').value;
+                var subject = document.getElementById('messageSubject').value;
+                var message = document.getElementById('messageBody').value;
+
+                var mailtoLink = 'mailto:reunionhill@gmail.com?subject=' + encodeURIComponent(subject) +
+                    '&body=' + encodeURIComponent('From: ' + name + ' (' + email + ')\n\n' + message);
+                window.location.href = mailtoLink;
+
+                document.getElementById('contactForm').reset();
+                closeModal('contactModal');
+            } catch (error) {
+                alert('Error sending message. Please try again.');
+            }
+        }
+
+        function openPhotoUpload() {
+            try {
+                var photoModal = document.createElement('div');
+                photoModal.className = 'modal';
+                photoModal.id = 'photoModal';
+                photoModal.style.display = 'block';
+
+                photoModal.innerHTML = '<div class="modal-content">' +
+                    '<button class="close-btn" onclick="closePhotoModal()"><i class="ti ti-x"></i></button>' +
+                    '<h2>Photo upload</h2>' +
+                    '<div class="modal-body">' +
+                    '<div style="text-align: center; padding: 40px 20px; background: white; border: 1px solid var(--card-border); border-radius: 16px; max-width: 500px; margin: 0 auto;">' +
+                    '<div class="feature-icon" style="margin-bottom: 20px;"><i class="ti ti-camera"></i></div>' +
+                    '<h3 style="color: var(--pine); margin-bottom: 20px; font-weight: 800;">Share your Montreat memories</h3>' +
+                    '<p style="color: var(--sage); line-height: 1.6; margin-bottom: 30px; font-size: 1.05em;">' +
+                    'Share a photo when a new memory is made at Montreat.' +
+                    '</p>' +
+                    '<p style="color: var(--sage); margin-bottom: 30px; font-size: 0.95em;">' +
+                    'Click the button below to open our photo upload form. After uploading your photo, you can return here by closing that tab.' +
+                    '</p>' +
+                    '<button onclick="openPhotoForm()" class="enter-btn" style="margin-bottom: 20px;">' +
+                    'Open photo upload form' +
+                    '</button>' +
+                    '<br>' +
+                    '<button onclick="closePhotoModal()" class="signout-btn">' +
+                    'Cancel' +
+                    '</button>' +
+                    '</div>' +
+                    '</div>' +
+                    '</div>';
+
+                document.body.appendChild(photoModal);
+                document.body.style.overflow = 'hidden';
+            } catch (error) {
+                alert('Error opening photo upload. Please try again.');
+            }
+        }
+
+        function openPhotoForm() {
+            window.open('https://docs.google.com/forms/d/19L1l9PSbsnNQXAf6bWFznuKC55ncFzEfGPfV0CiuOYE/viewform', '_blank');
+            closePhotoModal();
+        }
+
+        function closePhotoModal() {
+            try {
+                var photoModal = document.getElementById('photoModal');
+                if (photoModal) {
+                    photoModal.remove();
+                }
+                document.body.style.overflow = 'auto';
+            } catch (error) {
+                document.body.style.overflow = 'auto';
+            }
+        }
+
+        function openViewPhotos() {
+            try {
+                var viewPhotosModal = document.createElement('div');
+                viewPhotosModal.className = 'modal';
+                viewPhotosModal.id = 'viewPhotosModal';
+                viewPhotosModal.style.display = 'block';
+
+                var PHOTOS_FOLDER_ID = '1AVMRyaWUk74A-XAdjHa5CU686ys3j-D7QRdxA9Gz6bKaS8aXGjkdgWdOa8IpDnWmKNPnZy6p';
+                var embedUrl = 'https://drive.google.com/embeddedfolderview?id=' + PHOTOS_FOLDER_ID + '#grid';
+
+                viewPhotosModal.innerHTML = '<div class="modal-content" style="padding: 0; margin: 0;">' +
+                    '<button class="close-btn" onclick="closeViewPhotosModal()" style="z-index: 1003;"><i class="ti ti-x"></i></button>' +
+                    '<div class="modal-topbar">' +
+                    '<h2>Family photos</h2>' +
+                    '</div>' +
+                    '<iframe src="' + embedUrl + '" ' +
+                    'style="position: absolute; top: 60px; left: 0; width: 100%; height: calc(100vh - 60px); border: none; margin: 0; padding: 0; border-radius: 0;" ' +
+                    'frameborder="0" marginheight="0" marginwidth="0">' +
+                    'Loading family photos...' +
+                    '</iframe>' +
+                    '</div>';
+
+                document.body.appendChild(viewPhotosModal);
+                document.body.style.overflow = 'hidden';
+            } catch (error) {
+                alert('Error loading family photos. Please try again.');
+            }
+        }
+
+        function closeViewPhotosModal() {
+            try {
+                var viewPhotosModal = document.getElementById('viewPhotosModal');
+                if (viewPhotosModal) {
+                    viewPhotosModal.remove();
+                }
+                document.body.style.overflow = 'auto';
+            } catch (error) {
+                document.body.style.overflow = 'auto';
+            }
+        }
+
+        window.onclick = function(event) {
+            try {
+                if (event.target.classList && event.target.classList.contains('modal')) {
+                    event.target.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                }
+            } catch (error) {
+                // Ignore errors here
+            }
+        }
+    </script>
 </body>
 </html>
