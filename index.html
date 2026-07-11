@@ -615,16 +615,13 @@
             <button class="close-btn" onclick="closeModal('reservationModal')"><i class="ti ti-x"></i></button>
             <h2>Make a reservation</h2>
             <div class="modal-body">
-                <p style="text-align: center; margin-bottom: 15px; font-size: 1.05em; color: var(--sage);">
-                    Use the form below to request your reservation dates:
-                </p>
-                <p style="text-align: center;">
-                    <a class="open-tab-link" href="https://docs.google.com/forms/d/e/1FAIpQLSexq82ADg5c-l7JBg7HT9vfPzqpg2whpQZrjIzZ91r6fV4MFw/viewform" target="_blank" rel="noopener">
+                <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSexq82ADg5c-l7JBg7HT9vfPzqpg2whpQZrjIzZ91r6fV4MFw/viewform?embedded=true"
+                        frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>
+                <p style="text-align: center; margin-top: 10px; font-size: 0.9em;">
+                    <a href="https://docs.google.com/forms/d/e/1FAIpQLSexq82ADg5c-l7JBg7HT9vfPzqpg2whpQZrjIzZ91r6fV4MFw/viewform" target="_blank" rel="noopener" style="color: var(--sage);">
                         Trouble seeing the form? Open it in a new tab <i class="ti ti-external-link" style="vertical-align: -2px;"></i>
                     </a>
                 </p>
-                <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSexq82ADg5c-l7JBg7HT9vfPzqpg2whpQZrjIzZ91r6fV4MFw/viewform?embedded=true"
-                        frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>
             </div>
         </div>
     </div>
@@ -711,17 +708,27 @@
 
     <script>
         // ============================================================
-        // LOGIN: email allowlist (hashed).
-        // Emails are stored as SHA-256 hashes so they are not readable
-        // in this file. To add a family member:
-        //   1. Open the portal in Chrome/Safari on a computer
-        //   2. Open the browser console (View > Developer > JavaScript Console)
-        //   3. Type:  hashEmail('newperson@example.com')  and press Enter
-        //   4. Copy the printed hash into the ALLOWED_HASHES list below
+        // LOGIN: the allowlist is read LIVE from the Family Directory
+        // Google Sheet. Any email address that appears on any of the
+        // six family tabs can log in. To grant someone access, just
+        // add their email to the directory sheet - no code changes.
+        //
+        // The hashed list below is a BACKUP ONLY: it is used if the
+        // sheet can't be reached (offline, or sharing settings change).
+        // You normally never need to touch it.
+        //
         // NOTE: This is a light privacy gate, not bank-grade security.
-        // Keep the underlying Google Sheets/Drive/Calendar sharing
-        // settings restricted for real protection.
         // ============================================================
+        var SHEETS_ID = '1Fj6JKLC6fZdEU8QbZXr43JNH__8ec8NjEz0aCDLQRXY';
+        var FAMILY_TAB_GIDS = {
+            'jennings': '983585983',
+            'almeida': '125647568',
+            'evans': '157418657',
+            'patteson': '1577721354',
+            'riley': '341548763',
+            'crawford': '213369466'
+        };
+        var CACHE_KEY = 'rh_portal_allowlist_cache';
         var HASH_SALT = 'reunion-hill-portal';
         var ALLOWED_HASHES = [
             '32e7e29d646f8a9bfe6b175db7833d2a8a1cc132c2248ffb5dab66b1e237c716', // bob***
@@ -770,8 +777,51 @@
             return h;
         }
 
+        function extractEmails(text) {
+            var found = text.match(/[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/gi) || [];
+            return found.map(function (e) { return e.toLowerCase(); });
+        }
+
+        // Fetch every family tab of the directory sheet and collect all
+        // email addresses found on them.
+        async function fetchSheetEmails() {
+            var gids = Object.keys(FAMILY_TAB_GIDS).map(function (k) { return FAMILY_TAB_GIDS[k]; });
+            var results = await Promise.all(gids.map(function (gid) {
+                var url = 'https://docs.google.com/spreadsheets/d/' + SHEETS_ID +
+                    '/gviz/tq?tqx=out:csv&gid=' + gid;
+                return fetch(url).then(function (r) {
+                    if (!r.ok) throw new Error('HTTP ' + r.status);
+                    return r.text();
+                });
+            }));
+            var emails = [];
+            results.forEach(function (csv) {
+                emails = emails.concat(extractEmails(csv));
+            });
+            if (emails.length === 0) throw new Error('No emails found in sheet');
+            return emails;
+        }
+
         async function isAllowed(email) {
-            var h = await sha256Hex(HASH_SALT + String(email).trim().toLowerCase());
+            var normalized = String(email).trim().toLowerCase();
+
+            // 1. Live check against the Family Directory sheet
+            try {
+                var sheetEmails = await fetchSheetEmails();
+                try {
+                    localStorage.setItem(CACHE_KEY, JSON.stringify(sheetEmails));
+                } catch (e) { /* ignore */ }
+                if (sheetEmails.indexOf(normalized) !== -1) return true;
+            } catch (e) {
+                // Sheet unreachable - fall back to the last successful copy
+                try {
+                    var cached = JSON.parse(localStorage.getItem(CACHE_KEY) || '[]');
+                    if (cached.indexOf(normalized) !== -1) return true;
+                } catch (e2) { /* ignore */ }
+            }
+
+            // 2. Backup: built-in hashed list
+            var h = await sha256Hex(HASH_SALT + normalized);
             return ALLOWED_HASHES.indexOf(h) !== -1;
         }
 
@@ -876,17 +926,7 @@
                 sheetModal.id = 'sheetModal';
                 sheetModal.style.display = 'block';
 
-                var tabGids = {
-                    'jennings': '983585983',
-                    'almeida': '125647568',
-                    'evans': '157418657',
-                    'patteson': '1577721354',
-                    'riley': '341548763',
-                    'crawford': '213369466'
-                };
-
-                var gid = tabGids[familyName.toLowerCase()] || '0';
-                var SHEETS_ID = '1Fj6JKLC6fZdEU8QbZXr43JNH__8ec8NjEz0aCDLQRXY';
+                var gid = FAMILY_TAB_GIDS[familyName.toLowerCase()] || '0';
 
                 var embedUrl = 'https://docs.google.com/spreadsheets/d/' + SHEETS_ID + '/edit#gid=' + gid;
 
