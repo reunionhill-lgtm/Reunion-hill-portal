@@ -8,6 +8,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.34.1/dist/tabler-icons.min.css" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
     <style>
         :root {
             --mint: #EEF4F2;
@@ -111,6 +113,57 @@
             font-size: 0.95em;
             line-height: 1.4;
             text-align: left;
+        }
+
+        .login-success {
+            display: none;
+            background: var(--tint);
+            color: var(--pine);
+            padding: 12px 16px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            font-size: 0.95em;
+            line-height: 1.4;
+            text-align: left;
+        }
+
+        .google-btn {
+            width: 100%;
+            background: white;
+            color: #2A3B38;
+            border: 1.5px solid var(--card-border);
+            padding: 14px;
+            font-size: 16px;
+            font-family: inherit;
+            font-weight: 700;
+            border-radius: 12px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            transition: border-color 0.2s;
+        }
+
+        .google-btn:hover {
+            border-color: var(--teal);
+        }
+
+        .login-divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 18px 0;
+            color: var(--sage);
+            font-size: 0.9em;
+        }
+
+        .login-divider::before,
+        .login-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--card-border);
         }
 
         .login-error a {
@@ -547,18 +600,23 @@
 
         <div class="auth-section" id="authSection">
             <h2>Welcome to the family portal</h2>
-            <p style="margin: 16px 0 24px; color: var(--sage);">Enter your email address to come on in</p>
-            <form class="login-form" onsubmit="attemptLogin(event)">
-                <input type="email" id="loginEmail" placeholder="your.email@example.com" required autocomplete="email">
-                <div class="login-error" id="loginError">
-                    That email isn't on the family list. Please check the spelling, or
-                    email <a href="mailto:reunionhill@gmail.com">reunionhill@gmail.com</a> to request access.
-                </div>
-                <button type="submit" class="enter-btn" id="loginBtn">
-                    <i class="ti ti-door-enter" style="font-size: 20px;"></i>
-                    Come on in
+            <p style="margin: 16px 0 24px; color: var(--sage);">Sign in to come on in</p>
+            <div class="login-form">
+                <button type="button" class="google-btn" id="googleBtn" onclick="googleSignIn()">
+                    <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+                    Sign in with Google
                 </button>
-            </form>
+                <div class="login-divider"><span>or</span></div>
+                <form onsubmit="sendLoginLink(event)">
+                    <input type="email" id="loginEmail" placeholder="your.email@example.com" required autocomplete="email">
+                    <div class="login-error" id="loginError"></div>
+                    <div class="login-success" id="loginSuccess"></div>
+                    <button type="submit" class="enter-btn" id="loginBtn" style="background: white; color: var(--teal); border: 2px solid var(--teal);">
+                        <i class="ti ti-mail-forward" style="font-size: 20px;"></i>
+                        Email me a sign-in link
+                    </button>
+                </form>
+            </div>
             <p style="margin-top: 18px; font-size: 0.9em; color: var(--sage);">
                 Family members and authorized users only
             </p>
@@ -729,7 +787,28 @@
             'crawford': '213369466'
         };
         var CACHE_KEY = 'rh_portal_allowlist_cache';
+        var PENDING_EMAIL_KEY = 'rh_portal_pending_email';
         var HASH_SALT = 'reunion-hill-portal';
+
+        // ============================================================
+        // FIREBASE CONFIG - paste the values from your Firebase project
+        // here (Project settings > General > Your apps > SDK setup).
+        // ============================================================
+        var FIREBASE_CONFIG = {
+            apiKey: 'AIzaSyBYNDuj8FdC6eYs03DM6goLwmQYUNCn5k0',
+            authDomain: 'reunion-hill-portal-3774f.firebaseapp.com',
+            projectId: 'reunion-hill-portal-3774f',
+            storageBucket: 'reunion-hill-portal-3774f.firebasestorage.app',
+            messagingSenderId: '702241985917',
+            appId: '1:702241985917:web:6a031e75f370960bb2e814'
+        };
+
+        var firebaseReady = FIREBASE_CONFIG.apiKey.indexOf('PASTE') === -1;
+        var auth = null;
+        if (firebaseReady && typeof firebase !== 'undefined') {
+            firebase.initializeApp(FIREBASE_CONFIG);
+            auth = firebase.auth();
+        }
         var ALLOWED_HASHES = [
             '32e7e29d646f8a9bfe6b175db7833d2a8a1cc132c2248ffb5dab66b1e237c716', // bob***
             '7e7fd47f57a6666758830090a561dce58fe7d5859af96e5cbe47dd0b694912ee', // reu*** (admin)
@@ -761,7 +840,6 @@
             'c4954fa3ba1b8b0817fc55b42a7f3ada8f1a6409f1d12dc671c381d1599d48d6'  // mar*** (c)
             // ADD MORE FAMILY EMAIL HASHES HERE (one per line, in quotes, comma-separated)
         ];
-        var STORAGE_KEY = 'rh_portal_user';
 
         async function sha256Hex(text) {
             var data = new TextEncoder().encode(text);
@@ -839,56 +917,135 @@
             document.getElementById('userInfo').style.display = 'none';
         }
 
-        async function attemptLogin(event) {
+        function showAuthError(msg) {
+            var box = document.getElementById('loginError');
+            document.getElementById('loginSuccess').style.display = 'none';
+            box.innerHTML = msg;
+            box.style.display = 'block';
+        }
+
+        function showAuthSuccess(msg) {
+            var box = document.getElementById('loginSuccess');
+            document.getElementById('loginError').style.display = 'none';
+            box.innerHTML = msg;
+            box.style.display = 'block';
+        }
+
+        var NOT_ON_LIST_MSG = 'That email isn\'t on the family list. Please check the spelling, or ' +
+            'email <a href="mailto:reunionhill@gmail.com">reunionhill@gmail.com</a> to request access.';
+
+        // --- Google sign-in button ---
+        async function googleSignIn() {
+            if (!firebaseReady || !auth) {
+                showAuthError('Sign-in is not set up yet. Please contact the administrator.');
+                return;
+            }
+            try {
+                var provider = new firebase.auth.GoogleAuthProvider();
+                await auth.signInWithPopup(provider);
+                // onAuthStateChanged handles the rest
+            } catch (e) {
+                if (e && (e.code === 'auth/popup-blocked' || e.code === 'auth/popup-closed-by-user' ||
+                          e.code === 'auth/cancelled-popup-request' || e.code === 'auth/operation-not-supported-in-this-environment')) {
+                    try {
+                        await auth.signInWithRedirect(new firebase.auth.GoogleAuthProvider());
+                    } catch (e2) {
+                        showAuthError('Google sign-in didn\'t work. Try the email link below instead.');
+                    }
+                } else {
+                    showAuthError('Google sign-in didn\'t work. Try the email link below instead.');
+                }
+            }
+        }
+
+        // --- "Email me a sign-in link" button ---
+        async function sendLoginLink(event) {
             if (event) event.preventDefault();
-            var emailInput = document.getElementById('loginEmail');
-            var errorBox = document.getElementById('loginError');
+            if (!firebaseReady || !auth) {
+                showAuthError('Sign-in is not set up yet. Please contact the administrator.');
+                return;
+            }
             var btn = document.getElementById('loginBtn');
-            var email = emailInput.value.trim().toLowerCase();
+            var email = document.getElementById('loginEmail').value.trim().toLowerCase();
             if (!email) return;
 
             btn.disabled = true;
             try {
-                if (await isAllowed(email)) {
-                    errorBox.style.display = 'none';
-                    try {
-                        localStorage.setItem(STORAGE_KEY, email);
-                    } catch (e) { /* private browsing - session only */ }
-                    showPortal(email);
-                } else {
-                    errorBox.style.display = 'block';
+                // Only send links to family-list emails
+                if (!(await isAllowed(email))) {
+                    showAuthError(NOT_ON_LIST_MSG);
+                    btn.disabled = false;
+                    return;
                 }
+                await auth.sendSignInLinkToEmail(email, {
+                    url: window.location.origin + window.location.pathname,
+                    handleCodeInApp: true
+                });
+                try { localStorage.setItem(PENDING_EMAIL_KEY, email); } catch (e) { /* ignore */ }
+                showAuthSuccess('A sign-in link is on its way to <strong>' + email +
+                    '</strong>. Open that email on this device and click the link. ' +
+                    '(Check your spam folder if it doesn\'t arrive in a minute or two.)');
             } catch (e) {
-                alert('Login check failed. Please make sure you are using the https:// address of the portal and try again.');
+                showAuthError('Couldn\'t send the sign-in link. Please try again, or use the Google button above.');
             }
             btn.disabled = false;
         }
 
-        function signOut() {
+        // --- Finish sign-in when the user arrives via an emailed link ---
+        async function completeEmailLinkSignIn() {
+            if (!firebaseReady || !auth) return;
+            if (!auth.isSignInWithEmailLink(window.location.href)) return;
+            var email = null;
+            try { email = localStorage.getItem(PENDING_EMAIL_KEY); } catch (e) { /* ignore */ }
+            if (!email) {
+                email = window.prompt('Please confirm your email address to finish signing in:');
+            }
+            if (!email) return;
             try {
-                localStorage.removeItem(STORAGE_KEY);
-            } catch (e) { /* ignore */ }
-            document.getElementById('loginEmail').value = '';
-            showLogin();
+                await auth.signInWithEmailLink(email.trim().toLowerCase(), window.location.href);
+                try { localStorage.removeItem(PENDING_EMAIL_KEY); } catch (e) { /* ignore */ }
+                // Clean the long sign-in code out of the address bar
+                window.history.replaceState(null, '', window.location.pathname);
+            } catch (e) {
+                showAuthError('That sign-in link is invalid or has expired. Please request a new one below.');
+            }
         }
 
-        // On page load: if this device logged in before AND the email is
-        // still on the allowlist, go straight in.
-        (async function restoreSession() {
-            var saved = null;
-            try {
-                saved = localStorage.getItem(STORAGE_KEY);
-            } catch (e) { /* ignore */ }
-            if (saved) {
-                try {
-                    if (await isAllowed(saved)) {
-                        showPortal(saved);
-                        return;
-                    }
-                    localStorage.removeItem(STORAGE_KEY); // was removed from list
-                } catch (e) { /* fall through to login */ }
+        function signOut() {
+            document.getElementById('loginEmail').value = '';
+            document.getElementById('loginError').style.display = 'none';
+            document.getElementById('loginSuccess').style.display = 'none';
+            if (auth) {
+                auth.signOut(); // onAuthStateChanged shows the login screen
+            } else {
+                showLogin();
             }
-        })();
+        }
+
+        // --- The gatekeeper: runs on every page load and sign-in ---
+        if (auth) {
+            completeEmailLinkSignIn();
+            auth.onAuthStateChanged(async function (user) {
+                if (!user || !user.email) {
+                    showLogin();
+                    return;
+                }
+                var email = user.email.toLowerCase();
+                try {
+                    if (await isAllowed(email)) {
+                        showPortal(email);
+                    } else {
+                        await auth.signOut();
+                        showAuthError(NOT_ON_LIST_MSG);
+                    }
+                } catch (e) {
+                    await auth.signOut();
+                    showAuthError('Something went wrong checking the family list. Please try again.');
+                }
+            });
+        } else if (!firebaseReady) {
+            console.warn('Firebase is not configured yet - paste your config into FIREBASE_CONFIG.');
+        }
 
         // ============================================================
         // PORTAL FEATURES
