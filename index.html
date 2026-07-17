@@ -986,7 +986,9 @@
                     '</strong>. Open that email on this device and click the link. ' +
                     '(Check your spam folder if it doesn\'t arrive in a minute or two.)');
             } catch (e) {
-                showAuthError('Couldn\'t send the sign-in link. Please try again, or use the Google button above.');
+                var detail = (e && (e.code || e.message)) ? '<br><span style="font-size: 0.85em; opacity: 0.8;">Technical detail: ' +
+                    String(e.code || e.message).replace(/</g, '&lt;') + '</span>' : '';
+                showAuthError('Couldn\'t send the sign-in link. Please try again, or use the Google button above.' + detail);
             }
             btn.disabled = false;
         }
