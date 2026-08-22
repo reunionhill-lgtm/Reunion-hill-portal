@@ -629,22 +629,22 @@
                 <p>Reserve your dates at Reunion Hill</p>
             </div>
 
-            <div class="feature-card" onclick="openModal('directoryModal')">
-                <div class="feature-icon"><i class="ti ti-users"></i></div>
-                <h3>Family directory</h3>
-                <p>View and update family member information</p>
-            </div>
-
             <div class="feature-card" onclick="openModal('calendarModal')">
                 <div class="feature-icon"><i class="ti ti-calendar-event"></i></div>
                 <h3>Family calendar</h3>
                 <p>View upcoming events and reservations</p>
             </div>
 
-            <div class="feature-card" onclick="openLLCDocuments()">
-                <div class="feature-icon"><i class="ti ti-file-text"></i></div>
-                <h3>LLC documents</h3>
-                <p>Access official business documents</p>
+            <div class="feature-card" onclick="openModal('directoryModal')">
+                <div class="feature-icon"><i class="ti ti-users"></i></div>
+                <h3>Family directory</h3>
+                <p>View and update family member information</p>
+            </div>
+
+            <div class="feature-card" onclick="openModal('maintenanceModal')">
+                <div class="feature-icon"><i class="ti ti-tool"></i></div>
+                <h3>Maintenance and To Do's</h3>
+                <p>Repairs, recurring upkeep and appliance records</p>
             </div>
 
             <div class="feature-card" onclick="openPhotoUpload()">
@@ -657,6 +657,12 @@
                 <div class="feature-icon"><i class="ti ti-photo"></i></div>
                 <h3>View photos</h3>
                 <p>Browse family memories and photos from Montreat</p>
+            </div>
+
+            <div class="feature-card" onclick="openLLCDocuments()">
+                <div class="feature-icon"><i class="ti ti-file-text"></i></div>
+                <h3>LLC documents</h3>
+                <p>Access official business documents</p>
             </div>
 
             <div class="feature-card" onclick="openModal('contactModal')">
@@ -710,6 +716,38 @@
                         <p style="color: var(--sage); font-size: 0.9em;">
                             Family members can update their own information directly.
                         </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Maintenance Modal -->
+    <div class="modal" id="maintenanceModal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal('maintenanceModal')"><i class="ti ti-x"></i></button>
+            <h2>Maintenance and To Do's</h2>
+            <div class="modal-body">
+                <div class="family-tabs">
+                    <button class="family-tab" onclick="showMaintenanceTab('repairs')">Repairs &amp; Updates</button>
+                    <button class="family-tab" onclick="showMaintenanceTab('recurring')">Recurring Maint</button>
+                    <button class="family-tab" onclick="showMaintenanceTab('appliances')">Appliances</button>
+                </div>
+
+                <div class="directory-content" id="maintenanceContent">
+                    <div style="text-align: center; padding: 40px;">
+                        <div class="feature-icon" style="margin-bottom: 20px;"><i class="ti ti-tool"></i></div>
+                        <h3 style="color: var(--pine); margin-bottom: 20px; font-weight: 800;">Maintenance log</h3>
+                        <p style="color: var(--sage); line-height: 1.6; margin-bottom: 30px;">
+                            Click a tab above to view the maintenance records.<br>
+                            Each section opens within the app for easy viewing.
+                        </p>
+                        <p style="color: var(--sage); font-size: 0.9em; margin-bottom: 16px;">
+                            The log is view-only here. Editors can make changes in Google Sheets:
+                        </p>
+                        <a class="open-tab-link" href="https://docs.google.com/spreadsheets/d/1nWrVWjsx_XqWmRIfHDb0t0VhT37cjNicr8k6nPkRxNw/edit" target="_blank" rel="noopener">
+                            Open in Google Sheets <i class="ti ti-external-link" style="vertical-align: -2px;"></i>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -785,6 +823,13 @@
             'patteson': '1577721354',
             'riley': '341548763',
             'crawford': '213369466'
+        };
+        // Maintenance and To Do's log (separate Google Sheet, view-only on the site)
+        var MAINTENANCE_SHEET_ID = '1nWrVWjsx_XqWmRIfHDb0t0VhT37cjNicr8k6nPkRxNw';
+        var MAINTENANCE_TABS = {
+            'repairs':    { gid: '188379810',  title: 'Repairs & Updates' },
+            'recurring':  { gid: '757852390',  title: 'Recurring Maint' },
+            'appliances': { gid: '1134563774', title: 'Appliances' }
         };
         var CACHE_KEY = 'rh_portal_allowlist_cache';
         var PENDING_EMAIL_KEY = 'rh_portal_pending_email';
@@ -1076,48 +1121,67 @@
             }
         }
 
+        // Opens a full-screen Google Sheet viewer. returnTo is the modal
+        // to re-open when the X is clicked.
+        function openSheetModal(sheetId, gid, title, loadingText, returnTo) {
+            var sheetModal = document.createElement('div');
+            sheetModal.className = 'modal';
+            sheetModal.id = 'sheetModal';
+            sheetModal.style.display = 'block';
+            sheetModal.setAttribute('data-return-to', returnTo);
+
+            var embedUrl = 'https://docs.google.com/spreadsheets/d/' + sheetId + '/edit#gid=' + gid;
+
+            sheetModal.innerHTML = '<div class="modal-content" style="padding: 0; margin: 0;">' +
+                '<button class="close-btn" onclick="closeSheetModal()" style="z-index: 1003;"><i class="ti ti-x"></i></button>' +
+                '<div class="modal-topbar">' +
+                '<h2>' + title + '</h2>' +
+                '</div>' +
+                '<iframe src="' + embedUrl + '" ' +
+                'id="sheetFrame" ' +
+                'style="position: absolute; top: 60px; left: 0; width: 100%; height: calc(100vh - 60px); border: none; margin: 0; padding: 0; border-radius: 0;" ' +
+                'frameborder="0" marginheight="0" marginwidth="0">' +
+                loadingText +
+                '</iframe>' +
+                '</div>';
+
+            document.body.appendChild(sheetModal);
+            document.body.style.overflow = 'hidden';
+        }
+
         function showFamily(familyName) {
             try {
                 closeModal('directoryModal');
-
-                var sheetModal = document.createElement('div');
-                sheetModal.className = 'modal';
-                sheetModal.id = 'sheetModal';
-                sheetModal.style.display = 'block';
-
                 var gid = FAMILY_TAB_GIDS[familyName.toLowerCase()] || '0';
-
-                var embedUrl = 'https://docs.google.com/spreadsheets/d/' + SHEETS_ID + '/edit#gid=' + gid;
-
-                sheetModal.innerHTML = '<div class="modal-content" style="padding: 0; margin: 0;">' +
-                    '<button class="close-btn" onclick="closeSheetModal()" style="z-index: 1003;"><i class="ti ti-x"></i></button>' +
-                    '<div class="modal-topbar">' +
-                    '<h2>' + familyName.charAt(0).toUpperCase() + familyName.slice(1) + ' family directory</h2>' +
-                    '</div>' +
-                    '<iframe src="' + embedUrl + '" ' +
-                    'id="sheetFrame" ' +
-                    'style="position: absolute; top: 60px; left: 0; width: 100%; height: calc(100vh - 60px); border: none; margin: 0; padding: 0; border-radius: 0;" ' +
-                    'frameborder="0" marginheight="0" marginwidth="0">' +
-                    'Loading family directory...' +
-                    '</iframe>' +
-                    '</div>';
-
-                document.body.appendChild(sheetModal);
-                document.body.style.overflow = 'hidden';
+                var title = familyName.charAt(0).toUpperCase() + familyName.slice(1) + ' family directory';
+                openSheetModal(SHEETS_ID, gid, title, 'Loading family directory...', 'directoryModal');
             } catch (error) {
                 console.error('Error in showFamily:', error);
                 alert('Error loading family directory: ' + error.message + '. Please try again.');
             }
         }
 
+        function showMaintenanceTab(tabKey) {
+            try {
+                closeModal('maintenanceModal');
+                var tab = MAINTENANCE_TABS[tabKey] || MAINTENANCE_TABS['repairs'];
+                openSheetModal(MAINTENANCE_SHEET_ID, tab.gid, tab.title, 'Loading maintenance log...', 'maintenanceModal');
+            } catch (error) {
+                console.error('Error in showMaintenanceTab:', error);
+                alert('Error loading maintenance log: ' + error.message + '. Please try again.');
+            }
+        }
+
         function closeSheetModal() {
+            var returnTo = 'directoryModal';
             try {
                 var sheetModal = document.getElementById('sheetModal');
                 if (sheetModal) {
+                    returnTo = sheetModal.getAttribute('data-return-to') || returnTo;
                     sheetModal.remove();
                 }
                 document.body.style.overflow = 'auto';
-                openModal('directoryModal');
+                openModal(returnTo);
             } catch (error) {
                 document.body.style.overflow = 'auto';
             }
