@@ -63,6 +63,7 @@
         }
 
         .auth-section {
+            display: none;
             text-align: center;
             background: white;
             padding: 40px 30px;
@@ -74,6 +75,31 @@
         .auth-section h2 {
             color: var(--pine);
             font-weight: 800;
+        }
+
+        .auth-checking {
+            text-align: center;
+            background: white;
+            padding: 40px 30px;
+            border-radius: 20px;
+            border: 1px solid var(--card-border);
+            margin-bottom: 30px;
+            color: var(--sage);
+            font-weight: 700;
+        }
+
+        .spinner {
+            width: 34px;
+            height: 34px;
+            border: 4px solid var(--card-border);
+            border-top-color: var(--teal);
+            border-radius: 50%;
+            margin: 0 auto 14px;
+            animation: spin 0.9s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
 
         .login-form {
@@ -598,6 +624,11 @@
             <button class="signout-btn" onclick="signOut()">Sign out</button>
         </div>
 
+        <div class="auth-checking" id="authChecking">
+            <div class="spinner"></div>
+            Checking your sign-in...
+        </div>
+
         <div class="auth-section" id="authSection">
             <h2>Welcome to the family portal</h2>
             <p style="margin: 16px 0 24px; color: var(--sage);">Sign in to come on in</p>
@@ -635,16 +666,16 @@
                 <p>View upcoming events and reservations</p>
             </div>
 
-            <div class="feature-card" onclick="openModal('directoryModal')">
-                <div class="feature-icon"><i class="ti ti-users"></i></div>
-                <h3>Family directory</h3>
-                <p>View and update family member information</p>
-            </div>
-
             <div class="feature-card" onclick="openModal('maintenanceModal')">
                 <div class="feature-icon"><i class="ti ti-tool"></i></div>
                 <h3>Maintenance and To Do's</h3>
                 <p>Repairs, recurring upkeep and appliance records</p>
+            </div>
+
+            <div class="feature-card" onclick="openModal('directoryModal')">
+                <div class="feature-icon"><i class="ti ti-users"></i></div>
+                <h3>Family directory</h3>
+                <p>View and update family member information</p>
             </div>
 
             <div class="feature-card" onclick="openPhotoUpload()">
@@ -943,6 +974,7 @@
         }
 
         function showPortal(email) {
+            document.getElementById('authChecking').style.display = 'none';
             document.getElementById('authSection').style.display = 'none';
             document.getElementById('mainContent').style.display = 'grid';
             var userInfo = document.getElementById('userInfo');
@@ -951,6 +983,7 @@
         }
 
         function showLogin() {
+            document.getElementById('authChecking').style.display = 'none';
             document.getElementById('authSection').style.display = 'block';
             document.getElementById('mainContent').style.display = 'none';
             document.getElementById('userInfo').style.display = 'none';
@@ -1064,14 +1097,52 @@
         }
 
         // --- The gatekeeper: runs on every page load and sign-in ---
+        // Returns true if the email is in the copy of the family list saved
+        // on this device from the last successful check (instant, no network).
+        function isInCachedList(email) {
+            try {
+                var cached = JSON.parse(localStorage.getItem(CACHE_KEY) || '[]');
+                return cached.indexOf(email) !== -1;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        // Re-downloads the live family list in the background. If the person
+        // has since been removed from the list, sign them out.
+        async function verifyInBackground(email) {
+            try {
+                var sheetEmails = await fetchSheetEmails();
+                try { localStorage.setItem(CACHE_KEY, JSON.stringify(sheetEmails)); } catch (e) { /* ignore */ }
+                if (sheetEmails.indexOf(email) === -1) {
+                    await auth.signOut();
+                    showAuthError(NOT_ON_LIST_MSG);
+                }
+            } catch (e) {
+                // Sheet unreachable right now - keep them signed in on the cached copy.
+            }
+        }
+
+        var authResolved = false;
         if (auth) {
             completeEmailLinkSignIn();
             auth.onAuthStateChanged(async function (user) {
+                authResolved = true;
                 if (!user || !user.email) {
                     showLogin();
                     return;
                 }
                 var email = user.email.toLowerCase();
+
+                // Fast path: returning visitor already on the saved list -
+                // open the portal right away and double-check in the background.
+                if (isInCachedList(email)) {
+                    showPortal(email);
+                    verifyInBackground(email);
+                    return;
+                }
+
+                // Full check (first visit on this device, or cache cleared)
                 try {
                     if (await isAllowed(email)) {
                         showPortal(email);
@@ -1084,8 +1155,15 @@
                     showAuthError('Something went wrong checking the family list. Please try again.');
                 }
             });
-        } else if (!firebaseReady) {
-            console.warn('Firebase is not configured yet - paste your config into FIREBASE_CONFIG.');
+            // Safety net: if Firebase hasn't answered in 8 seconds, show the login form.
+            setTimeout(function () {
+                if (!authResolved) showLogin();
+            }, 8000);
+        } else {
+            showLogin();
+            if (!firebaseReady) {
+                console.warn('Firebase is not configured yet - paste your config into FIREBASE_CONFIG.');
+            }
         }
 
         // ============================================================
@@ -1351,3 +1429,4 @@
     </script>
 </body>
 </html>
+
