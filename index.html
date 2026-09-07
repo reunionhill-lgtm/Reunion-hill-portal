@@ -745,8 +745,9 @@
                             Each family's details will open right here in the app.
                         </p>
                         <p style="color: var(--sage); font-size: 0.9em; margin-bottom: 22px;">
-                            Need your information changed? The button below starts an email
-                            to the admin with your current listing already filled in.
+                            Need to change your information, or add a new family member?
+                            The button below starts an email to the admin with your
+                            current listing already filled in.
                         </p>
                         <button class="enter-btn" onclick="emailDirectoryUpdate()">
                             <i class="ti ti-mail-forward" style="font-size: 20px;"></i>
@@ -1306,9 +1307,12 @@
                 lines.push("I couldn't find my current listing. My sign-in email is: " + email);
             }
             var body = 'Hello,\n\n' +
-                "I'd like to update my family directory information.\n\n" +
+                "I'd like to request a change to the family directory.\n\n" +
                 lines.join('\n') +
-                '\n\nPlease change the following:\n\n\nThank you!';
+                '\n\nTO UPDATE MY INFORMATION - please change the following:\n\n\n' +
+                'TO ADD A NEW FAMILY MEMBER (a new baby, a spouse, etc.) - ' +
+                'here are their details (name, family, birthday, and any ' +
+                'contact info to list):\n\n\nThank you!';
             window.location.href = 'mailto:reunionhill@gmail.com' +
                 '?subject=' + encodeURIComponent('Family directory update request') +
                 '&body=' + encodeURIComponent(body);
