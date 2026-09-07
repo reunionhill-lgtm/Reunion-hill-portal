@@ -843,12 +843,12 @@
         // ONLY, used if the service can't be reached.
         // ============================================================
         var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw0u8aFDoSuFFvfmSXcmkeFEbhU9kKo4Io_IUWWC15W-DqPHY9O7zIwFooQ1MGDYSnt/exec';
-        // Maintenance and To Do's log (separate Google Sheet, view-only on the site)
-        var MAINTENANCE_SHEET_ID = '1nWrVWjsx_XqWmRIfHDb0t0VhT37cjNicr8k6nPkRxNw';
+        // Maintenance and To Do's tab titles (the data itself
+        // arrives from the service, same as the directory)
         var MAINTENANCE_TABS = {
-            'repairs':    { gid: '188379810',  title: 'Repairs & Updates' },
-            'recurring':  { gid: '757852390',  title: 'Recurring Maint' },
-            'appliances': { gid: '1134563774', title: 'Appliances' }
+            'repairs': 'Repairs & Updates',
+            'recurring': 'Recurring Maint',
+            'appliances': 'Appliances'
         };
         var CACHE_KEY = 'rh_portal_verified_email';
         var PENDING_EMAIL_KEY = 'rh_portal_pending_email';
@@ -923,13 +923,17 @@
         // visitor's current sign-in token. The body is sent as plain
         // text (not JSON headers) on purpose - Apps Script only
         // accepts cross-site requests in that form.
-        async function callService(action) {
+        async function callService(action, extras) {
             var user = auth.currentUser;
             if (!user) throw new Error('not-signed-in');
             var token = await user.getIdToken();
+            var payload = { action: action, token: token };
+            if (extras) {
+                Object.keys(extras).forEach(function (k) { payload[k] = extras[k]; });
+            }
             var resp = await fetch(SCRIPT_URL, {
                 method: 'POST',
-                body: JSON.stringify({ action: action, token: token })
+                body: JSON.stringify(payload)
             });
             if (!resp.ok) throw new Error('HTTP ' + resp.status);
             return resp.json();
@@ -1056,6 +1060,8 @@
 
         function signOut() {
             DIRECTORY_CACHE = null;
+            MAINT_CACHE = null;
+            LLC_TREE = null;
             document.getElementById('loginEmail').value = '';
             document.getElementById('loginError').style.display = 'none';
             document.getElementById('loginSuccess').style.display = 'none';
@@ -1169,38 +1175,12 @@
             }
         }
 
-        // Opens a full-screen Google Sheet viewer. returnTo is the modal
-        // to re-open when the X is clicked.
-        function openSheetModal(sheetId, gid, title, loadingText, returnTo) {
-            var sheetModal = document.createElement('div');
-            sheetModal.className = 'modal';
-            sheetModal.id = 'sheetModal';
-            sheetModal.style.display = 'block';
-            sheetModal.setAttribute('data-return-to', returnTo);
-
-            var embedUrl = 'https://docs.google.com/spreadsheets/d/' + sheetId + '/edit#gid=' + gid;
-
-            sheetModal.innerHTML = '<div class="modal-content" style="padding: 0; margin: 0;">' +
-                '<button class="close-btn" onclick="closeSheetModal()" style="z-index: 1003;"><i class="ti ti-x"></i></button>' +
-                '<div class="modal-topbar">' +
-                '<h2>' + title + '</h2>' +
-                '</div>' +
-                '<iframe src="' + embedUrl + '" ' +
-                'id="sheetFrame" ' +
-                'style="position: absolute; top: 60px; left: 0; width: 100%; height: calc(100vh - 60px); border: none; margin: 0; padding: 0; border-radius: 0;" ' +
-                'frameborder="0" marginheight="0" marginwidth="0">' +
-                loadingText +
-                '</iframe>' +
-                '</div>';
-
-            document.body.appendChild(sheetModal);
-            document.body.style.overflow = 'hidden';
-        }
-
-        // The directory arrives from the Apps Script service (which
-        // reads the Restricted sheet on Google's servers) and is drawn
-        // here as a table. Fetched once per visit, then reused.
+        // Data for the private tiles arrives from the Apps Script
+        // service, which reads the Restricted files on Google's
+        // servers. Each dataset is fetched once per visit, then reused.
         var DIRECTORY_CACHE = null;
+        var MAINT_CACHE = null;
+        var LLC_TREE = null;
 
         function escapeHtml(text) {
             return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -1228,62 +1208,62 @@
             return html;
         }
 
-        function openDirectoryViewer(title, bodyHtml) {
+        function openTableViewer(title, returnTo) {
             var m = document.createElement('div');
             m.className = 'modal';
             m.id = 'sheetModal';
             m.style.display = 'block';
-            m.setAttribute('data-return-to', 'directoryModal');
+            m.setAttribute('data-return-to', returnTo);
             m.innerHTML = '<div class="modal-content" style="padding: 0; margin: 0;">' +
                 '<button class="close-btn" onclick="closeSheetModal()" style="z-index: 1003;"><i class="ti ti-x"></i></button>' +
-                '<div class="modal-topbar"><h2>' + title + '</h2></div>' +
-                '<div id="directoryViewerBody" style="position: absolute; top: 60px; left: 0; width: 100%; height: calc(100vh - 60px); overflow: auto; background: var(--mint); padding: 16px;">' +
-                bodyHtml +
+                '<div class="modal-topbar"><h2>' + escapeHtml(title) + '</h2></div>' +
+                '<div id="tableViewerBody" style="position: absolute; top: 60px; left: 0; width: 100%; height: calc(100vh - 60px); overflow: auto; background: var(--mint); padding: 16px;">' +
+                '<div style="text-align: center; padding: 60px 20px; color: var(--sage); font-weight: 700;">' +
+                '<div class="spinner"></div>Loading...</div>' +
                 '</div></div>';
             document.body.appendChild(m);
             document.body.style.overflow = 'hidden';
         }
 
-        function setDirectoryViewerContent(html) {
-            var body = document.getElementById('directoryViewerBody');
+        function setTableViewerContent(html) {
+            var body = document.getElementById('tableViewerBody');
             if (body) body.innerHTML = html;
         }
 
-        async function showFamily(familyName) {
+        var VIEWER_ERROR_HTML = '<div style="text-align: center; padding: 60px 20px; color: #A63A2B;">' +
+            'Couldn\'t load this right now. Please close this and try again.</div>';
+
+        async function showSheetTab(kind, matchName, title, returnTo) {
             try {
-                closeModal('directoryModal');
-                var title = familyName.charAt(0).toUpperCase() + familyName.slice(1) + ' family directory';
-                openDirectoryViewer(title,
-                    '<div style="text-align: center; padding: 60px 20px; color: var(--sage); font-weight: 700;">' +
-                    '<div class="spinner"></div>Loading family directory...</div>');
-                if (!DIRECTORY_CACHE) {
-                    var res = await callService('directory');
+                closeModal(returnTo);
+                openTableViewer(title, returnTo);
+                var cache = (kind === 'directory') ? DIRECTORY_CACHE : MAINT_CACHE;
+                if (!cache) {
+                    var res = await callService(kind);
                     if (!res || !res.ok || !res.tabs) throw new Error((res && res.error) || 'service error');
-                    DIRECTORY_CACHE = res.tabs;
+                    cache = res.tabs;
+                    if (kind === 'directory') { DIRECTORY_CACHE = cache; } else { MAINT_CACHE = cache; }
                 }
                 var tab = null;
-                DIRECTORY_CACHE.forEach(function (t) {
-                    if (String(t.name).toLowerCase().indexOf(familyName.toLowerCase()) !== -1) tab = t;
+                cache.forEach(function (t) {
+                    if (String(t.name).toLowerCase().indexOf(matchName.toLowerCase()) !== -1) tab = t;
                 });
-                if (!tab) throw new Error('tab not found');
-                setDirectoryViewerContent(renderDirectoryTable(tab.rows));
+                if (!tab) throw new Error('tab not found: ' + matchName);
+                setTableViewerContent(renderDirectoryTable(tab.rows));
             } catch (error) {
-                console.error('Error in showFamily:', error);
-                setDirectoryViewerContent(
-                    '<div style="text-align: center; padding: 60px 20px; color: #A63A2B;">' +
-                    'Couldn\'t load the directory right now. Please close this and try again.</div>');
+                console.error('Error loading ' + kind + ':', error);
+                setTableViewerContent(VIEWER_ERROR_HTML);
             }
         }
 
+        function showFamily(familyName) {
+            var title = familyName.charAt(0).toUpperCase() + familyName.slice(1) + ' family directory';
+            showSheetTab('directory', familyName, title, 'directoryModal');
+        }
+
         function showMaintenanceTab(tabKey) {
-            try {
-                closeModal('maintenanceModal');
-                var tab = MAINTENANCE_TABS[tabKey] || MAINTENANCE_TABS['repairs'];
-                openSheetModal(MAINTENANCE_SHEET_ID, tab.gid, tab.title, 'Loading maintenance log...', 'maintenanceModal');
-            } catch (error) {
-                console.error('Error in showMaintenanceTab:', error);
-                alert('Error loading maintenance log: ' + error.message + '. Please try again.');
-            }
+            var title = MAINTENANCE_TABS[tabKey] || MAINTENANCE_TABS['repairs'];
+            showSheetTab('maintenance', title, title, 'maintenanceModal');
         }
 
         function closeSheetModal() {
@@ -1301,44 +1281,162 @@
             }
         }
 
-        function openLLCDocuments() {
+        // ---- LLC documents: in-app folder browser and viewer ----
+        var LLC_PATH = []; // which subfolders are open, from the top
+
+        function currentLlcNode() {
+            var node = LLC_TREE;
+            LLC_PATH.forEach(function (i) { node = node.folders[i]; });
+            return node;
+        }
+
+        function formatSize(bytes) {
+            if (!bytes) return '';
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1048576) return Math.round(bytes / 1024) + ' KB';
+            return (bytes / 1048576).toFixed(1) + ' MB';
+        }
+
+        async function openLLCDocuments() {
             try {
-                var driveModal = document.createElement('div');
-                driveModal.className = 'modal';
-                driveModal.id = 'driveModal';
-                driveModal.style.display = 'block';
-
-                var FOLDER_ID = '1cNkv_tVhwPBEhB43CvTeM2J-KDfMDumo';
-                var embedUrl = 'https://drive.google.com/embeddedfolderview?id=' + FOLDER_ID + '#grid';
-
-                driveModal.innerHTML = '<div class="modal-content" style="padding: 0; margin: 0;">' +
-                    '<button class="close-btn" onclick="closeDriveModal()" style="z-index: 1003;"><i class="ti ti-x"></i></button>' +
-                    '<div class="modal-topbar">' +
-                    '<h2>LLC business documents</h2>' +
-                    '</div>' +
-                    '<iframe src="' + embedUrl + '" ' +
-                    'style="position: absolute; top: 60px; left: 0; width: 100%; height: calc(100vh - 60px); border: none; margin: 0; padding: 0; border-radius: 0;" ' +
-                    'frameborder="0" marginheight="0" marginwidth="0">' +
-                    'Loading LLC documents...' +
-                    '</iframe>' +
-                    '</div>';
-
-                document.body.appendChild(driveModal);
-                document.body.style.overflow = 'hidden';
+                LLC_PATH = [];
+                openLlcBrowser();
+                if (!LLC_TREE) {
+                    var res = await callService('llc-list');
+                    if (!res || !res.ok || !res.tree) throw new Error((res && res.error) || 'service error');
+                    LLC_TREE = res.tree;
+                }
+                renderLlcBrowser();
             } catch (error) {
-                alert('Error loading LLC documents. Please try again.');
+                console.error('Error loading LLC documents:', error);
+                var body = document.getElementById('llcBrowserBody');
+                if (body) body.innerHTML = VIEWER_ERROR_HTML;
             }
         }
 
-        function closeDriveModal() {
+        function openLlcBrowser() {
+            var m = document.createElement('div');
+            m.className = 'modal';
+            m.id = 'llcModal';
+            m.style.display = 'block';
+            m.innerHTML = '<div class="modal-content" style="padding: 0; margin: 0;">' +
+                '<button class="close-btn" onclick="closeLlcBrowser()" style="z-index: 1003;"><i class="ti ti-x"></i></button>' +
+                '<button class="close-btn" id="llcBackBtn" onclick="llcGoUp()" style="z-index: 1003; right: auto; left: 15px; display: none;" title="Back"><i class="ti ti-arrow-left"></i></button>' +
+                '<div class="modal-topbar"><h2 id="llcTitle" style="padding: 0 70px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">LLC business documents</h2></div>' +
+                '<div id="llcBrowserBody" style="position: absolute; top: 60px; left: 0; width: 100%; height: calc(100vh - 60px); overflow: auto; background: var(--mint); padding: 16px;">' +
+                '<div style="text-align: center; padding: 60px 20px; color: var(--sage); font-weight: 700;">' +
+                '<div class="spinner"></div>Loading documents...</div>' +
+                '</div></div>';
+            document.body.appendChild(m);
+            document.body.style.overflow = 'hidden';
+        }
+
+        function renderLlcBrowser() {
+            var node = currentLlcNode();
+            var titleEl = document.getElementById('llcTitle');
+            if (titleEl) titleEl.textContent = (LLC_PATH.length === 0) ? 'LLC business documents' : node.name;
+            var back = document.getElementById('llcBackBtn');
+            if (back) back.style.display = (LLC_PATH.length === 0) ? 'none' : 'flex';
+
+            var html = '<div style="max-width: 700px; margin: 0 auto;">';
+            if (node.folders.length === 0 && node.files.length === 0) {
+                html += '<p style="text-align: center; color: var(--sage); padding: 40px; font-weight: 700;">This folder is empty.</p>';
+            }
+            node.folders.forEach(function (sub, i) {
+                html += '<div class="feature-card" style="text-align: left; padding: 16px 20px; margin-bottom: 10px; display: flex; align-items: center; gap: 14px;" onclick="llcOpenFolder(' + i + ')">' +
+                    '<i class="ti ti-folder" style="font-size: 24px; color: var(--teal); flex-shrink: 0;"></i>' +
+                    '<span style="font-weight: 700; color: var(--pine);">' + escapeHtml(sub.name) + '</span>' +
+                    '<i class="ti ti-chevron-right" style="margin-left: auto; color: var(--sage); flex-shrink: 0;"></i>' +
+                    '</div>';
+            });
+            node.files.forEach(function (f, i) {
+                html += '<div class="feature-card" style="text-align: left; padding: 16px 20px; margin-bottom: 10px; display: flex; align-items: center; gap: 14px;" onclick="llcOpenFile(' + i + ')">' +
+                    '<i class="ti ti-file-text" style="font-size: 24px; color: var(--teal); flex-shrink: 0;"></i>' +
+                    '<span style="font-weight: 700; color: var(--pine); word-break: break-word;">' + escapeHtml(f.name) + '</span>' +
+                    '<span style="margin-left: auto; color: var(--sage); font-size: 0.85em; white-space: nowrap; flex-shrink: 0;">' + formatSize(f.size) + '</span>' +
+                    '</div>';
+            });
+            html += '</div>';
+            var body = document.getElementById('llcBrowserBody');
+            if (body) body.innerHTML = html;
+        }
+
+        function llcOpenFolder(i) {
+            LLC_PATH.push(i);
+            renderLlcBrowser();
+        }
+
+        function llcGoUp() {
+            LLC_PATH.pop();
+            renderLlcBrowser();
+        }
+
+        function closeLlcBrowser() {
+            var m = document.getElementById('llcModal');
+            if (m) m.remove();
+            document.body.style.overflow = 'auto';
+        }
+
+        // ---- Single-document viewer (sits on top of the browser) ----
+        var LLC_FILE_URL = null;
+
+        async function llcOpenFile(i) {
+            var f = currentLlcNode().files[i];
+            openLlcFileViewer(f.name);
             try {
-                var driveModal = document.getElementById('driveModal');
-                if (driveModal) {
-                    driveModal.remove();
+                var res = await callService('llc-file', { fileId: f.id });
+                if (!res || !res.ok || !res.file) throw new Error((res && res.error) || 'service error');
+                var raw = atob(res.file.data);
+                var arr = new Uint8Array(raw.length);
+                for (var j = 0; j < raw.length; j++) arr[j] = raw.charCodeAt(j);
+                var mime = res.file.mimeType || 'application/octet-stream';
+                LLC_FILE_URL = URL.createObjectURL(new Blob([arr], { type: mime }));
+
+                var dl = document.getElementById('llcDownloadBtn');
+                if (dl) {
+                    dl.href = LLC_FILE_URL;
+                    dl.setAttribute('download', res.file.name);
+                    dl.style.display = 'flex';
                 }
-                document.body.style.overflow = 'auto';
+                var body = document.getElementById('llcFileBody');
+                if (!body) return;
+                if (mime === 'application/pdf' || mime.indexOf('image/') === 0) {
+                    body.innerHTML = '<iframe src="' + LLC_FILE_URL + '" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; border-radius: 0; background: white;"></iframe>';
+                } else {
+                    body.innerHTML = '<div style="text-align: center; padding: 60px 20px;">' +
+                        '<p style="color: var(--sage); font-weight: 700; margin-bottom: 24px;">This type of document opens outside the viewer.</p>' +
+                        '<a class="enter-btn" href="' + LLC_FILE_URL + '" download="' + escapeHtml(res.file.name) + '" style="text-decoration: none;">' +
+                        '<i class="ti ti-download" style="font-size: 20px;"></i>Download ' + escapeHtml(res.file.name) + '</a></div>';
+                }
             } catch (error) {
-                document.body.style.overflow = 'auto';
+                console.error('Error opening document:', error);
+                var body2 = document.getElementById('llcFileBody');
+                if (body2) body2.innerHTML = VIEWER_ERROR_HTML;
+            }
+        }
+
+        function openLlcFileViewer(name) {
+            var m = document.createElement('div');
+            m.className = 'modal';
+            m.id = 'llcFileModal';
+            m.style.display = 'block';
+            m.innerHTML = '<div class="modal-content" style="padding: 0; margin: 0;">' +
+                '<button class="close-btn" onclick="closeLlcFileViewer()" style="z-index: 1003;"><i class="ti ti-x"></i></button>' +
+                '<a class="close-btn" id="llcDownloadBtn" style="z-index: 1003; right: 90px; display: none; text-decoration: none;" title="Download"><i class="ti ti-download"></i></a>' +
+                '<div class="modal-topbar"><h2 style="padding: 0 140px 0 20px; font-size: 1.05em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">' + escapeHtml(name) + '</h2></div>' +
+                '<div id="llcFileBody" style="position: absolute; top: 60px; left: 0; width: 100%; height: calc(100vh - 60px); overflow: auto; background: var(--mint);">' +
+                '<div style="text-align: center; padding: 60px 20px; color: var(--sage); font-weight: 700;">' +
+                '<div class="spinner"></div>Opening document...</div>' +
+                '</div></div>';
+            document.body.appendChild(m);
+        }
+
+        function closeLlcFileViewer() {
+            var m = document.getElementById('llcFileModal');
+            if (m) m.remove();
+            if (LLC_FILE_URL) {
+                URL.revokeObjectURL(LLC_FILE_URL);
+                LLC_FILE_URL = null;
             }
         }
 
