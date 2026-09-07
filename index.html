@@ -744,9 +744,14 @@
                             Click on any family name above to view their directory information.<br>
                             Each family's details will open right here in the app.
                         </p>
-                        <p style="color: var(--sage); font-size: 0.9em;">
-                            Need something changed? Send a note through Contact admin.
+                        <p style="color: var(--sage); font-size: 0.9em; margin-bottom: 22px;">
+                            Need your information changed? The button below starts an email
+                            to the admin with your current listing already filled in.
                         </p>
+                        <button class="enter-btn" onclick="emailDirectoryUpdate()">
+                            <i class="ti ti-mail-forward" style="font-size: 20px;"></i>
+                            Email an update to the admin
+                        </button>
                     </div>
                 </div>
             </div>
@@ -785,11 +790,6 @@
             <button class="close-btn" onclick="closeModal('calendarModal')"><i class="ti ti-x"></i></button>
             <h2>Reunion Hill calendar</h2>
             <div class="modal-body">
-                <p style="text-align: center;">
-                    <a class="open-tab-link" href="https://calendar.google.com/calendar/embed?src=reunionhill%40gmail.com&ctz=America%2FNew_York" target="_blank" rel="noopener">
-                        Trouble seeing the calendar? Open it in a new tab <i class="ti ti-external-link" style="vertical-align: -2px;"></i>
-                    </a>
-                </p>
                 <iframe src="https://calendar.google.com/calendar/embed?src=reunionhill%40gmail.com&ctz=America%2FNew_York"
                         frameborder="0" marginheight="0" marginwidth="0">Loading calendar...</iframe>
             </div>
@@ -1264,6 +1264,54 @@
         function showMaintenanceTab(tabKey) {
             var title = MAINTENANCE_TABS[tabKey] || MAINTENANCE_TABS['repairs'];
             showSheetTab('maintenance', title, title, 'maintenanceModal');
+        }
+
+        // Builds an email to the admin pre-filled with the signed-in
+        // person's current directory listing (found by matching their
+        // sign-in email), so update requests arrive with everything
+        // needed to make the change.
+        async function emailDirectoryUpdate() {
+            var email = (auth && auth.currentUser && auth.currentUser.email)
+                ? auth.currentUser.email.toLowerCase() : '';
+            var lines = [];
+            try {
+                if (!DIRECTORY_CACHE) {
+                    var res = await callService('directory');
+                    if (res && res.ok && res.tabs) DIRECTORY_CACHE = res.tabs;
+                }
+                if (DIRECTORY_CACHE && email) {
+                    outer:
+                    for (var t = 0; t < DIRECTORY_CACHE.length; t++) {
+                        var tab = DIRECTORY_CACHE[t];
+                        var rows = tab.rows || [];
+                        var headers = rows[0] || [];
+                        for (var r = 1; r < rows.length; r++) {
+                            if (rows[r].join(' ').toLowerCase().indexOf(email) !== -1) {
+                                lines.push('My current listing on the ' + tab.name + ' tab:');
+                                for (var c = 0; c < rows[r].length; c++) {
+                                    var label = String(headers[c] || '').trim();
+                                    var value = String(rows[r][c] || '').trim();
+                                    if (label === '' && value === '') continue;
+                                    lines.push((label || ('Column ' + (c + 1))) + ': ' + value);
+                                }
+                                break outer;
+                            }
+                        }
+                    }
+                }
+            } catch (e) {
+                // If the directory can't be fetched, send the email anyway.
+            }
+            if (lines.length === 0) {
+                lines.push("I couldn't find my current listing. My sign-in email is: " + email);
+            }
+            var body = 'Hello,\n\n' +
+                "I'd like to update my family directory information.\n\n" +
+                lines.join('\n') +
+                '\n\nPlease change the following:\n\n\nThank you!';
+            window.location.href = 'mailto:reunionhill@gmail.com' +
+                '?subject=' + encodeURIComponent('Family directory update request') +
+                '&body=' + encodeURIComponent(body);
         }
 
         function closeSheetModal() {
