@@ -840,8 +840,7 @@
         // directory sheet does not need a public link.
         //
         // To grant someone access, add their email to the directory
-        // sheet - no code changes. The hashed list below is a BACKUP
-        // ONLY, used if the service can't be reached.
+        // sheet - no code changes.
         // ============================================================
         var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw0u8aFDoSuFFvfmSXcmkeFEbhU9kKo4Io_IUWWC15W-DqPHY9O7zIwFooQ1MGDYSnt/exec';
         // Maintenance and To Do's tab titles (the data itself
@@ -853,7 +852,6 @@
         };
         var CACHE_KEY = 'rh_portal_verified_email';
         var PENDING_EMAIL_KEY = 'rh_portal_pending_email';
-        var HASH_SALT = 'reunion-hill-portal';
 
         // ============================================================
         // FIREBASE CONFIG - paste the values from your Firebase project
@@ -874,52 +872,6 @@
             firebase.initializeApp(FIREBASE_CONFIG);
             auth = firebase.auth();
         }
-        var ALLOWED_HASHES = [
-            '32e7e29d646f8a9bfe6b175db7833d2a8a1cc132c2248ffb5dab66b1e237c716', // bob***
-            '7e7fd47f57a6666758830090a561dce58fe7d5859af96e5cbe47dd0b694912ee', // reu*** (admin)
-            'db0e5ab92d7bcd61c600ac7325b529039838eb9bfe6d10e468aee1ce912d5371', // nan***
-            '661fda5203bf00083302699a6d8ced4298f604ad2dc89bf39c4f39f46602290e', // kkt***
-            'fe7f0902d7e0ea31bd39d5429d7e4df2b6f6099cfd49e2b892a458927a7fd930', // nan***
-            'b04f53f080ec0616dd4c0bb8e559c37f0bf565f2cb0c843eaa1ac19c404560bb', // ben***
-            '94c18b2958e42d9ab4a02542ca53b44dec92d46c5669263d9e39db6ac6f55206', // lee***
-            '7c98211b2b845a14ed4a9446d7f95b3f12bd7ab90a9fb8c9ffe967a40b83fca4', // emi***
-            '26da631196b4e7c0d42728b49e70f8abefc95ed33073f844f9552e4df955d2f1', // wmp***
-            '92e03b6222a4dc761749a31bcbf742fed395ba2668442df05e93500f34053528', // jos***
-            'a768be8944f5857236d5e70d59757509bceaa6bf4bfb662174ac1736a1a3ee42', // kal***
-            '48de30a126dec439928735b0863d47488f2f404ccd6ffded59f489636596eb79', // gin***
-            'dc5b6c40ef3b0d1da1ba50919b6eb3a38dce05ac1ec31429c7e9b64139986ca2', // ale***
-            'ff64afb23c444315e4b703dd022628f634af34473d1eee2f02b644438f2cfc53', // san***
-            '563dbc233834f57d9e6a0ed19bd94b329b8ba89db4463b7a9001aa632002c28b', // kat***
-            '75140e519d274b5cfdae9352040fc1fe5ab654287f382bca3c59485a3b22b214', // mar***
-            'ccc26adae760521865ea6eee2ba1933cc5cd54e3ea216425cd05502c33779e61', // gin***
-            '308a6a6b875a2a26d2406a69a0de6fc385a5aa1f4c62241012ed439fe9d58f89', // gre***
-            'f2e9df4bae93c195e1eb60579d76bfeecce6c9f054c9f24cae939175022f40ef', // eli***
-            '481cdb39673b0ca8d0d17480ad13e2eefebd618ce12b916e1cef7861094a354f', // tlp***
-            '75d33347854f2958c2852f17cefd8c7d95c83f96585137a4f4d6de8a237e1a92', // reb***
-            '0d3872b9c1de2292df82a779f5d127ddc3a12fcddca2387217bb30b26d618f01', // sri***
-            'e7337aec4dfb3446d320e743e5771f510a1649734a75fbb5987f8ac006bb5675', // joh*** (g)
-            'a5579e2b69c0595093de64834a9b3cd5bb7969dfc4aa0cb57e0abb6cdaa48fcf', // tay***
-            '1db0bd6ae99b87f329dd096772223ad515de447734090a59e64920b3eb4c55f6', // eve***
-            '4301802da3bedb981846e78490ccc5351aaa5a4c65c3f02ae6d2f3b7d71f733e', // joh*** (c)
-            '652fbed593f4d6ff0d72dd0207276904bee94055d1936567209aeb7276432974', // kat*** (c)
-            'c4954fa3ba1b8b0817fc55b42a7f3ada8f1a6409f1d12dc671c381d1599d48d6'  // mar*** (c)
-            // ADD MORE FAMILY EMAIL HASHES HERE (one per line, in quotes, comma-separated)
-        ];
-
-        async function sha256Hex(text) {
-            var data = new TextEncoder().encode(text);
-            var buf = await crypto.subtle.digest('SHA-256', data);
-            return Array.prototype.map.call(new Uint8Array(buf), function (b) {
-                return b.toString(16).padStart(2, '0');
-            }).join('');
-        }
-
-        async function hashEmail(email) {
-            var h = await sha256Hex(HASH_SALT + String(email).trim().toLowerCase());
-            console.log('Hash for ' + email + ':\n' + h);
-            return h;
-        }
-
         // Send an action to the Apps Script service along with the
         // visitor's current sign-in token. The body is sent as plain
         // text (not JSON headers) on purpose - Apps Script only
@@ -1128,14 +1080,10 @@
                     await auth.signOut();
                     showAuthError(NOT_ON_LIST_MSG);
                 } else {
-                    // Service unreachable - fall back to the built-in backup list
-                    var h = await sha256Hex(HASH_SALT + email);
-                    if (ALLOWED_HASHES.indexOf(h) !== -1) {
-                        showPortal(email);
-                    } else {
-                        await auth.signOut();
-                        showAuthError('Something went wrong checking the family list. Please try again.');
-                    }
+                    // Service unreachable - nothing private can load anyway,
+                    // so ask them to try again rather than guessing.
+                    await auth.signOut();
+                    showAuthError('Couldn\'t reach the family list just now. Please try again in a minute.');
                 }
             });
             // Safety net: if Firebase hasn't answered in 8 seconds, show the login form.
@@ -1184,7 +1132,8 @@
         var LLC_TREE = null;
 
         function escapeHtml(text) {
-            return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
         }
 
         function renderDirectoryTable(rows) {
