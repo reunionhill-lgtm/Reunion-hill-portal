@@ -742,10 +742,10 @@
                         <h3 style="color: var(--pine); margin-bottom: 20px; font-weight: 800;">Family directory access</h3>
                         <p style="color: var(--sage); line-height: 1.6; margin-bottom: 30px;">
                             Click on any family name above to view their directory information.<br>
-                            Each family's details will open within the app for easy viewing and editing.
+                            Each family's details will open right here in the app.
                         </p>
                         <p style="color: var(--sage); font-size: 0.9em;">
-                            Family members can update their own information directly.
+                            Need something changed? Send a note through Contact admin.
                         </p>
                     </div>
                 </div>
@@ -829,26 +829,20 @@
 
     <script>
         // ============================================================
-        // LOGIN: the allowlist is read LIVE from the Family Directory
-        // Google Sheet. Any email address that appears on any of the
-        // six family tabs can log in. To grant someone access, just
-        // add their email to the directory sheet - no code changes.
+        // LOGIN: verification happens on Google's servers, not in the
+        // browser. The page sends the visitor's Firebase sign-in token
+        // to a private Apps Script service owned by
+        // reunionhill@gmail.com. The service confirms the token is
+        // genuine, checks the email against the family directory
+        // sheet, and answers yes or no. The family list and the
+        // directory sheet ID never appear in this file, so the
+        // directory sheet does not need a public link.
         //
-        // The hashed list below is a BACKUP ONLY: it is used if the
-        // sheet can't be reached (offline, or sharing settings change).
-        // You normally never need to touch it.
-        //
-        // NOTE: This is a light privacy gate, not bank-grade security.
+        // To grant someone access, add their email to the directory
+        // sheet - no code changes. The hashed list below is a BACKUP
+        // ONLY, used if the service can't be reached.
         // ============================================================
-        var SHEETS_ID = '1Fj6JKLC6fZdEU8QbZXr43JNH__8ec8NjEz0aCDLQRXY';
-        var FAMILY_TAB_GIDS = {
-            'jennings': '983585983',
-            'almeida': '125647568',
-            'evans': '157418657',
-            'patteson': '1577721354',
-            'riley': '341548763',
-            'crawford': '213369466'
-        };
+        var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw0u8aFDoSuFFvfmSXcmkeFEbhU9kKo4Io_IUWWC15W-DqPHY9O7zIwFooQ1MGDYSnt/exec';
         // Maintenance and To Do's log (separate Google Sheet, view-only on the site)
         var MAINTENANCE_SHEET_ID = '1nWrVWjsx_XqWmRIfHDb0t0VhT37cjNicr8k6nPkRxNw';
         var MAINTENANCE_TABS = {
@@ -856,7 +850,7 @@
             'recurring':  { gid: '757852390',  title: 'Recurring Maint' },
             'appliances': { gid: '1134563774', title: 'Appliances' }
         };
-        var CACHE_KEY = 'rh_portal_allowlist_cache';
+        var CACHE_KEY = 'rh_portal_verified_email';
         var PENDING_EMAIL_KEY = 'rh_portal_pending_email';
         var HASH_SALT = 'reunion-hill-portal';
 
@@ -925,52 +919,33 @@
             return h;
         }
 
-        function extractEmails(text) {
-            var found = text.match(/[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/gi) || [];
-            return found.map(function (e) { return e.toLowerCase(); });
-        }
-
-        // Fetch every family tab of the directory sheet and collect all
-        // email addresses found on them.
-        async function fetchSheetEmails() {
-            var gids = Object.keys(FAMILY_TAB_GIDS).map(function (k) { return FAMILY_TAB_GIDS[k]; });
-            var results = await Promise.all(gids.map(function (gid) {
-                var url = 'https://docs.google.com/spreadsheets/d/' + SHEETS_ID +
-                    '/gviz/tq?tqx=out:csv&gid=' + gid;
-                return fetch(url).then(function (r) {
-                    if (!r.ok) throw new Error('HTTP ' + r.status);
-                    return r.text();
-                });
-            }));
-            var emails = [];
-            results.forEach(function (csv) {
-                emails = emails.concat(extractEmails(csv));
+        // Send an action to the Apps Script service along with the
+        // visitor's current sign-in token. The body is sent as plain
+        // text (not JSON headers) on purpose - Apps Script only
+        // accepts cross-site requests in that form.
+        async function callService(action) {
+            var user = auth.currentUser;
+            if (!user) throw new Error('not-signed-in');
+            var token = await user.getIdToken();
+            var resp = await fetch(SCRIPT_URL, {
+                method: 'POST',
+                body: JSON.stringify({ action: action, token: token })
             });
-            if (emails.length === 0) throw new Error('No emails found in sheet');
-            return emails;
+            if (!resp.ok) throw new Error('HTTP ' + resp.status);
+            return resp.json();
         }
 
-        async function isAllowed(email) {
-            var normalized = String(email).trim().toLowerCase();
-
-            // 1. Live check against the Family Directory sheet
+        // Ask the service whether the signed-in person is on the
+        // family list. Returns 'yes', 'no', or 'unreachable'.
+        async function checkWithService() {
             try {
-                var sheetEmails = await fetchSheetEmails();
-                try {
-                    localStorage.setItem(CACHE_KEY, JSON.stringify(sheetEmails));
-                } catch (e) { /* ignore */ }
-                if (sheetEmails.indexOf(normalized) !== -1) return true;
+                var res = await callService('check');
+                if (res && res.ok) return 'yes';
+                if (res && (res.error === 'not-on-list' || res.error === 'bad-token')) return 'no';
+                return 'unreachable';
             } catch (e) {
-                // Sheet unreachable - fall back to the last successful copy
-                try {
-                    var cached = JSON.parse(localStorage.getItem(CACHE_KEY) || '[]');
-                    if (cached.indexOf(normalized) !== -1) return true;
-                } catch (e2) { /* ignore */ }
+                return 'unreachable';
             }
-
-            // 2. Backup: built-in hashed list
-            var h = await sha256Hex(HASH_SALT + normalized);
-            return ALLOWED_HASHES.indexOf(h) !== -1;
         }
 
         function showPortal(email) {
@@ -1043,12 +1018,6 @@
 
             btn.disabled = true;
             try {
-                // Only send links to family-list emails
-                if (!(await isAllowed(email))) {
-                    showAuthError(NOT_ON_LIST_MSG);
-                    btn.disabled = false;
-                    return;
-                }
                 await auth.sendSignInLinkToEmail(email, {
                     url: window.location.origin + window.location.pathname,
                     handleCodeInApp: true
@@ -1086,6 +1055,7 @@
         }
 
         function signOut() {
+            DIRECTORY_CACHE = null;
             document.getElementById('loginEmail').value = '';
             document.getElementById('loginError').style.display = 'none';
             document.getElementById('loginSuccess').style.display = 'none';
@@ -1097,30 +1067,30 @@
         }
 
         // --- The gatekeeper: runs on every page load and sign-in ---
-        // Returns true if the email is in the copy of the family list saved
-        // on this device from the last successful check (instant, no network).
-        function isInCachedList(email) {
-            try {
-                var cached = JSON.parse(localStorage.getItem(CACHE_KEY) || '[]');
-                return cached.indexOf(email) !== -1;
-            } catch (e) {
-                return false;
-            }
+        // The device remembers the last email the service approved, so
+        // returning visitors open the portal instantly (no network).
+        function getVerifiedEmail() {
+            try { return localStorage.getItem(CACHE_KEY) || ''; } catch (e) { return ''; }
         }
 
-        // Re-downloads the live family list in the background. If the person
-        // has since been removed from the list, sign them out.
+        function setVerifiedEmail(email) {
+            try { localStorage.setItem(CACHE_KEY, email); } catch (e) { /* ignore */ }
+        }
+
+        function clearVerifiedEmail() {
+            try { localStorage.removeItem(CACHE_KEY); } catch (e) { /* ignore */ }
+        }
+
+        // Re-checks with the service in the background. If the person
+        // has since been removed from the family list, sign them out.
         async function verifyInBackground(email) {
-            try {
-                var sheetEmails = await fetchSheetEmails();
-                try { localStorage.setItem(CACHE_KEY, JSON.stringify(sheetEmails)); } catch (e) { /* ignore */ }
-                if (sheetEmails.indexOf(email) === -1) {
-                    await auth.signOut();
-                    showAuthError(NOT_ON_LIST_MSG);
-                }
-            } catch (e) {
-                // Sheet unreachable right now - keep them signed in on the cached copy.
+            var verdict = await checkWithService();
+            if (verdict === 'no') {
+                clearVerifiedEmail();
+                await auth.signOut();
+                showAuthError(NOT_ON_LIST_MSG);
             }
+            // 'unreachable' keeps them signed in on the remembered approval.
         }
 
         var authResolved = false;
@@ -1134,25 +1104,31 @@
                 }
                 var email = user.email.toLowerCase();
 
-                // Fast path: returning visitor already on the saved list -
+                // Fast path: this person was approved on this device before -
                 // open the portal right away and double-check in the background.
-                if (isInCachedList(email)) {
+                if (getVerifiedEmail() === email) {
                     showPortal(email);
                     verifyInBackground(email);
                     return;
                 }
 
                 // Full check (first visit on this device, or cache cleared)
-                try {
-                    if (await isAllowed(email)) {
+                var verdict = await checkWithService();
+                if (verdict === 'yes') {
+                    setVerifiedEmail(email);
+                    showPortal(email);
+                } else if (verdict === 'no') {
+                    await auth.signOut();
+                    showAuthError(NOT_ON_LIST_MSG);
+                } else {
+                    // Service unreachable - fall back to the built-in backup list
+                    var h = await sha256Hex(HASH_SALT + email);
+                    if (ALLOWED_HASHES.indexOf(h) !== -1) {
                         showPortal(email);
                     } else {
                         await auth.signOut();
-                        showAuthError(NOT_ON_LIST_MSG);
+                        showAuthError('Something went wrong checking the family list. Please try again.');
                     }
-                } catch (e) {
-                    await auth.signOut();
-                    showAuthError('Something went wrong checking the family list. Please try again.');
                 }
             });
             // Safety net: if Firebase hasn't answered in 8 seconds, show the login form.
@@ -1221,15 +1197,81 @@
             document.body.style.overflow = 'hidden';
         }
 
-        function showFamily(familyName) {
+        // The directory arrives from the Apps Script service (which
+        // reads the Restricted sheet on Google's servers) and is drawn
+        // here as a table. Fetched once per visit, then reused.
+        var DIRECTORY_CACHE = null;
+
+        function escapeHtml(text) {
+            return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        }
+
+        function renderDirectoryTable(rows) {
+            var cleaned = (rows || []).filter(function (row) {
+                return row.some(function (cell) { return String(cell).trim() !== ''; });
+            });
+            if (cleaned.length === 0) {
+                return '<p style="padding: 20px; color: var(--sage);">Nothing here yet.</p>';
+            }
+            var html = '<div style="overflow-x: auto;"><table style="border-collapse: collapse; width: 100%; font-size: 0.95em; background: white;">';
+            cleaned.forEach(function (row, i) {
+                html += '<tr>';
+                row.forEach(function (cell) {
+                    var tag = (i === 0) ? 'th' : 'td';
+                    html += '<' + tag + ' style="border: 1px solid var(--card-border); padding: 9px 12px; text-align: left;' +
+                        (i === 0 ? ' background: var(--tint); color: var(--pine);' : '') + '">' +
+                        escapeHtml(cell) + '</' + tag + '>';
+                });
+                html += '</tr>';
+            });
+            html += '</table></div>';
+            return html;
+        }
+
+        function openDirectoryViewer(title, bodyHtml) {
+            var m = document.createElement('div');
+            m.className = 'modal';
+            m.id = 'sheetModal';
+            m.style.display = 'block';
+            m.setAttribute('data-return-to', 'directoryModal');
+            m.innerHTML = '<div class="modal-content" style="padding: 0; margin: 0;">' +
+                '<button class="close-btn" onclick="closeSheetModal()" style="z-index: 1003;"><i class="ti ti-x"></i></button>' +
+                '<div class="modal-topbar"><h2>' + title + '</h2></div>' +
+                '<div id="directoryViewerBody" style="position: absolute; top: 60px; left: 0; width: 100%; height: calc(100vh - 60px); overflow: auto; background: var(--mint); padding: 16px;">' +
+                bodyHtml +
+                '</div></div>';
+            document.body.appendChild(m);
+            document.body.style.overflow = 'hidden';
+        }
+
+        function setDirectoryViewerContent(html) {
+            var body = document.getElementById('directoryViewerBody');
+            if (body) body.innerHTML = html;
+        }
+
+        async function showFamily(familyName) {
             try {
                 closeModal('directoryModal');
-                var gid = FAMILY_TAB_GIDS[familyName.toLowerCase()] || '0';
                 var title = familyName.charAt(0).toUpperCase() + familyName.slice(1) + ' family directory';
-                openSheetModal(SHEETS_ID, gid, title, 'Loading family directory...', 'directoryModal');
+                openDirectoryViewer(title,
+                    '<div style="text-align: center; padding: 60px 20px; color: var(--sage); font-weight: 700;">' +
+                    '<div class="spinner"></div>Loading family directory...</div>');
+                if (!DIRECTORY_CACHE) {
+                    var res = await callService('directory');
+                    if (!res || !res.ok || !res.tabs) throw new Error((res && res.error) || 'service error');
+                    DIRECTORY_CACHE = res.tabs;
+                }
+                var tab = null;
+                DIRECTORY_CACHE.forEach(function (t) {
+                    if (String(t.name).toLowerCase().indexOf(familyName.toLowerCase()) !== -1) tab = t;
+                });
+                if (!tab) throw new Error('tab not found');
+                setDirectoryViewerContent(renderDirectoryTable(tab.rows));
             } catch (error) {
                 console.error('Error in showFamily:', error);
-                alert('Error loading family directory: ' + error.message + '. Please try again.');
+                setDirectoryViewerContent(
+                    '<div style="text-align: center; padding: 60px 20px; color: #A63A2B;">' +
+                    'Couldn\'t load the directory right now. Please close this and try again.</div>');
             }
         }
 
@@ -1429,4 +1471,3 @@
     </script>
 </body>
 </html>
-
