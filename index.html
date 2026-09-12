@@ -381,6 +381,29 @@
             background: var(--cream);
         }
         .feature-body.padded { padding: 16px; }
+
+        /* ---------- Check-in / check-out checklists ---------- */
+        .check-wrap { max-width: 640px; margin: 0 auto; }
+        .code-card {
+            background: var(--paper); border: 2px solid var(--gold); border-radius: 16px;
+            padding: 14px 18px; margin-bottom: 16px; text-align: center;
+        }
+        .code-card .lbl { color: var(--mute); font-size: 0.9em; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
+        .code-card .code { font-family: var(--serif); font-size: 2em; color: var(--ink); letter-spacing: 0.08em; margin-top: 2px; }
+        .rules-card { background: var(--paper); border: 1px solid var(--line); border-radius: 16px; padding: 14px 18px; margin-bottom: 16px; }
+        .rules-card h3 { font-size: 1.2em; margin-bottom: 8px; }
+        .rules-card li { margin: 6px 0 6px 18px; line-height: 1.45; font-size: var(--body-size); }
+        .check-item {
+            display: flex; align-items: flex-start; gap: 14px;
+            background: var(--paper); border: 1px solid var(--line); border-radius: 14px;
+            padding: 14px 16px; margin-bottom: 10px; cursor: pointer;
+        }
+        .check-item input { width: 24px; height: 24px; margin-top: 2px; flex-shrink: 0; accent-color: var(--forest); cursor: pointer; }
+        .check-item .item { font-size: var(--body-size); line-height: 1.4; font-weight: 700; }
+        .check-item .detail { color: var(--mute); font-size: 0.95em; line-height: 1.45; margin-top: 3px; font-weight: 400; }
+        .check-item.done .item { text-decoration: line-through; color: var(--mute); }
+        .check-progress { color: var(--mute); font-weight: 700; text-align: center; margin: 4px 0 14px; }
+        .check-actions { margin-top: 18px; display: flex; flex-direction: column; gap: 10px; }
         .feature-body iframe {
             width: 100%;
             height: 100%;
@@ -618,7 +641,21 @@
                 <div class="photo-shade"><h2>Manage my visit</h2><p>Everything you need from the front door onward</p></div>
             </div>
             <div class="section-body">
-                <p class="intro">Check-in and check-out checklists, with the door code and house rules, are coming next. For now, here's how to reach the people who look after the house.</p>
+                <button class="action-row" onclick="openChecklist('checkin')">
+                    <span class="ico"><i class="ti ti-door-enter" aria-hidden="true"></i></span>
+                    <span class="txt"><strong>Check in</strong><span>The door code, house rules, and what to do when you arrive.</span></span>
+                    <i class="ti ti-chevron-right chev" aria-hidden="true"></i>
+                </button>
+                <button class="action-row" onclick="openHouseRules()">
+                    <span class="ico"><i class="ti ti-home" aria-hidden="true"></i></span>
+                    <span class="txt"><strong>House rules</strong><span>A quick look any time during your stay.</span></span>
+                    <i class="ti ti-chevron-right chev" aria-hidden="true"></i>
+                </button>
+                <button class="action-row" onclick="openChecklist('checkout')">
+                    <span class="ico"><i class="ti ti-door-exit" aria-hidden="true"></i></span>
+                    <span class="txt"><strong>Check out</strong><span>Close up the house and let the house manager know you've left.</span><span class="who">House manager: <span data-role-name="house manager">the house manager</span></span></span>
+                    <i class="ti ti-chevron-right chev" aria-hidden="true"></i>
+                </button>
                 <h3 class="group">Something needs attention?</h3>
                 <button class="action-row" onclick="emailReportProblem()">
                     <span class="ico"><i class="ti ti-tool" aria-hidden="true"></i></span>
@@ -1452,6 +1489,224 @@
                 subject: 'Family directory update request',
                 body: body
             });
+        }
+
+        // ============================================================
+        // HOUSE INFO: check-in list, house rules, and check-out list,
+        // read from the "House Info" sheet the house manager edits.
+        // Tabs are matched by name (check-in / rules / check-out). The
+        // first column is the item, the second (optional) is a detail.
+        // A row whose item mentions "door code" is pulled out and shown
+        // in a highlighted box on both the check-in and rules screens.
+        // Checkbox progress is remembered on the device until the
+        // person taps "I'm checked in/out".
+        // ============================================================
+        var HOUSE_CACHE = null;
+        var CHECK_STATE_KEY = 'rh_portal_checklist_';
+
+        function houseTab(kind) {
+            if (!HOUSE_CACHE) return null;
+            var want = { checkin: /check.?in/i, checkout: /check.?out/i, rules: /rule/i }[kind];
+            for (var i = 0; i < HOUSE_CACHE.length; i++) {
+                var name = String(HOUSE_CACHE[i].name || '');
+                if (want.test(name) && !(kind === 'checkin' && /out/i.test(name))) return HOUSE_CACHE[i];
+            }
+            return null;
+        }
+
+        // Rows -> [{item, detail}], skipping blanks and a header row.
+        function houseRows(tab) {
+            var out = [];
+            if (!tab) return out;
+            (tab.rows || []).forEach(function (row, i) {
+                var item = String(row[0] || '').trim();
+                var detail = String(row[1] || '').trim();
+                if (!item) return;
+                if (i === 0 && /^(item|rule|step|task)s?$/i.test(item)) return; // header row
+                out.push({ item: item, detail: detail });
+            });
+            return out;
+        }
+
+        function findDoorCode() {
+            if (!HOUSE_CACHE) return '';
+            for (var t = 0; t < HOUSE_CACHE.length; t++) {
+                var rows = HOUSE_CACHE[t].rows || [];
+                for (var r = 0; r < rows.length; r++) {
+                    var line = rows[r].join(' ');
+                    if (/door\s*code/i.test(line)) {
+                        var m = line.match(/door\s*code\s*[:\-]?\s*(.+)$/i);
+                        var code = m ? m[1].trim() : String(rows[r][1] || '').trim();
+                        if (code) return code;
+                    }
+                }
+            }
+            return '';
+        }
+
+        async function loadHouse() {
+            if (HOUSE_CACHE) return HOUSE_CACHE;
+            var res = await callService('house');
+            if (!res || !res.ok || !res.tabs) throw new Error((res && res.error) || 'service error');
+            HOUSE_CACHE = res.tabs;
+            return HOUSE_CACHE;
+        }
+
+        function doorCodeHtml() {
+            var code = findDoorCode();
+            if (!code) return '';
+            return '<div class="code-card"><div class="lbl">Door code</div><div class="code">' + escapeHtml(code) + '</div></div>';
+        }
+
+        function rulesHtml(withHeading) {
+            var rules = houseRows(houseTab('rules')).filter(function (r) { return !/door\s*code/i.test(r.item); });
+            if (rules.length === 0) return '';
+            var html = '<div class="rules-card">' + (withHeading ? '<h3>House rules</h3>' : '') + '<ul>';
+            rules.forEach(function (r) {
+                html += '<li>' + escapeHtml(r.item) + (r.detail ? ' <span style="color: var(--mute);">' + escapeHtml(r.detail) + '</span>' : '') + '</li>';
+            });
+            return html + '</ul></div>';
+        }
+
+        async function openHouseRules() {
+            closeModal('visitModal');
+            openTableViewer('House rules', 'visitModal');
+            try {
+                await loadHouse();
+                var html = '<div class="check-wrap">' + doorCodeHtml() + rulesHtml(false);
+                if (!findDoorCode() && houseRows(houseTab('rules')).length === 0) {
+                    html += '<p style="text-align: center; color: var(--mute); padding: 40px;">Nothing here yet.</p>';
+                }
+                setTableViewerContent(html + '</div>');
+            } catch (e) {
+                console.error('House rules:', e);
+                setTableViewerContent(VIEWER_ERROR_HTML);
+            }
+        }
+
+        function readCheckState(kind) {
+            try { return JSON.parse(localStorage.getItem(CHECK_STATE_KEY + kind) || '{}'); } catch (e) { return {}; }
+        }
+
+        function saveCheckState(kind, state) {
+            try { localStorage.setItem(CHECK_STATE_KEY + kind, JSON.stringify(state)); } catch (e) { /* ignore */ }
+        }
+
+        function clearCheckState(kind) {
+            try { localStorage.removeItem(CHECK_STATE_KEY + kind); } catch (e) { /* ignore */ }
+        }
+
+        async function openChecklist(kind) {
+            var isIn = (kind === 'checkin');
+            closeModal('visitModal');
+            openTableViewer(isIn ? 'Check in' : 'Check out', 'visitModal');
+            try {
+                await loadHouse();
+                renderChecklist(kind);
+            } catch (e) {
+                console.error('Checklist:', e);
+                setTableViewerContent(VIEWER_ERROR_HTML);
+            }
+        }
+
+        function renderChecklist(kind) {
+            var isIn = (kind === 'checkin');
+            var items = houseRows(houseTab(kind)).filter(function (r) { return !/door\s*code/i.test(r.item); });
+            var state = readCheckState(kind);
+            var done = 0;
+            var html = '<div class="check-wrap">';
+            if (isIn) html += doorCodeHtml() + rulesHtml(true);
+            if (items.length === 0) {
+                html += '<p style="text-align: center; color: var(--mute); padding: 30px;">No steps listed yet.</p>';
+            } else {
+                items.forEach(function (r, i) {
+                    var checked = !!state[i];
+                    if (checked) done++;
+                    html += '<label class="check-item' + (checked ? ' done' : '') + '">' +
+                        '<input type="checkbox" ' + (checked ? 'checked ' : '') + 'onchange="toggleCheck(\'' + kind + '\', ' + i + ', this)">' +
+                        '<span><span class="item">' + escapeHtml(r.item) + '</span>' +
+                        (r.detail ? '<div class="detail">' + escapeHtml(r.detail) + '</div>' : '') + '</span></label>';
+                });
+                html = html.replace('<div class="check-wrap">', '<div class="check-wrap"><div class="check-progress" id="checkProgress">' + done + ' of ' + items.length + ' done</div>');
+            }
+            html += '<div class="check-actions">';
+            if (isIn) {
+                html += '<button type="button" class="btn btn-forest btn-block" onclick="finishCheckin()"><i class="ti ti-check" aria-hidden="true"></i> I\'m checked in</button>';
+            } else {
+                html += '<div class="form-group" style="margin-top: 8px;"><label for="checkoutNotes">Anything the house manager should know? (optional)</label>' +
+                    '<textarea id="checkoutNotes" placeholder="Low on propane, a chair with a wobbly leg, leftovers in the fridge..."></textarea></div>' +
+                    '<div class="login-error" id="checkoutError"></div>' +
+                    '<button type="button" class="btn btn-forest btn-block" id="checkoutBtn" onclick="finishCheckout()"><i class="ti ti-send" aria-hidden="true"></i> I\'m checked out - notify the house manager</button>';
+            }
+            html += '<button type="button" class="btn btn-quiet btn-block" onclick="resetChecklist(\'' + kind + '\')">Clear the checkmarks</button></div></div>';
+            setTableViewerContent(html);
+        }
+
+        function toggleCheck(kind, i, box) {
+            var state = readCheckState(kind);
+            if (box.checked) state[i] = true; else delete state[i];
+            saveCheckState(kind, state);
+            var row = box.closest('.check-item');
+            if (row) row.classList.toggle('done', box.checked);
+            var total = document.querySelectorAll('#tableViewerBody .check-item').length;
+            var prog = document.getElementById('checkProgress');
+            if (prog) prog.textContent = Object.keys(state).length + ' of ' + total + ' done';
+        }
+
+        function resetChecklist(kind) {
+            clearCheckState(kind);
+            renderChecklist(kind);
+        }
+
+        function finishCheckin() {
+            clearCheckState('checkin');
+            setTableViewerContent('<div style="text-align: center; padding: 40px 20px;">' +
+                '<div class="feature-icon"><i class="ti ti-home-heart" aria-hidden="true"></i></div>' +
+                '<h3 style="margin-bottom: 12px; font-size: 1.35em;">Welcome to Reunion Hill</h3>' +
+                '<p style="color: var(--ink); line-height: 1.6; margin-bottom: 24px;">Enjoy your stay. House rules are one tap away if you need them.</p>' +
+                '<button type="button" class="btn btn-forest" onclick="closeSheetModal()">Done</button></div>');
+        }
+
+        async function finishCheckout() {
+            var items = houseRows(houseTab('checkout')).filter(function (r) { return !/door\s*code/i.test(r.item); });
+            var state = readCheckState('checkout');
+            var doneList = [], missedList = [];
+            items.forEach(function (r, i) { (state[i] ? doneList : missedList).push(r.item); });
+            var notes = (document.getElementById('checkoutNotes') || { value: '' }).value.trim();
+            var err = document.getElementById('checkoutError');
+            var btn = document.getElementById('checkoutBtn');
+            err.style.display = 'none';
+            btn.disabled = true;
+            btn.textContent = 'Sending...';
+            var who = senderName();
+            var body = greeting('house manager') +
+                who + ' has checked out of Reunion Hill.\n\n' +
+                (missedList.length ? 'NOT DONE (' + missedList.length + '):\n- ' + missedList.join('\n- ') + '\n\n' : 'Everything on the check-out list was done.\n\n') +
+                (doneList.length ? 'Done (' + doneList.length + '):\n- ' + doneList.join('\n- ') + '\n\n' : '') +
+                (notes ? 'Notes from ' + who + ':\n' + notes + '\n\n' : '') +
+                'Sent automatically from the portal\'s check-out screen.';
+            try {
+                var res = await callService('send', {
+                    role: 'house manager',
+                    ccRole: 'maintenance manager',
+                    subject: 'Check-out: ' + who + (missedList.length ? ' (' + missedList.length + ' item' + (missedList.length > 1 ? 's' : '') + ' not done)' : ''),
+                    body: body
+                });
+                if (!res || !res.ok || !res.sent) throw new Error((res && res.error) || 'service error');
+                clearCheckState('checkout');
+                setTableViewerContent('<div style="text-align: center; padding: 40px 20px;">' +
+                    '<div class="feature-icon"><i class="ti ti-check" aria-hidden="true"></i></div>' +
+                    '<h3 style="margin-bottom: 12px; font-size: 1.35em;">Safe travels</h3>' +
+                    '<p style="color: var(--ink); line-height: 1.6; margin-bottom: 24px;">' + escapeHtml(res.sent.to || 'The house manager') + ' has been notified. Thanks for closing up the house.</p>' +
+                    '<button type="button" class="btn btn-forest" onclick="closeSheetModal()">Done</button></div>');
+            } catch (e) {
+                console.error('Check-out send failed:', e);
+                err.innerHTML = 'Couldn\'t send the notification just now. Please try again in a minute.' +
+                    '<br><span style="font-size: 0.85em; opacity: 0.8;">Technical detail: ' + escapeHtml(e && e.message ? e.message : e) + '</span>';
+                err.style.display = 'block';
+                btn.disabled = false;
+                btn.innerHTML = '<i class="ti ti-send" aria-hidden="true"></i> I\'m checked out - notify the house manager';
+            }
         }
 
         function closeSheetModal() {
