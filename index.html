@@ -6,622 +6,489 @@
     <title>Reunion Hill Family Portal</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.34.1/dist/tabler-icons.min.css" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
     <style>
+        /* Palette drawn from the house: cream walls, deck wood, stair red,
+           the trees, and evening light on the ridge. */
         :root {
-            --mint: #EEF4F2;
-            --teal: #1D9E75;
-            --teal-dark: #157A5B;
-            --pine: #1D5C55;
-            --sage: #5C8B84;
-            --card-border: #D3E2DE;
-            --tint: #E1F5EE;
+            --cream: #F3EBDD;
+            --paper: #FFFCF6;
+            --wood: #6B4A2B;
+            --wood-light: #A67C52;
+            --deck: #8C3B2E;
+            --forest: #3F5D4A;
+            --gold: #C9862B;
+            --ink: #2E241B;
+            --mute: #7A6650;
+            --line: #DCCFBA;
+            --serif: 'Fraunces', Georgia, 'Times New Roman', serif;
+            --sans: 'Nunito', 'Segoe UI', Tahoma, sans-serif;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html { -webkit-text-size-adjust: 100%; }
 
         body {
-            font-family: 'Nunito', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: var(--mint);
+            font-family: var(--sans);
+            background: var(--cream);
             min-height: 100vh;
-            color: #2A3B38;
+            color: var(--ink);
+            line-height: 1.5;
         }
+
+        h1, h2, h3 { font-family: var(--serif); font-weight: 500; color: var(--ink); }
 
         .container {
-            max-width: 1100px;
+            max-width: 760px;
             margin: 0 auto;
-            padding: 24px 20px 48px;
+            padding: 20px 16px 48px;
         }
 
-        .header {
+        /* ---------- Photos pulled from the "Portal images" Drive folder ---------- */
+        .photo {
+            background-color: var(--wood);
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .photo[data-img="plan"] { background-color: var(--forest); }
+        .photo[data-img="visit"] { background-color: var(--deck); }
+        .photo[data-img="memories"] { background-color: var(--gold); }
+        .photo[data-img="llc"] { background-color: var(--wood); }
+        .photo-shade {
+            position: absolute; left: 0; right: 0; bottom: 0;
+            padding: 18px 20px 16px;
+            background: linear-gradient(to top, rgba(46, 36, 27, 0.72), rgba(46, 36, 27, 0));
+            color: var(--paper);
+        }
+
+        /* ---------- Masthead ---------- */
+        .masthead {
             text-align: center;
-            margin-bottom: 28px;
-            background: white;
-            padding: 36px 30px;
+            padding: 26px 10px 18px;
+        }
+        .masthead h1 {
+            font-size: 2.6em;
+            line-height: 1.05;
+            letter-spacing: -0.01em;
+        }
+        .masthead p {
+            color: var(--mute);
+            font-size: 1.05em;
+            margin-top: 6px;
+        }
+
+        /* ---------- Sign-in ---------- */
+        .auth-checking, .auth-section {
+            background: var(--paper);
+            border: 1px solid var(--line);
             border-radius: 20px;
-            border: 1px solid var(--card-border);
+            overflow: hidden;
+            margin-bottom: 24px;
         }
-
-        .header h1 {
-            color: var(--pine);
-            font-size: 2.4em;
-            font-weight: 800;
-            margin-bottom: 6px;
-            letter-spacing: -0.5px;
-        }
-
-        .header p {
-            color: var(--sage);
-            font-size: 1.1em;
-        }
-
-        .auth-section {
-            display: none;
-            text-align: center;
-            background: white;
-            padding: 40px 30px;
-            border-radius: 20px;
-            border: 1px solid var(--card-border);
-            margin-bottom: 30px;
-        }
-
-        .auth-section h2 {
-            color: var(--pine);
-            font-weight: 800;
-        }
-
-        .auth-checking {
-            text-align: center;
-            background: white;
-            padding: 40px 30px;
-            border-radius: 20px;
-            border: 1px solid var(--card-border);
-            margin-bottom: 30px;
-            color: var(--sage);
-            font-weight: 700;
-        }
+        .auth-checking { display: block; text-align: center; padding: 40px 30px; color: var(--mute); font-weight: 700; }
+        .auth-section { display: none; }
+        .auth-photo { height: 220px; }
+        .auth-photo .photo-shade h2 { color: var(--paper); font-size: 1.7em; }
+        .auth-body { padding: 26px 24px 28px; text-align: center; }
+        .auth-body p.lead { color: var(--mute); margin-bottom: 20px; }
 
         .spinner {
-            width: 34px;
-            height: 34px;
-            border: 4px solid var(--card-border);
-            border-top-color: var(--teal);
+            width: 34px; height: 34px;
+            border: 4px solid var(--line);
+            border-top-color: var(--forest);
             border-radius: 50%;
             margin: 0 auto 14px;
             animation: spin 0.9s linear infinite;
         }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @media (prefers-reduced-motion: reduce) {
+            .spinner { animation: none; }
+            .chapter, .action-row, .btn { transition: none !important; }
         }
 
-        .login-form {
-            max-width: 400px;
-            margin: 0 auto;
-        }
-
+        .login-form { max-width: 380px; margin: 0 auto; }
         .login-form input[type="email"] {
             width: 100%;
-            padding: 15px 18px;
+            padding: 14px 16px;
             font-size: 16px;
             font-family: inherit;
-            border: 1.5px solid var(--card-border);
-            background: #F2F7F6;
+            border: 1.5px solid var(--line);
+            background: var(--cream);
             border-radius: 12px;
-            margin-bottom: 15px;
-            color: #2A3B38;
+            margin-bottom: 12px;
+            color: var(--ink);
         }
+        .login-form input[type="email"]::placeholder { color: #B09A80; }
+        .login-form input[type="email"]:focus { outline: none; border-color: var(--forest); background: white; }
 
-        .login-form input[type="email"]::placeholder {
-            color: #9BB5AF;
-        }
-
-        .login-form input[type="email"]:focus {
-            outline: none;
-            border-color: var(--teal);
-            background: white;
-        }
-
-        .login-error {
+        .login-error, .login-success {
             display: none;
-            background: #FDF0EE;
-            color: #A63A2B;
             padding: 12px 16px;
             border-radius: 12px;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             font-size: 0.95em;
             line-height: 1.4;
             text-align: left;
         }
-
-        .login-success {
-            display: none;
-            background: var(--tint);
-            color: var(--pine);
-            padding: 12px 16px;
-            border-radius: 12px;
-            margin-bottom: 15px;
-            font-size: 0.95em;
-            line-height: 1.4;
-            text-align: left;
-        }
-
-        .google-btn {
-            width: 100%;
-            background: white;
-            color: #2A3B38;
-            border: 1.5px solid var(--card-border);
-            padding: 14px;
-            font-size: 16px;
-            font-family: inherit;
-            font-weight: 700;
-            border-radius: 12px;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            transition: border-color 0.2s;
-        }
-
-        .google-btn:hover {
-            border-color: var(--teal);
-        }
+        .login-error { background: #F9E7E3; color: #7A2C21; }
+        .login-error a { color: #7A2C21; font-weight: 700; }
+        .login-success { background: #E6EEE8; color: var(--forest); }
 
         .login-divider {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin: 18px 0;
-            color: var(--sage);
-            font-size: 0.9em;
+            display: flex; align-items: center; gap: 12px;
+            margin: 16px 0; color: var(--mute); font-size: 0.9em;
         }
+        .login-divider::before, .login-divider::after { content: ''; flex: 1; height: 1px; background: var(--line); }
 
-        .login-divider::before,
-        .login-divider::after {
-            content: '';
-            flex: 1;
-            height: 1px;
-            background: var(--card-border);
-        }
-
-        .login-error a {
-            color: #A63A2B;
-            font-weight: 700;
-        }
-
-        .enter-btn {
-            background: var(--teal);
-            color: white;
-            border: none;
-            padding: 15px 32px;
-            font-size: 17px;
-            font-family: inherit;
-            font-weight: 700;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: background 0.2s ease, transform 0.2s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .enter-btn:hover {
-            background: var(--teal-dark);
-            transform: translateY(-1px);
-        }
-
-        .enter-btn:disabled {
-            opacity: 0.6;
-            cursor: wait;
-        }
-
-        .main-content {
-            display: none;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 18px;
-        }
-
-        .feature-card {
-            background: white;
-            padding: 28px 22px;
-            border-radius: 18px;
-            border: 1px solid var(--card-border);
-            transition: transform 0.2s ease, border-color 0.2s ease;
-            cursor: pointer;
-            text-align: center;
-        }
-
-        .feature-card:hover {
-            transform: translateY(-4px);
-            border-color: var(--teal);
-        }
-
-        .feature-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: var(--tint);
-            color: var(--teal);
-            font-size: 28px;
+        /* ---------- Buttons ---------- */
+        .btn {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 15px;
+            gap: 10px;
+            font-family: inherit;
+            font-weight: 700;
+            font-size: 16px;
+            padding: 13px 22px;
+            border-radius: 12px;
+            border: 1.5px solid transparent;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.15s ease;
         }
+        .btn:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+        .btn-forest { background: var(--forest); color: var(--paper); }
+        .btn-forest:hover { background: #33493B; }
+        .btn-deck { background: var(--deck); color: var(--paper); }
+        .btn-deck:hover { background: #722F24; }
+        .btn-quiet { background: var(--paper); color: var(--ink); border-color: var(--line); }
+        .btn-quiet:hover { border-color: var(--wood-light); }
+        .btn:disabled { opacity: 0.6; cursor: wait; }
+        .btn-block { width: 100%; }
 
-        .feature-card h3 {
-            margin-bottom: 8px;
-            color: var(--pine);
-            font-size: 1.25em;
-            font-weight: 800;
-        }
-
-        .feature-card p {
-            color: var(--sage);
-            line-height: 1.5;
-            font-size: 0.95em;
-        }
-
+        /* ---------- Signed-in strip ---------- */
         .user-info {
-            background: white;
-            padding: 12px 20px;
-            border-radius: 14px;
-            border: 1px solid var(--card-border);
-            margin-bottom: 20px;
             display: none;
             align-items: center;
             justify-content: space-between;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 8px;
+            font-size: 0.9em;
+            color: var(--mute);
+            padding: 0 6px 12px;
         }
-
-        .user-info strong {
-            color: var(--pine);
-        }
-
         .signout-btn {
             background: none;
-            border: 1.5px solid var(--card-border);
-            color: var(--sage);
-            padding: 6px 16px;
+            border: 1.5px solid var(--line);
+            color: var(--mute);
+            padding: 5px 14px;
             border-radius: 20px;
             cursor: pointer;
-            font-size: 0.85em;
+            font-size: 0.9em;
             font-family: inherit;
             font-weight: 700;
         }
+        .signout-btn:hover { border-color: var(--wood-light); color: var(--ink); }
 
-        .signout-btn:hover {
-            border-color: var(--teal);
-            color: var(--teal);
+        /* ---------- Home: hero + chapters ---------- */
+        .main-content { display: none; }
+
+        .hero {
+            height: 250px;
+            border-radius: 20px;
+            margin-bottom: 22px;
+        }
+        .hero .photo-shade h2 { color: var(--paper); font-size: 1.9em; line-height: 1.1; }
+        .hero .photo-shade p { color: #EADFCB; font-size: 0.95em; margin-top: 4px; }
+
+        .journal-card {
+            display: none; /* shown once the guest journal exists (phase three) */
+            background: var(--paper);
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            padding: 16px 18px;
+            margin-bottom: 22px;
         }
 
-        .open-tab-link {
-            display: inline-block;
-            background: var(--teal);
-            color: white;
-            text-decoration: none;
-            padding: 10px 22px;
-            border-radius: 12px;
-            margin-bottom: 15px;
-            font-size: 0.95em;
+        .chapters { display: flex; flex-direction: column; gap: 14px; }
+
+        .chapter {
+            display: flex;
+            align-items: stretch;
+            gap: 0;
+            background: var(--paper);
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            overflow: hidden;
+            cursor: pointer;
+            text-align: left;
+            width: 100%;
+            font-family: inherit;
+            color: var(--ink);
+            transition: border-color 0.15s ease;
+        }
+        .chapter:hover, .chapter:focus-visible { border-color: var(--wood-light); outline: none; }
+        .chapter .photo { width: 132px; flex-shrink: 0; min-height: 112px; }
+        .chapter-text { padding: 16px 18px; flex: 1; min-width: 0; }
+        .chapter-text h3 { font-size: 1.35em; line-height: 1.15; margin-bottom: 5px; }
+        .chapter-text p { color: var(--mute); font-size: 0.93em; line-height: 1.45; }
+        .chapter-text .who { color: var(--wood); font-size: 0.85em; margin-top: 7px; }
+
+        .footer-note {
+            margin-top: 26px;
+            padding: 18px 20px;
+            border-top: 1px solid var(--line);
+            color: var(--mute);
+            font-size: 0.9em;
+            line-height: 1.6;
+            text-align: center;
+        }
+        .footer-note a, .footer-note button {
+            color: var(--wood);
             font-weight: 700;
+            background: none;
+            border: none;
+            font: inherit;
+            cursor: pointer;
+            text-decoration: underline;
+            text-underline-offset: 3px;
         }
 
-        .open-tab-link:hover {
-            background: var(--teal-dark);
-        }
-
+        /* ---------- Section pages (full-screen panels) ---------- */
         .modal {
             display: none;
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(29, 92, 85, 0.45);
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(46, 36, 27, 0.45);
             z-index: 1000;
         }
-
         .modal-content {
             position: fixed;
-            top: 0;
-            left: 0;
+            top: 0; left: 0;
             width: 100%;
             height: 100vh;
-            background: var(--mint);
-            padding: 20px;
+            background: var(--cream);
             overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
             z-index: 1001;
             display: flex;
             flex-direction: column;
         }
-
-        .modal-content h2 {
-            margin-top: 60px;
-            margin-bottom: 30px;
-            text-align: center;
-            color: var(--pine);
-            font-size: 2.2em;
-            font-weight: 800;
-            flex-shrink: 0;
-        }
-
-        .modal-body {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            min-height: 0;
-        }
-
         .close-btn {
             position: fixed;
-            top: 20px;
-            right: 30px;
-            font-size: 28px;
+            top: 14px; right: 14px;
+            width: 44px; height: 44px;
+            font-size: 22px;
             cursor: pointer;
-            background: #fff;
-            border: 1.5px solid var(--card-border);
+            background: rgba(255, 252, 246, 0.94);
+            border: 1.5px solid var(--line);
             border-radius: 50%;
-            width: 48px;
-            height: 48px;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: var(--sage);
+            color: var(--ink);
             z-index: 1002;
         }
+        .close-btn:hover { border-color: var(--wood-light); }
 
-        .close-btn:hover {
-            border-color: var(--teal);
-            color: var(--teal);
+        .section-photo { height: 190px; flex-shrink: 0; }
+        .section-photo .photo-shade h2 { color: var(--paper); font-size: 1.8em; line-height: 1.1; }
+        .section-photo .photo-shade p { color: #EADFCB; font-size: 0.95em; margin-top: 3px; }
+
+        .section-body {
+            max-width: 640px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 18px 16px 48px;
         }
+        .section-body .intro { color: var(--mute); margin: 4px 4px 18px; line-height: 1.55; }
+        .section-body h3.group { font-size: 1.1em; color: var(--wood); margin: 22px 4px 10px; }
 
+        .action-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            width: 100%;
+            background: var(--paper);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 14px 16px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            text-align: left;
+            font-family: inherit;
+            color: var(--ink);
+            text-decoration: none;
+            transition: border-color 0.15s ease;
+        }
+        .action-row:hover, .action-row:focus-visible { border-color: var(--wood-light); outline: none; }
+        .action-row .ico {
+            width: 42px; height: 42px;
+            border-radius: 12px;
+            background: var(--cream);
+            color: var(--forest);
+            font-size: 22px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .action-row .txt { flex: 1; min-width: 0; }
+        .action-row .txt strong { display: block; font-size: 1.02em; }
+        .action-row .txt span { display: block; color: var(--mute); font-size: 0.88em; line-height: 1.4; }
+        .action-row .chev { color: var(--mute); flex-shrink: 0; font-size: 18px; }
+
+        /* ---------- Feature screens (tools that open on top of a section) ---------- */
         .modal-topbar {
             position: fixed;
-            top: 0;
-            left: 0;
+            top: 0; left: 0;
             width: 100vw;
             height: 60px;
-            background: var(--teal);
+            background: var(--forest);
             z-index: 1002;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
+            color: var(--paper);
         }
-
         .modal-topbar h2 {
             margin: 0;
-            font-size: 1.4em;
-            font-weight: 800;
-            color: white;
+            font-size: 1.25em;
+            color: var(--paper);
+            padding: 0 70px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
+        .feature-body {
+            position: absolute;
+            top: 60px; left: 0;
+            width: 100%;
+            height: calc(100vh - 60px);
+            overflow: auto;
+            -webkit-overflow-scrolling: touch;
+            background: var(--cream);
+        }
+        .feature-body.padded { padding: 16px; }
+        .feature-body iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: white;
+            display: block;
+        }
+        .feature-note {
+            text-align: center;
+            padding: 10px 16px 14px;
+            font-size: 0.9em;
+            background: var(--cream);
+        }
+        .feature-note a { color: var(--mute); }
 
         .family-tabs {
             display: flex;
             flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 20px;
+            gap: 8px;
             justify-content: center;
+            margin-bottom: 16px;
         }
-
         .family-tab {
-            background: white;
-            color: var(--pine);
-            border: 1.5px solid var(--card-border);
-            padding: 10px 22px;
-            border-radius: 25px;
+            background: var(--paper);
+            color: var(--ink);
+            border: 1.5px solid var(--line);
+            padding: 9px 18px;
+            border-radius: 22px;
             cursor: pointer;
             font-family: inherit;
             font-weight: 700;
             font-size: 15px;
-            transition: all 0.2s;
         }
-
-        .family-tab:hover {
-            background: var(--teal);
-            border-color: var(--teal);
-            color: white;
-        }
+        .family-tab:hover { border-color: var(--forest); color: var(--forest); }
 
         .directory-content {
-            background: white;
-            border: 1px solid var(--card-border);
+            background: var(--paper);
+            border: 1px solid var(--line);
             padding: 20px;
             border-radius: 16px;
-            min-height: 300px;
-            flex: 1;
+            min-height: 200px;
+        }
+
+        .feature-icon {
+            width: 60px; height: 60px;
+            border-radius: 50%;
+            background: var(--cream);
+            color: var(--forest);
+            font-size: 28px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
         }
 
         .contact-form {
             max-width: 500px;
             width: 100%;
             margin: 0 auto;
-            background: white;
-            border: 1px solid var(--card-border);
+            background: var(--paper);
+            border: 1px solid var(--line);
             border-radius: 16px;
-            padding: 26px;
+            padding: 24px;
         }
-
-        .form-group {
-            margin-bottom: 18px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 6px;
-            font-weight: 700;
-            color: var(--pine);
-            font-size: 0.95em;
-        }
-
-        .form-group input,
-        .form-group textarea {
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; margin-bottom: 6px; font-weight: 700; color: var(--wood); font-size: 0.95em; }
+        .form-group input, .form-group textarea {
             width: 100%;
             padding: 12px 14px;
-            border: 1.5px solid var(--card-border);
-            background: #F2F7F6;
+            border: 1.5px solid var(--line);
+            background: var(--cream);
             border-radius: 10px;
             font-size: 16px;
             font-family: inherit;
-            color: #2A3B38;
+            color: var(--ink);
         }
+        .form-group input:focus, .form-group textarea:focus { outline: none; border-color: var(--forest); background: white; }
+        .form-group textarea { height: 120px; resize: vertical; }
 
-        .form-group input:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: var(--teal);
-            background: white;
-        }
-
-        .form-group textarea {
-            height: 120px;
-            resize: vertical;
-        }
-
-        .submit-btn {
-            background: var(--teal);
-            color: white;
-            border: none;
-            padding: 13px 30px;
-            border-radius: 12px;
+        .card-list { max-width: 700px; margin: 0 auto; }
+        .list-card {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            background: var(--paper);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 14px 18px;
+            margin-bottom: 10px;
             cursor: pointer;
-            font-size: 16px;
-            font-family: inherit;
-            font-weight: 700;
-            width: 100%;
+            text-align: left;
         }
+        .list-card:hover { border-color: var(--wood-light); }
 
-        .submit-btn:hover {
-            background: var(--teal-dark);
-        }
-
-        iframe {
-            width: 100%;
-            flex: 1;
-            border: none;
-            border-radius: 12px;
-            min-height: 400px;
-            background: white;
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                padding: 12px 12px 40px;
-            }
-
-            .header {
-                padding: 26px 18px;
-            }
-
-            .header h1 {
-                font-size: 1.9em;
-            }
-
-            .main-content {
-                grid-template-columns: 1fr;
-            }
-
-            .family-tab {
-                font-size: 14px;
-                padding: 8px 16px;
-            }
-
-            .modal-content {
-                padding: 10px;
-            }
-
-            .modal-content h2 {
-                font-size: 1.8em;
-                margin-top: 50px;
-            }
-
-            .close-btn {
-                top: 10px;
-                right: 15px;
-                font-size: 22px;
-                width: 40px;
-                height: 40px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .modal-content {
-                padding: 0;
-                overflow: hidden;
-            }
-
-            .modal-content h2 {
-                position: fixed;
-                top: 0;
-                left: 0;
-                right: 0;
-                margin: 0;
-                padding: 15px 50px 15px 15px;
-                font-size: 1.25em;
-                background: white;
-                border-bottom: 1px solid var(--card-border);
-                z-index: 1002;
-                height: 60px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-
-            .modal-body {
-                position: absolute;
-                top: 60px;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                padding: 10px;
-                overflow-y: auto;
-            }
-
-            .close-btn {
-                position: fixed;
-                top: 10px;
-                right: 10px;
-                font-size: 18px;
-                width: 36px;
-                height: 36px;
-                z-index: 1003;
-                background: rgba(255, 255, 255, 0.95);
-            }
-
-            iframe {
-                width: 100%;
-                height: calc(100vh - 80px);
-                border: none;
-                margin: 0;
-                padding: 0;
-                border-radius: 0;
-            }
+        @media (max-width: 560px) {
+            .container { padding: 10px 12px 40px; }
+            .masthead { padding: 18px 6px 14px; }
+            .masthead h1 { font-size: 2.15em; }
+            .hero { height: 210px; }
+            .chapter .photo { width: 108px; }
+            .chapter-text { padding: 13px 14px; }
+            .chapter-text h3 { font-size: 1.2em; }
+            .section-photo { height: 160px; }
+            .section-body { padding: 14px 12px 40px; }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
+        <div class="masthead">
             <h1>Reunion Hill</h1>
             <p>Where the family gathers · Montreat, North Carolina</p>
-        </div>
-
-        <div class="user-info" id="userInfo">
-            <div>
-                <strong><i class="ti ti-user-check" style="vertical-align: -2px;"></i> Signed in:</strong>
-                <span id="signedInEmail" style="color: var(--sage);"></span>
-            </div>
-            <button class="signout-btn" onclick="signOut()">Sign out</button>
         </div>
 
         <div class="auth-checking" id="authChecking">
@@ -630,103 +497,225 @@
         </div>
 
         <div class="auth-section" id="authSection">
-            <h2>Welcome to the family portal</h2>
-            <p style="margin: 16px 0 24px; color: var(--sage);">Sign in to come on in</p>
-            <div class="login-form">
-                <button type="button" class="google-btn" id="googleBtn" onclick="googleSignIn()">
-                    <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
-                    Sign in with Google
-                </button>
-                <div class="login-divider"><span>or</span></div>
-                <form onsubmit="sendLoginLink(event)">
-                    <input type="email" id="loginEmail" placeholder="your.email@example.com" required autocomplete="email">
-                    <div class="login-error" id="loginError"></div>
-                    <div class="login-success" id="loginSuccess"></div>
-                    <button type="submit" class="enter-btn" id="loginBtn" style="background: white; color: var(--teal); border: 2px solid var(--teal);">
-                        <i class="ti ti-mail-forward" style="font-size: 20px;"></i>
-                        Email me a sign-in link
-                    </button>
-                </form>
+            <div class="photo auth-photo" data-img="login">
+                <div class="photo-shade"><h2>Come on in</h2></div>
             </div>
-            <p style="margin-top: 18px; font-size: 0.9em; color: var(--sage);">
-                Family members and authorized users only
-            </p>
+            <div class="auth-body">
+                <p class="lead">Sign in to open the family portal</p>
+                <div class="login-form">
+                    <button type="button" class="btn btn-quiet btn-block" id="googleBtn" onclick="googleSignIn()">
+                        <svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+                        Sign in with Google
+                    </button>
+                    <div class="login-divider"><span>or</span></div>
+                    <form onsubmit="sendLoginLink(event)">
+                        <input type="email" id="loginEmail" placeholder="your.email@example.com" required autocomplete="email">
+                        <div class="login-error" id="loginError"></div>
+                        <div class="login-success" id="loginSuccess"></div>
+                        <button type="submit" class="btn btn-forest btn-block" id="loginBtn">
+                            <i class="ti ti-mail-forward" style="font-size: 20px;" aria-hidden="true"></i>
+                            Email me a sign-in link
+                        </button>
+                    </form>
+                </div>
+                <p style="margin-top: 16px; font-size: 0.88em; color: var(--mute);">Family members and authorized users only</p>
+            </div>
+        </div>
+
+        <div class="user-info" id="userInfo">
+            <div><i class="ti ti-user-check" style="vertical-align: -2px;" aria-hidden="true"></i> Signed in as <span id="signedInEmail"></span></div>
+            <button class="signout-btn" onclick="signOut()">Sign out</button>
         </div>
 
         <div class="main-content" id="mainContent">
-            <div class="feature-card" onclick="openModal('reservationModal')">
-                <div class="feature-icon"><i class="ti ti-calendar-plus"></i></div>
-                <h3>Make a reservation</h3>
-                <p>Reserve your dates at Reunion Hill</p>
+            <div class="photo hero" data-img="home">
+                <div class="photo-shade">
+                    <h2>Welcome home</h2>
+                    <p>Plan a stay, settle in, and leave a memory behind.</p>
+                </div>
             </div>
 
-            <div class="feature-card" onclick="openModal('calendarModal')">
-                <div class="feature-icon"><i class="ti ti-calendar-event"></i></div>
-                <h3>Family calendar</h3>
-                <p>View upcoming events and reservations</p>
+            <div class="journal-card" id="journalCard"></div>
+
+            <div class="chapters">
+                <button class="chapter" onclick="openModal('planModal')">
+                    <div class="photo" data-img="plan"></div>
+                    <div class="chapter-text">
+                        <h3>Plan my visit</h3>
+                        <p>Reserve dates, see who's coming, and offer a hand while you're there.</p>
+                        <div class="who">Calendar: <span data-role-name="calendar manager">the calendar manager</span></div>
+                    </div>
+                </button>
+                <button class="chapter" onclick="openModal('visitModal')">
+                    <div class="photo" data-img="visit"></div>
+                    <div class="chapter-text">
+                        <h3>Manage my visit</h3>
+                        <p>Check in, house rules, report a problem, check out.</p>
+                        <div class="who">House: <span data-role-name="house manager">the house manager</span></div>
+                    </div>
+                </button>
+                <button class="chapter" onclick="openModal('memoriesModal')">
+                    <div class="photo" data-img="memories"></div>
+                    <div class="chapter-text">
+                        <h3>Memories</h3>
+                        <p>Share photos from your stay and browse the family's.</p>
+                    </div>
+                </button>
+                <button class="chapter" onclick="openModal('llcModal')">
+                    <div class="photo" data-img="llc"></div>
+                    <div class="chapter-text">
+                        <h3>LLC business</h3>
+                        <p>Documents, the maintenance log, and a line to the webmaster.</p>
+                        <div class="who">Financials: <span data-role-name="financial manager">the financial manager</span></div>
+                    </div>
+                </button>
             </div>
 
-            <div class="feature-card" onclick="openModal('maintenanceModal')">
-                <div class="feature-icon"><i class="ti ti-tool"></i></div>
-                <h3>Maintenance and To Do's</h3>
-                <p>Repairs, recurring upkeep and appliance records</p>
-            </div>
-
-            <div class="feature-card" onclick="openPhotoUpload()">
-                <div class="feature-icon"><i class="ti ti-camera"></i></div>
-                <h3>Photo upload</h3>
-                <p>Share a photo when a new memory is made at Montreat</p>
-            </div>
-
-            <div class="feature-card" onclick="openViewPhotos()">
-                <div class="feature-icon"><i class="ti ti-photo"></i></div>
-                <h3>View photos</h3>
-                <p>Browse family memories and photos from Montreat</p>
-            </div>
-
-            <div class="feature-card" onclick="openModal('directoryModal')">
-                <div class="feature-icon"><i class="ti ti-users"></i></div>
-                <h3>Family directory</h3>
-                <p>View and update family member information</p>
-            </div>
-
-            <div class="feature-card" onclick="openLLCDocuments()">
-                <div class="feature-icon"><i class="ti ti-file-text"></i></div>
-                <h3>LLC documents</h3>
-                <p>Access official business documents</p>
-            </div>
-
-            <div class="feature-card" onclick="openModal('contactModal')">
-                <div class="feature-icon"><i class="ti ti-mail"></i></div>
-                <h3>Contact admin</h3>
-                <p>Send a message to the administrator</p>
+            <div class="footer-note">
+                <div id="managersLine">Family roles are listed in the directory.</div>
+                <div style="margin-top: 8px;"><button type="button" onclick="openModal('directoryModal')">Open the family directory</button></div>
             </div>
         </div>
     </div>
 
-    <!-- Reservation Modal -->
-    <div class="modal" id="reservationModal">
+    <!-- ====================== Section: Plan my visit ====================== -->
+    <div class="modal" id="planModal">
         <div class="modal-content">
-            <button class="close-btn" onclick="closeModal('reservationModal')"><i class="ti ti-x"></i></button>
-            <h2>Make a reservation</h2>
-            <div class="modal-body">
+            <button class="close-btn" onclick="closeModal('planModal')" aria-label="Close"><i class="ti ti-x"></i></button>
+            <div class="photo section-photo" data-img="plan">
+                <div class="photo-shade"><h2>Plan my visit</h2><p>Pick your dates and let the house know you're coming</p></div>
+            </div>
+            <div class="section-body">
+                <button class="action-row" onclick="openModal('reservationModal')">
+                    <span class="ico"><i class="ti ti-calendar-plus" aria-hidden="true"></i></span>
+                    <span class="txt"><strong>Make a reservation</strong><span>Request your dates. <span data-role-name="calendar manager">The calendar manager</span> reviews each request and adds it to the calendar.</span></span>
+                    <i class="ti ti-chevron-right chev" aria-hidden="true"></i>
+                </button>
+                <button class="action-row" onclick="openModal('calendarModal')">
+                    <span class="ico"><i class="ti ti-calendar-event" aria-hidden="true"></i></span>
+                    <span class="txt"><strong>Family calendar</strong><span>See who's at the house and when.</span></span>
+                    <i class="ti ti-chevron-right chev" aria-hidden="true"></i>
+                </button>
+                <h3 class="group">While you're there</h3>
+                <p class="intro">The house always has a few things that need doing. If you have an hour, a day, or a skill to lend during your stay, let <span data-role-name="maintenance manager">the maintenance manager</span> know. The email opens in your mail app so you can say exactly what you're up for.</p>
+                <button class="action-row" onclick="emailOfferHelp()">
+                    <span class="ico"><i class="ti ti-hammer" aria-hidden="true"></i></span>
+                    <span class="txt"><strong>Offer to help with a project</strong><span>Starts an email to <span data-role-name="maintenance manager">the maintenance manager</span>. Edit it to fit your time and skills.</span></span>
+                    <i class="ti ti-chevron-right chev" aria-hidden="true"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====================== Section: Manage my visit ====================== -->
+    <div class="modal" id="visitModal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal('visitModal')" aria-label="Close"><i class="ti ti-x"></i></button>
+            <div class="photo section-photo" data-img="visit">
+                <div class="photo-shade"><h2>Manage my visit</h2><p>Everything you need from the front door onward</p></div>
+            </div>
+            <div class="section-body">
+                <p class="intro">Check-in and check-out checklists, with the door code and house rules, are coming next. For now, here's how to reach the people who look after the house.</p>
+                <h3 class="group">Something needs attention?</h3>
+                <button class="action-row" onclick="emailReportProblem()">
+                    <span class="ico"><i class="ti ti-tool" aria-hidden="true"></i></span>
+                    <span class="txt"><strong>Report a maintenance need</strong><span>A dripping faucet, a loose board, a light that's out. Goes to <span data-role-name="maintenance manager">the maintenance manager</span>.</span></span>
+                    <i class="ti ti-chevron-right chev" aria-hidden="true"></i>
+                </button>
+                <button class="action-row" onclick="emailHouseManager()">
+                    <span class="ico"><i class="ti ti-home-heart" aria-hidden="true"></i></span>
+                    <span class="txt"><strong>Send a note to the house manager</strong><span>Supplies running low, worn linens, anything about how the house is kept. Goes to <span data-role-name="house manager">the house manager</span>.</span></span>
+                    <i class="ti ti-chevron-right chev" aria-hidden="true"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====================== Section: Memories ====================== -->
+    <div class="modal" id="memoriesModal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal('memoriesModal')" aria-label="Close"><i class="ti ti-x"></i></button>
+            <div class="photo section-photo" data-img="memories">
+                <div class="photo-shade"><h2>Memories</h2><p>What happened at the house stays in the family</p></div>
+            </div>
+            <div class="section-body">
+                <button class="action-row" onclick="openViewPhotos()">
+                    <span class="ico"><i class="ti ti-photo" aria-hidden="true"></i></span>
+                    <span class="txt"><strong>Browse family photos</strong><span>Everything the family has shared, newest first.</span></span>
+                    <i class="ti ti-chevron-right chev" aria-hidden="true"></i>
+                </button>
+                <button class="action-row" onclick="openPhotoUpload()">
+                    <span class="ico"><i class="ti ti-camera" aria-hidden="true"></i></span>
+                    <span class="txt"><strong>Share a photo</strong><span>Add a picture from your stay to the family album.</span></span>
+                    <i class="ti ti-chevron-right chev" aria-hidden="true"></i>
+                </button>
+                <p class="intro" style="margin-top: 18px;">A guest journal, where each family can leave a note about their stay, is coming soon.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====================== Section: LLC business ====================== -->
+    <div class="modal" id="llcModal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal('llcModal')" aria-label="Close"><i class="ti ti-x"></i></button>
+            <div class="photo section-photo" data-img="llc">
+                <div class="photo-shade"><h2>LLC business</h2><p>The paperwork that keeps the house in the family</p></div>
+            </div>
+            <div class="section-body">
+                <button class="action-row" onclick="openLLCDocuments()">
+                    <span class="ico"><i class="ti ti-file-text" aria-hidden="true"></i></span>
+                    <span class="txt"><strong>LLC documents</strong><span>Financials, meeting agendas, and minutes. Financials are kept by <span data-role-name="financial manager">the financial manager</span>.</span></span>
+                    <i class="ti ti-chevron-right chev" aria-hidden="true"></i>
+                </button>
+                <button class="action-row" onclick="openModal('maintenanceModal')">
+                    <span class="ico"><i class="ti ti-clipboard-list" aria-hidden="true"></i></span>
+                    <span class="txt"><strong>Maintenance log</strong><span>Repairs, recurring upkeep, and appliance records.</span></span>
+                    <i class="ti ti-chevron-right chev" aria-hidden="true"></i>
+                </button>
+                <button class="action-row" onclick="openModal('contactModal')">
+                    <span class="ico"><i class="ti ti-mail" aria-hidden="true"></i></span>
+                    <span class="txt"><strong>Contact the webmaster</strong><span>Feedback or ideas for this site. Goes to <span data-role-name="webmaster">the webmaster</span>.</span></span>
+                    <i class="ti ti-chevron-right chev" aria-hidden="true"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====================== Feature: Reservation form ====================== -->
+    <div class="modal" id="reservationModal">
+        <div class="modal-content" style="padding: 0;">
+            <button class="close-btn" onclick="closeModal('reservationModal')" aria-label="Close"><i class="ti ti-x"></i></button>
+            <div class="modal-topbar"><h2>Make a reservation</h2></div>
+            <div class="feature-body" style="display: flex; flex-direction: column;">
                 <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSexq82ADg5c-l7JBg7HT9vfPzqpg2whpQZrjIzZ91r6fV4MFw/viewform?embedded=true"
-                        frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe>
-                <p style="text-align: center; margin-top: 10px; font-size: 0.9em;">
-                    <a href="https://docs.google.com/forms/d/e/1FAIpQLSexq82ADg5c-l7JBg7HT9vfPzqpg2whpQZrjIzZ91r6fV4MFw/viewform" target="_blank" rel="noopener" style="color: var(--sage);">
-                        Trouble seeing the form? Open it in a new tab <i class="ti ti-external-link" style="vertical-align: -2px;"></i>
+                        frameborder="0" marginheight="0" marginwidth="0" style="flex: 1;">Loading…</iframe>
+                <p class="feature-note">
+                    <a href="https://docs.google.com/forms/d/e/1FAIpQLSexq82ADg5c-l7JBg7HT9vfPzqpg2whpQZrjIzZ91r6fV4MFw/viewform" target="_blank" rel="noopener">
+                        Trouble seeing the form? Open it in a new tab <i class="ti ti-external-link" style="vertical-align: -2px;" aria-hidden="true"></i>
                     </a>
                 </p>
             </div>
         </div>
     </div>
 
-    <!-- Directory Modal -->
+    <!-- ====================== Feature: Calendar ====================== -->
+    <div class="modal" id="calendarModal">
+        <div class="modal-content" style="padding: 0;">
+            <button class="close-btn" onclick="closeModal('calendarModal')" aria-label="Close"><i class="ti ti-x"></i></button>
+            <div class="modal-topbar"><h2>Reunion Hill calendar</h2></div>
+            <div class="feature-body">
+                <iframe src="https://calendar.google.com/calendar/embed?src=reunionhill%40gmail.com&ctz=America%2FNew_York"
+                        frameborder="0" marginheight="0" marginwidth="0">Loading calendar...</iframe>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====================== Feature: Family directory ====================== -->
     <div class="modal" id="directoryModal">
-        <div class="modal-content">
-            <button class="close-btn" onclick="closeModal('directoryModal')"><i class="ti ti-x"></i></button>
-            <h2>Family directory</h2>
-            <div class="modal-body">
+        <div class="modal-content" style="padding: 0;">
+            <button class="close-btn" onclick="closeModal('directoryModal')" aria-label="Close"><i class="ti ti-x"></i></button>
+            <div class="modal-topbar"><h2>Family directory</h2></div>
+            <div class="feature-body padded">
                 <div class="family-tabs">
                     <button class="family-tab" onclick="showFamily('jennings')">Jennings</button>
                     <button class="family-tab" onclick="showFamily('almeida')">Almeida</button>
@@ -735,22 +724,19 @@
                     <button class="family-tab" onclick="showFamily('riley')">Riley</button>
                     <button class="family-tab" onclick="showFamily('crawford')">Crawford</button>
                 </div>
-
                 <div class="directory-content" id="directoryContent">
-                    <div style="text-align: center; padding: 40px;">
-                        <div class="feature-icon" style="margin-bottom: 20px;"><i class="ti ti-address-book"></i></div>
-                        <h3 style="color: var(--pine); margin-bottom: 20px; font-weight: 800;">Family directory access</h3>
-                        <p style="color: var(--sage); line-height: 1.6; margin-bottom: 30px;">
-                            Click on any family name above to view their directory information.<br>
-                            Each family's details will open right here in the app.
+                    <div style="text-align: center; padding: 30px 10px;">
+                        <div class="feature-icon"><i class="ti ti-address-book" aria-hidden="true"></i></div>
+                        <h3 style="margin-bottom: 14px; font-size: 1.3em;">Who's who at Reunion Hill</h3>
+                        <p style="color: var(--mute); line-height: 1.6; margin-bottom: 22px;">
+                            Choose a family above to see their listing. The Role column shows who looks after what.
                         </p>
-                        <p style="color: var(--sage); font-size: 0.9em; margin-bottom: 22px;">
+                        <p style="color: var(--mute); font-size: 0.92em; margin-bottom: 18px;">
                             Need to change your information, or add a new family member?
-                            The button below starts an email to the admin with your
-                            current listing already filled in.
+                            The button below starts an email to the admin with your current listing filled in.
                         </p>
-                        <button class="enter-btn" onclick="emailDirectoryUpdate()">
-                            <i class="ti ti-mail-forward" style="font-size: 20px;"></i>
+                        <button class="btn btn-forest" onclick="emailDirectoryUpdate()">
+                            <i class="ti ti-mail-forward" style="font-size: 20px;" aria-hidden="true"></i>
                             Email an update to the admin
                         </button>
                     </div>
@@ -759,25 +745,23 @@
         </div>
     </div>
 
-    <!-- Maintenance Modal -->
+    <!-- ====================== Feature: Maintenance log ====================== -->
     <div class="modal" id="maintenanceModal">
-        <div class="modal-content">
-            <button class="close-btn" onclick="closeModal('maintenanceModal')"><i class="ti ti-x"></i></button>
-            <h2>Maintenance and To Do's</h2>
-            <div class="modal-body">
+        <div class="modal-content" style="padding: 0;">
+            <button class="close-btn" onclick="closeModal('maintenanceModal')" aria-label="Close"><i class="ti ti-x"></i></button>
+            <div class="modal-topbar"><h2>Maintenance log</h2></div>
+            <div class="feature-body padded">
                 <div class="family-tabs">
                     <button class="family-tab" onclick="showMaintenanceTab('repairs')">Repairs &amp; Updates</button>
                     <button class="family-tab" onclick="showMaintenanceTab('recurring')">Recurring Maint</button>
                     <button class="family-tab" onclick="showMaintenanceTab('appliances')">Appliances</button>
                 </div>
-
                 <div class="directory-content" id="maintenanceContent">
-                    <div style="text-align: center; padding: 40px;">
-                        <div class="feature-icon" style="margin-bottom: 20px;"><i class="ti ti-tool"></i></div>
-                        <h3 style="color: var(--pine); margin-bottom: 20px; font-weight: 800;">Maintenance log</h3>
-                        <p style="color: var(--sage); line-height: 1.6; margin-bottom: 30px;">
-                            Click a tab above to view the maintenance records.<br>
-                            Each section opens within the app for easy viewing.
+                    <div style="text-align: center; padding: 30px 10px;">
+                        <div class="feature-icon"><i class="ti ti-tool" aria-hidden="true"></i></div>
+                        <h3 style="margin-bottom: 14px; font-size: 1.3em;">The house's record</h3>
+                        <p style="color: var(--mute); line-height: 1.6;">
+                            Choose a tab above. Repairs and updates, the recurring upkeep schedule, and the appliance inventory each open here.
                         </p>
                     </div>
                 </div>
@@ -785,33 +769,18 @@
         </div>
     </div>
 
-    <!-- Calendar Modal -->
-    <div class="modal" id="calendarModal">
-        <div class="modal-content">
-            <button class="close-btn" onclick="closeModal('calendarModal')"><i class="ti ti-x"></i></button>
-            <h2>Reunion Hill calendar</h2>
-            <div class="modal-body">
-                <iframe src="https://calendar.google.com/calendar/embed?src=reunionhill%40gmail.com&ctz=America%2FNew_York"
-                        frameborder="0" marginheight="0" marginwidth="0">Loading calendar...</iframe>
-            </div>
-        </div>
-    </div>
-
-    <!-- Contact Modal -->
+    <!-- ====================== Feature: Contact the webmaster ====================== -->
     <div class="modal" id="contactModal">
-        <div class="modal-content">
-            <button class="close-btn" onclick="closeModal('contactModal')"><i class="ti ti-x"></i></button>
-            <h2>Contact administrator</h2>
-            <div class="modal-body">
+        <div class="modal-content" style="padding: 0;">
+            <button class="close-btn" onclick="closeModal('contactModal')" aria-label="Close"><i class="ti ti-x"></i></button>
+            <div class="modal-topbar"><h2>Contact the webmaster</h2></div>
+            <div class="feature-body padded">
                 <div class="contact-form">
+                    <p style="color: var(--mute); margin-bottom: 18px; line-height: 1.5;">Ideas, problems, or something that doesn't look right on the site. Your message opens in your mail app addressed to <span data-role-name="webmaster">the webmaster</span>.</p>
                     <form id="contactForm" onsubmit="sendMessage(event)">
                         <div class="form-group">
                             <label for="senderName">Your name</label>
                             <input type="text" id="senderName" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="senderEmail">Your email</label>
-                            <input type="email" id="senderEmail" required>
                         </div>
                         <div class="form-group">
                             <label for="messageSubject">Subject</label>
@@ -819,15 +788,14 @@
                         </div>
                         <div class="form-group">
                             <label for="messageBody">Message</label>
-                            <textarea id="messageBody" required placeholder="Type your message here..."></textarea>
+                            <textarea id="messageBody" required placeholder="What's on your mind?"></textarea>
                         </div>
-                        <button type="submit" class="submit-btn">Send message</button>
+                        <button type="submit" class="btn btn-forest btn-block">Open in my mail app</button>
                     </form>
                 </div>
             </div>
         </div>
     </div>
-
     <script>
         // ============================================================
         // LOGIN: verification happens on Google's servers, not in the
@@ -836,15 +804,17 @@
         // reunionhill@gmail.com. The service confirms the token is
         // genuine, checks the email against the family directory
         // sheet, and answers yes or no. The family list and the
-        // directory sheet ID never appear in this file, so the
-        // directory sheet does not need a public link.
+        // directory sheet ID never appear in this file.
         //
         // To grant someone access, add their email to the directory
-        // sheet - no code changes.
+        // sheet - no code changes. To change who holds a role, edit
+        // the Role column in the directory sheet - no code changes.
+        // To change a photo, replace the file of the same name in the
+        // "Portal images" Drive folder - no code changes.
         // ============================================================
         var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw0u8aFDoSuFFvfmSXcmkeFEbhU9kKo4Io_IUWWC15W-DqPHY9O7zIwFooQ1MGDYSnt/exec';
-        // Maintenance and To Do's tab titles (the data itself
-        // arrives from the service, same as the directory)
+        var ADMIN_EMAIL = 'reunionhill@gmail.com';
+        // Maintenance log tab titles (the data itself arrives from the service)
         var MAINTENANCE_TABS = {
             'repairs': 'Repairs & Updates',
             'recurring': 'Recurring Maint',
@@ -852,10 +822,10 @@
         };
         var CACHE_KEY = 'rh_portal_verified_email';
         var PENDING_EMAIL_KEY = 'rh_portal_pending_email';
+        var IMAGES_CACHE_KEY = 'rh_portal_images';
 
         // ============================================================
-        // FIREBASE CONFIG - paste the values from your Firebase project
-        // here (Project settings > General > Your apps > SDK setup).
+        // FIREBASE CONFIG (public by design; locked to the family's domains)
         // ============================================================
         var FIREBASE_CONFIG = {
             apiKey: 'AIzaSyBYNDuj8FdC6eYs03DM6goLwmQYUNCn5k0',
@@ -872,6 +842,7 @@
             firebase.initializeApp(FIREBASE_CONFIG);
             auth = firebase.auth();
         }
+
         // Send an action to the Apps Script service along with the
         // visitor's current sign-in token. The body is sent as plain
         // text (not JSON headers) on purpose - Apps Script only
@@ -908,10 +879,10 @@
         function showPortal(email) {
             document.getElementById('authChecking').style.display = 'none';
             document.getElementById('authSection').style.display = 'none';
-            document.getElementById('mainContent').style.display = 'grid';
-            var userInfo = document.getElementById('userInfo');
+            document.getElementById('mainContent').style.display = 'block';
             document.getElementById('signedInEmail').textContent = email;
-            userInfo.style.display = 'flex';
+            document.getElementById('userInfo').style.display = 'flex';
+            loadRoles();
         }
 
         function showLogin() {
@@ -947,7 +918,6 @@
             try {
                 var provider = new firebase.auth.GoogleAuthProvider();
                 await auth.signInWithPopup(provider);
-                // onAuthStateChanged handles the rest
             } catch (e) {
                 if (e && (e.code === 'auth/popup-blocked' || e.code === 'auth/popup-closed-by-user' ||
                           e.code === 'auth/cancelled-popup-request' || e.code === 'auth/operation-not-supported-in-this-environment')) {
@@ -980,12 +950,12 @@
                     handleCodeInApp: true
                 });
                 try { localStorage.setItem(PENDING_EMAIL_KEY, email); } catch (e) { /* ignore */ }
-                showAuthSuccess('A sign-in link is on its way to <strong>' + email +
+                showAuthSuccess('A sign-in link is on its way to <strong>' + escapeHtml(email) +
                     '</strong>. Open that email on this device and click the link. ' +
                     '(Check your spam folder if it doesn\'t arrive in a minute or two.)');
             } catch (e) {
                 var detail = (e && (e.code || e.message)) ? '<br><span style="font-size: 0.85em; opacity: 0.8;">Technical detail: ' +
-                    String(e.code || e.message).replace(/</g, '&lt;') + '</span>' : '';
+                    escapeHtml(String(e.code || e.message)) + '</span>' : '';
                 showAuthError('Couldn\'t send the sign-in link. Please try again, or use the Google button above.' + detail);
             }
             btn.disabled = false;
@@ -1004,7 +974,6 @@
             try {
                 await auth.signInWithEmailLink(email.trim().toLowerCase(), window.location.href);
                 try { localStorage.removeItem(PENDING_EMAIL_KEY); } catch (e) { /* ignore */ }
-                // Clean the long sign-in code out of the address bar
                 window.history.replaceState(null, '', window.location.pathname);
             } catch (e) {
                 showAuthError('That sign-in link is invalid or has expired. Please request a new one below.');
@@ -1015,27 +984,24 @@
             DIRECTORY_CACHE = null;
             MAINT_CACHE = null;
             LLC_TREE = null;
+            ROLES = null;
             document.getElementById('loginEmail').value = '';
             document.getElementById('loginError').style.display = 'none';
             document.getElementById('loginSuccess').style.display = 'none';
             if (auth) {
-                auth.signOut(); // onAuthStateChanged shows the login screen
+                auth.signOut();
             } else {
                 showLogin();
             }
         }
 
         // --- The gatekeeper: runs on every page load and sign-in ---
-        // The device remembers the last email the service approved, so
-        // returning visitors open the portal instantly (no network).
         function getVerifiedEmail() {
             try { return localStorage.getItem(CACHE_KEY) || ''; } catch (e) { return ''; }
         }
-
         function setVerifiedEmail(email) {
             try { localStorage.setItem(CACHE_KEY, email); } catch (e) { /* ignore */ }
         }
-
         function clearVerifiedEmail() {
             try { localStorage.removeItem(CACHE_KEY); } catch (e) { /* ignore */ }
         }
@@ -1049,7 +1015,6 @@
                 await auth.signOut();
                 showAuthError(NOT_ON_LIST_MSG);
             }
-            // 'unreachable' keeps them signed in on the remembered approval.
         }
 
         var authResolved = false;
@@ -1063,15 +1028,12 @@
                 }
                 var email = user.email.toLowerCase();
 
-                // Fast path: this person was approved on this device before -
-                // open the portal right away and double-check in the background.
                 if (getVerifiedEmail() === email) {
                     showPortal(email);
                     verifyInBackground(email);
                     return;
                 }
 
-                // Full check (first visit on this device, or cache cleared)
                 var verdict = await checkWithService();
                 if (verdict === 'yes') {
                     setVerifiedEmail(email);
@@ -1080,13 +1042,10 @@
                     await auth.signOut();
                     showAuthError(NOT_ON_LIST_MSG);
                 } else {
-                    // Service unreachable - nothing private can load anyway,
-                    // so ask them to try again rather than guessing.
                     await auth.signOut();
                     showAuthError('Couldn\'t reach the family list just now. Please try again in a minute.');
                 }
             });
-            // Safety net: if Firebase hasn't answered in 8 seconds, show the login form.
             setTimeout(function () {
                 if (!authResolved) showLogin();
             }, 8000);
@@ -1098,33 +1057,208 @@
         }
 
         // ============================================================
-        // PORTAL FEATURES
+        // PHOTOS: the "Portal images" Drive folder holds one file per
+        // slot (login, home, plan, visit, memories, llc). The service
+        // reports which file currently sits behind each name; the page
+        // loads it straight from Google. No sign-in needed for this
+        // one request - the folder is public-by-link, like the photos
+        // folder. The last known set is remembered on the device so
+        // photos appear instantly on the next visit.
         // ============================================================
+        function imageUrl(fileId) {
+            return 'https://drive.google.com/thumbnail?id=' + encodeURIComponent(fileId) + '&sz=w1600';
+        }
+
+        function applyImages(map) {
+            if (!map) return;
+            Object.keys(map).forEach(function (name) {
+                var id = map[name];
+                if (!id) return;
+                var url = imageUrl(id);
+                var img = new Image();
+                img.onload = function () {
+                    var els = document.querySelectorAll('.photo[data-img="' + name + '"]');
+                    for (var i = 0; i < els.length; i++) {
+                        els[i].style.backgroundImage = 'url("' + url + '")';
+                    }
+                };
+                img.src = url;
+            });
+        }
+
+        async function loadImages() {
+            try {
+                var cached = JSON.parse(localStorage.getItem(IMAGES_CACHE_KEY) || 'null');
+                if (cached && cached.images) applyImages(cached.images);
+            } catch (e) { /* ignore */ }
+            try {
+                var resp = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'images' }) });
+                if (!resp.ok) return;
+                var res = await resp.json();
+                if (res && res.ok && res.images) {
+                    applyImages(res.images);
+                    try { localStorage.setItem(IMAGES_CACHE_KEY, JSON.stringify({ images: res.images, at: Date.now() })); } catch (e) { /* ignore */ }
+                }
+            } catch (e) {
+                console.warn('Portal images not available right now:', e);
+            }
+        }
+        loadImages();
+
+        // ============================================================
+        // ROLES: who looks after what, read from the Role column of the
+        // directory sheet. Names and email addresses come from the
+        // sheet, so they're spelled the way the family spelled them.
+        // ============================================================
+        var ROLES = null; // { 'calendar manager': { role, name, email, family }, ... }
+
+        function roleKey(text) {
+            return String(text || '').trim().toLowerCase().replace(/\s+/g, ' ');
+        }
+
+        function getRole(title) {
+            return (ROLES && ROLES[roleKey(title)]) || null;
+        }
+
+        function roleEmail(title) {
+            var r = getRole(title);
+            return (r && r.email) ? r.email : ADMIN_EMAIL;
+        }
+
+        function roleName(title) {
+            var r = getRole(title);
+            return (r && r.name) ? r.name : ('the ' + roleKey(title));
+        }
+
+        function applyRoles() {
+            var els = document.querySelectorAll('[data-role-name]');
+            for (var i = 0; i < els.length; i++) {
+                var r = getRole(els[i].getAttribute('data-role-name'));
+                if (r && r.name) els[i].textContent = r.name;
+            }
+            var line = document.getElementById('managersLine');
+            if (line && ROLES) {
+                var parts = [];
+                Object.keys(ROLES).forEach(function (k) {
+                    var r = ROLES[k];
+                    if (r.name) parts.push(escapeHtml(r.role) + ': <strong>' + escapeHtml(r.name) + '</strong>');
+                });
+                if (parts.length) line.innerHTML = parts.join(' &nbsp;·&nbsp; ');
+            }
+        }
+
+        async function loadRoles() {
+            if (ROLES) { applyRoles(); return; }
+            try {
+                var res = await callService('roles');
+                if (res && res.ok && res.roles) {
+                    ROLES = {};
+                    res.roles.forEach(function (r) {
+                        var k = roleKey(r.role);
+                        if (k && !ROLES[k]) ROLES[k] = r;
+                    });
+                    applyRoles();
+                }
+            } catch (e) {
+                console.warn('Roles not available right now:', e);
+            }
+        }
+
+        // ============================================================
+        // PRE-FILLED EMAILS: each opens in the person's own mail app so
+        // they can edit before sending. Addresses come from the Role
+        // column; if a role isn't filled in, the admin address is used.
+        // ============================================================
+        function senderName() {
+            var u = auth && auth.currentUser;
+            if (u && u.displayName) return u.displayName;
+            return (u && u.email) ? u.email : 'a family member';
+        }
+
+        function mailto(to, subject, body) {
+            window.location.href = 'mailto:' + to +
+                '?subject=' + encodeURIComponent(subject) +
+                '&body=' + encodeURIComponent(body);
+        }
+
+        function emailOfferHelp() {
+            var body = 'Hi ' + roleName('maintenance manager').split(' ')[0] + ',\n\n' +
+                'I\'m planning a visit to Reunion Hill and would like to help with a project while I\'m there.\n\n' +
+                'When I\'ll be at the house: \n' +
+                'How much time I can give: \n' +
+                'What I\'m comfortable doing (tools, skills, or "anything simple"): \n\n' +
+                'Let me know what would be most useful.\n\n' +
+                'Thanks,\n' + senderName();
+            mailto(roleEmail('maintenance manager'), 'Offer to help at Reunion Hill', body);
+        }
+
+        function emailReportProblem() {
+            var body = 'Hi ' + roleName('maintenance manager').split(' ')[0] + ',\n\n' +
+                'I noticed something at the house that needs attention.\n\n' +
+                'What I found: \n' +
+                'Where in the house: \n' +
+                'How urgent it seems (fine for now / soon / needs attention right away): \n\n' +
+                'Thanks,\n' + senderName();
+            mailto(roleEmail('maintenance manager'), 'Maintenance need at Reunion Hill', body);
+        }
+
+        function emailHouseManager() {
+            var body = 'Hi ' + roleName('house manager').split(' ')[0] + ',\n\n' +
+                'A quick note from my stay at Reunion Hill:\n\n\n' +
+                'Thanks,\n' + senderName();
+            mailto(roleEmail('house manager'), 'A note about the house', body);
+        }
+
+        function sendMessage(event) {
+            try {
+                event.preventDefault();
+                var name = document.getElementById('senderName').value;
+                var subject = document.getElementById('messageSubject').value;
+                var message = document.getElementById('messageBody').value;
+                var email = (auth && auth.currentUser && auth.currentUser.email) ? auth.currentUser.email : '';
+                mailto(roleEmail('webmaster'), subject, 'From: ' + name + (email ? ' (' + email + ')' : '') + '\n\n' + message);
+                document.getElementById('contactForm').reset();
+                closeModal('contactModal');
+            } catch (error) {
+                alert('Error sending message. Please try again.');
+            }
+        }
+
+        // ============================================================
+        // SECTIONS AND FEATURE SCREENS
+        // ============================================================
+        function anyModalOpen() {
+            var modals = document.querySelectorAll('.modal');
+            for (var i = 0; i < modals.length; i++) {
+                if (modals[i].style.display === 'block') return true;
+            }
+            return false;
+        }
+
         function openModal(modalId) {
             try {
                 var modal = document.getElementById(modalId);
                 if (modal) {
                     modal.style.display = 'block';
+                    modal.querySelector('.modal-content').scrollTop = 0;
                     document.body.style.overflow = 'hidden';
                 }
             } catch (error) {
-                alert('Error opening modal. Please refresh the page.');
+                alert('Error opening this screen. Please refresh the page.');
             }
         }
 
         function closeModal(modalId) {
             try {
                 var modal = document.getElementById(modalId);
-                if (modal) {
-                    modal.style.display = 'none';
-                    document.body.style.overflow = 'auto';
-                }
+                if (modal) modal.style.display = 'none';
+                if (!anyModalOpen()) document.body.style.overflow = 'auto';
             } catch (error) {
-                alert('Error closing modal. Please refresh the page.');
+                document.body.style.overflow = 'auto';
             }
         }
 
-        // Data for the private tiles arrives from the Apps Script
+        // Data for the private tools arrives from the Apps Script
         // service, which reads the Restricted files on Google's
         // servers. Each dataset is fetched once per visit, then reused.
         var DIRECTORY_CACHE = null;
@@ -1141,15 +1275,15 @@
                 return row.some(function (cell) { return String(cell).trim() !== ''; });
             });
             if (cleaned.length === 0) {
-                return '<p style="padding: 20px; color: var(--sage);">Nothing here yet.</p>';
+                return '<p style="padding: 20px; color: var(--mute);">Nothing here yet.</p>';
             }
-            var html = '<div style="overflow-x: auto;"><table style="border-collapse: collapse; width: 100%; font-size: 0.95em; background: white;">';
+            var html = '<div style="overflow-x: auto;"><table style="border-collapse: collapse; width: 100%; font-size: 0.95em; background: var(--paper);">';
             cleaned.forEach(function (row, i) {
                 html += '<tr>';
                 row.forEach(function (cell) {
                     var tag = (i === 0) ? 'th' : 'td';
-                    html += '<' + tag + ' style="border: 1px solid var(--card-border); padding: 9px 12px; text-align: left;' +
-                        (i === 0 ? ' background: var(--tint); color: var(--pine);' : '') + '">' +
+                    html += '<' + tag + ' style="border: 1px solid var(--line); padding: 9px 12px; text-align: left; vertical-align: top;' +
+                        (i === 0 ? ' background: var(--cream); color: var(--wood);' : '') + '">' +
                         escapeHtml(cell) + '</' + tag + '>';
                 });
                 html += '</tr>';
@@ -1164,11 +1298,11 @@
             m.id = 'sheetModal';
             m.style.display = 'block';
             m.setAttribute('data-return-to', returnTo);
-            m.innerHTML = '<div class="modal-content" style="padding: 0; margin: 0;">' +
-                '<button class="close-btn" onclick="closeSheetModal()" style="z-index: 1003;"><i class="ti ti-x"></i></button>' +
+            m.innerHTML = '<div class="modal-content" style="padding: 0;">' +
+                '<button class="close-btn" onclick="closeSheetModal()" style="z-index: 1003;" aria-label="Close"><i class="ti ti-x"></i></button>' +
                 '<div class="modal-topbar"><h2>' + escapeHtml(title) + '</h2></div>' +
-                '<div id="tableViewerBody" style="position: absolute; top: 60px; left: 0; width: 100%; height: calc(100vh - 60px); overflow: auto; background: var(--mint); padding: 16px;">' +
-                '<div style="text-align: center; padding: 60px 20px; color: var(--sage); font-weight: 700;">' +
+                '<div id="tableViewerBody" class="feature-body padded">' +
+                '<div style="text-align: center; padding: 60px 20px; color: var(--mute); font-weight: 700;">' +
                 '<div class="spinner"></div>Loading...</div>' +
                 '</div></div>';
             document.body.appendChild(m);
@@ -1180,7 +1314,7 @@
             if (body) body.innerHTML = html;
         }
 
-        var VIEWER_ERROR_HTML = '<div style="text-align: center; padding: 60px 20px; color: #A63A2B;">' +
+        var VIEWER_ERROR_HTML = '<div style="text-align: center; padding: 60px 20px; color: #7A2C21;">' +
             'Couldn\'t load this right now. Please close this and try again.</div>';
 
         async function showSheetTab(kind, matchName, title, returnTo) {
@@ -1207,7 +1341,7 @@
         }
 
         function showFamily(familyName) {
-            var title = familyName.charAt(0).toUpperCase() + familyName.slice(1) + ' family directory';
+            var title = familyName.charAt(0).toUpperCase() + familyName.slice(1) + ' family';
             showSheetTab('directory', familyName, title, 'directoryModal');
         }
 
@@ -1218,8 +1352,7 @@
 
         // Builds an email to the admin pre-filled with the signed-in
         // person's current directory listing (found by matching their
-        // sign-in email), so update requests arrive with everything
-        // needed to make the change.
+        // sign-in email).
         async function emailDirectoryUpdate() {
             var email = (auth && auth.currentUser && auth.currentUser.email)
                 ? auth.currentUser.email.toLowerCase() : '';
@@ -1262,9 +1395,7 @@
                 'TO ADD A NEW FAMILY MEMBER (a new baby, a spouse, etc.) - ' +
                 'here are their details (name, family, birthday, and any ' +
                 'contact info to list):\n\n\nThank you!';
-            window.location.href = 'mailto:reunionhill@gmail.com' +
-                '?subject=' + encodeURIComponent('Family directory update request') +
-                '&body=' + encodeURIComponent(body);
+            mailto(ADMIN_EMAIL, 'Family directory update request', body);
         }
 
         function closeSheetModal() {
@@ -1275,7 +1406,6 @@
                     returnTo = sheetModal.getAttribute('data-return-to') || returnTo;
                     sheetModal.remove();
                 }
-                document.body.style.overflow = 'auto';
                 openModal(returnTo);
             } catch (error) {
                 document.body.style.overflow = 'auto';
@@ -1283,7 +1413,7 @@
         }
 
         // ---- LLC documents: in-app folder browser and viewer ----
-        var LLC_PATH = []; // which subfolders are open, from the top
+        var LLC_PATH = [];
 
         function currentLlcNode() {
             var node = LLC_TREE;
@@ -1318,14 +1448,14 @@
         function openLlcBrowser() {
             var m = document.createElement('div');
             m.className = 'modal';
-            m.id = 'llcModal';
+            m.id = 'llcDocsModal';
             m.style.display = 'block';
-            m.innerHTML = '<div class="modal-content" style="padding: 0; margin: 0;">' +
-                '<button class="close-btn" onclick="closeLlcBrowser()" style="z-index: 1003;"><i class="ti ti-x"></i></button>' +
-                '<button class="close-btn" id="llcBackBtn" onclick="llcGoUp()" style="z-index: 1003; right: auto; left: 15px; display: none;" title="Back"><i class="ti ti-arrow-left"></i></button>' +
-                '<div class="modal-topbar"><h2 id="llcTitle" style="padding: 0 70px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">LLC business documents</h2></div>' +
-                '<div id="llcBrowserBody" style="position: absolute; top: 60px; left: 0; width: 100%; height: calc(100vh - 60px); overflow: auto; background: var(--mint); padding: 16px;">' +
-                '<div style="text-align: center; padding: 60px 20px; color: var(--sage); font-weight: 700;">' +
+            m.innerHTML = '<div class="modal-content" style="padding: 0;">' +
+                '<button class="close-btn" onclick="closeLlcBrowser()" style="z-index: 1003;" aria-label="Close"><i class="ti ti-x"></i></button>' +
+                '<button class="close-btn" id="llcBackBtn" onclick="llcGoUp()" style="z-index: 1003; right: auto; left: 14px; display: none;" aria-label="Back"><i class="ti ti-arrow-left"></i></button>' +
+                '<div class="modal-topbar"><h2 id="llcTitle">LLC documents</h2></div>' +
+                '<div id="llcBrowserBody" class="feature-body padded">' +
+                '<div style="text-align: center; padding: 60px 20px; color: var(--mute); font-weight: 700;">' +
                 '<div class="spinner"></div>Loading documents...</div>' +
                 '</div></div>';
             document.body.appendChild(m);
@@ -1335,26 +1465,26 @@
         function renderLlcBrowser() {
             var node = currentLlcNode();
             var titleEl = document.getElementById('llcTitle');
-            if (titleEl) titleEl.textContent = (LLC_PATH.length === 0) ? 'LLC business documents' : node.name;
+            if (titleEl) titleEl.textContent = (LLC_PATH.length === 0) ? 'LLC documents' : node.name;
             var back = document.getElementById('llcBackBtn');
             if (back) back.style.display = (LLC_PATH.length === 0) ? 'none' : 'flex';
 
-            var html = '<div style="max-width: 700px; margin: 0 auto;">';
+            var html = '<div class="card-list">';
             if (node.folders.length === 0 && node.files.length === 0) {
-                html += '<p style="text-align: center; color: var(--sage); padding: 40px; font-weight: 700;">This folder is empty.</p>';
+                html += '<p style="text-align: center; color: var(--mute); padding: 40px; font-weight: 700;">This folder is empty.</p>';
             }
             node.folders.forEach(function (sub, i) {
-                html += '<div class="feature-card" style="text-align: left; padding: 16px 20px; margin-bottom: 10px; display: flex; align-items: center; gap: 14px;" onclick="llcOpenFolder(' + i + ')">' +
-                    '<i class="ti ti-folder" style="font-size: 24px; color: var(--teal); flex-shrink: 0;"></i>' +
-                    '<span style="font-weight: 700; color: var(--pine);">' + escapeHtml(sub.name) + '</span>' +
-                    '<i class="ti ti-chevron-right" style="margin-left: auto; color: var(--sage); flex-shrink: 0;"></i>' +
+                html += '<div class="list-card" onclick="llcOpenFolder(' + i + ')">' +
+                    '<i class="ti ti-folder" style="font-size: 24px; color: var(--gold); flex-shrink: 0;" aria-hidden="true"></i>' +
+                    '<span style="font-weight: 700;">' + escapeHtml(sub.name) + '</span>' +
+                    '<i class="ti ti-chevron-right" style="margin-left: auto; color: var(--mute); flex-shrink: 0;" aria-hidden="true"></i>' +
                     '</div>';
             });
             node.files.forEach(function (f, i) {
-                html += '<div class="feature-card" style="text-align: left; padding: 16px 20px; margin-bottom: 10px; display: flex; align-items: center; gap: 14px;" onclick="llcOpenFile(' + i + ')">' +
-                    '<i class="ti ti-file-text" style="font-size: 24px; color: var(--teal); flex-shrink: 0;"></i>' +
-                    '<span style="font-weight: 700; color: var(--pine); word-break: break-word;">' + escapeHtml(f.name) + '</span>' +
-                    '<span style="margin-left: auto; color: var(--sage); font-size: 0.85em; white-space: nowrap; flex-shrink: 0;">' + formatSize(f.size) + '</span>' +
+                html += '<div class="list-card" onclick="llcOpenFile(' + i + ')">' +
+                    '<i class="ti ti-file-text" style="font-size: 24px; color: var(--forest); flex-shrink: 0;" aria-hidden="true"></i>' +
+                    '<span style="font-weight: 700; word-break: break-word;">' + escapeHtml(f.name) + '</span>' +
+                    '<span style="margin-left: auto; color: var(--mute); font-size: 0.85em; white-space: nowrap; flex-shrink: 0;">' + formatSize(f.size) + '</span>' +
                     '</div>';
             });
             html += '</div>';
@@ -1373,9 +1503,9 @@
         }
 
         function closeLlcBrowser() {
-            var m = document.getElementById('llcModal');
+            var m = document.getElementById('llcDocsModal');
             if (m) m.remove();
-            document.body.style.overflow = 'auto';
+            if (!anyModalOpen()) document.body.style.overflow = 'auto';
         }
 
         // ---- Single-document viewer (sits on top of the browser) ----
@@ -1402,12 +1532,12 @@
                 var body = document.getElementById('llcFileBody');
                 if (!body) return;
                 if (mime === 'application/pdf' || mime.indexOf('image/') === 0) {
-                    body.innerHTML = '<iframe src="' + LLC_FILE_URL + '" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; border-radius: 0; background: white;"></iframe>';
+                    body.innerHTML = '<iframe src="' + LLC_FILE_URL + '" style="width: 100%; height: 100%; border: none; background: white;"></iframe>';
                 } else {
                     body.innerHTML = '<div style="text-align: center; padding: 60px 20px;">' +
-                        '<p style="color: var(--sage); font-weight: 700; margin-bottom: 24px;">This type of document opens outside the viewer.</p>' +
-                        '<a class="enter-btn" href="' + LLC_FILE_URL + '" download="' + escapeHtml(res.file.name) + '" style="text-decoration: none;">' +
-                        '<i class="ti ti-download" style="font-size: 20px;"></i>Download ' + escapeHtml(res.file.name) + '</a></div>';
+                        '<p style="color: var(--mute); font-weight: 700; margin-bottom: 24px;">This type of document opens outside the viewer.</p>' +
+                        '<a class="btn btn-forest" href="' + LLC_FILE_URL + '" download="' + escapeHtml(res.file.name) + '">' +
+                        '<i class="ti ti-download" style="font-size: 20px;" aria-hidden="true"></i>Download ' + escapeHtml(res.file.name) + '</a></div>';
                 }
             } catch (error) {
                 console.error('Error opening document:', error);
@@ -1421,12 +1551,12 @@
             m.className = 'modal';
             m.id = 'llcFileModal';
             m.style.display = 'block';
-            m.innerHTML = '<div class="modal-content" style="padding: 0; margin: 0;">' +
-                '<button class="close-btn" onclick="closeLlcFileViewer()" style="z-index: 1003;"><i class="ti ti-x"></i></button>' +
-                '<a class="close-btn" id="llcDownloadBtn" style="z-index: 1003; right: 90px; display: none; text-decoration: none;" title="Download"><i class="ti ti-download"></i></a>' +
-                '<div class="modal-topbar"><h2 style="padding: 0 140px 0 20px; font-size: 1.05em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">' + escapeHtml(name) + '</h2></div>' +
-                '<div id="llcFileBody" style="position: absolute; top: 60px; left: 0; width: 100%; height: calc(100vh - 60px); overflow: auto; background: var(--mint);">' +
-                '<div style="text-align: center; padding: 60px 20px; color: var(--sage); font-weight: 700;">' +
+            m.innerHTML = '<div class="modal-content" style="padding: 0;">' +
+                '<button class="close-btn" onclick="closeLlcFileViewer()" style="z-index: 1003;" aria-label="Close"><i class="ti ti-x"></i></button>' +
+                '<a class="close-btn" id="llcDownloadBtn" style="z-index: 1003; right: 66px; display: none; text-decoration: none;" aria-label="Download"><i class="ti ti-download"></i></a>' +
+                '<div class="modal-topbar"><h2 style="padding: 0 120px 0 16px; font-size: 1.05em;">' + escapeHtml(name) + '</h2></div>' +
+                '<div id="llcFileBody" class="feature-body">' +
+                '<div style="text-align: center; padding: 60px 20px; color: var(--mute); font-weight: 700;">' +
                 '<div class="spinner"></div>Opening document...</div>' +
                 '</div></div>';
             document.body.appendChild(m);
@@ -1441,57 +1571,26 @@
             }
         }
 
-        function sendMessage(event) {
-            try {
-                event.preventDefault();
-
-                var name = document.getElementById('senderName').value;
-                var email = document.getElementById('senderEmail').value;
-                var subject = document.getElementById('messageSubject').value;
-                var message = document.getElementById('messageBody').value;
-
-                var mailtoLink = 'mailto:reunionhill@gmail.com?subject=' + encodeURIComponent(subject) +
-                    '&body=' + encodeURIComponent('From: ' + name + ' (' + email + ')\n\n' + message);
-                window.location.href = mailtoLink;
-
-                document.getElementById('contactForm').reset();
-                closeModal('contactModal');
-            } catch (error) {
-                alert('Error sending message. Please try again.');
-            }
-        }
-
+        // ---- Photos ----
         function openPhotoUpload() {
             try {
                 var photoModal = document.createElement('div');
                 photoModal.className = 'modal';
                 photoModal.id = 'photoModal';
                 photoModal.style.display = 'block';
-
-                photoModal.innerHTML = '<div class="modal-content">' +
-                    '<button class="close-btn" onclick="closePhotoModal()"><i class="ti ti-x"></i></button>' +
-                    '<h2>Photo upload</h2>' +
-                    '<div class="modal-body">' +
-                    '<div style="text-align: center; padding: 40px 20px; background: white; border: 1px solid var(--card-border); border-radius: 16px; max-width: 500px; margin: 0 auto;">' +
-                    '<div class="feature-icon" style="margin-bottom: 20px;"><i class="ti ti-camera"></i></div>' +
-                    '<h3 style="color: var(--pine); margin-bottom: 20px; font-weight: 800;">Share your Montreat memories</h3>' +
-                    '<p style="color: var(--sage); line-height: 1.6; margin-bottom: 30px; font-size: 1.05em;">' +
-                    'Share a photo when a new memory is made at Montreat.' +
+                photoModal.innerHTML = '<div class="modal-content" style="padding: 0;">' +
+                    '<button class="close-btn" onclick="closePhotoModal()" aria-label="Close"><i class="ti ti-x"></i></button>' +
+                    '<div class="modal-topbar"><h2>Share a photo</h2></div>' +
+                    '<div class="feature-body padded">' +
+                    '<div style="text-align: center; padding: 34px 20px; background: var(--paper); border: 1px solid var(--line); border-radius: 16px; max-width: 480px; margin: 20px auto 0;">' +
+                    '<div class="feature-icon"><i class="ti ti-camera" aria-hidden="true"></i></div>' +
+                    '<h3 style="margin-bottom: 12px; font-size: 1.35em;">Add to the family album</h3>' +
+                    '<p style="color: var(--mute); line-height: 1.6; margin-bottom: 26px;">' +
+                    'The upload form opens in a new tab (Google needs that for photos). Close the tab when you\'re done to come back here.' +
                     '</p>' +
-                    '<p style="color: var(--sage); margin-bottom: 30px; font-size: 0.95em;">' +
-                    'Click the button below to open our photo upload form. After uploading your photo, you can return here by closing that tab.' +
-                    '</p>' +
-                    '<button onclick="openPhotoForm()" class="enter-btn" style="margin-bottom: 20px;">' +
-                    'Open photo upload form' +
-                    '</button>' +
-                    '<br>' +
-                    '<button onclick="closePhotoModal()" class="signout-btn">' +
-                    'Cancel' +
-                    '</button>' +
-                    '</div>' +
-                    '</div>' +
-                    '</div>';
-
+                    '<button onclick="openPhotoForm()" class="btn btn-forest" style="margin-bottom: 14px;">Open the upload form</button>' +
+                    '<br><button onclick="closePhotoModal()" class="signout-btn">Cancel</button>' +
+                    '</div></div></div>';
                 document.body.appendChild(photoModal);
                 document.body.style.overflow = 'hidden';
             } catch (error) {
@@ -1507,10 +1606,8 @@
         function closePhotoModal() {
             try {
                 var photoModal = document.getElementById('photoModal');
-                if (photoModal) {
-                    photoModal.remove();
-                }
-                document.body.style.overflow = 'auto';
+                if (photoModal) photoModal.remove();
+                if (!anyModalOpen()) document.body.style.overflow = 'auto';
             } catch (error) {
                 document.body.style.overflow = 'auto';
             }
@@ -1522,22 +1619,13 @@
                 viewPhotosModal.className = 'modal';
                 viewPhotosModal.id = 'viewPhotosModal';
                 viewPhotosModal.style.display = 'block';
-
                 var PHOTOS_FOLDER_ID = '1AVMRyaWUk74A-XAdjHa5CU686ys3j-D7QRdxA9Gz6bKaS8aXGjkdgWdOa8IpDnWmKNPnZy6p';
                 var embedUrl = 'https://drive.google.com/embeddedfolderview?id=' + PHOTOS_FOLDER_ID + '#grid';
-
-                viewPhotosModal.innerHTML = '<div class="modal-content" style="padding: 0; margin: 0;">' +
-                    '<button class="close-btn" onclick="closeViewPhotosModal()" style="z-index: 1003;"><i class="ti ti-x"></i></button>' +
-                    '<div class="modal-topbar">' +
-                    '<h2>Family photos</h2>' +
-                    '</div>' +
-                    '<iframe src="' + embedUrl + '" ' +
-                    'style="position: absolute; top: 60px; left: 0; width: 100%; height: calc(100vh - 60px); border: none; margin: 0; padding: 0; border-radius: 0;" ' +
-                    'frameborder="0" marginheight="0" marginwidth="0">' +
-                    'Loading family photos...' +
-                    '</iframe>' +
+                viewPhotosModal.innerHTML = '<div class="modal-content" style="padding: 0;">' +
+                    '<button class="close-btn" onclick="closeViewPhotosModal()" style="z-index: 1003;" aria-label="Close"><i class="ti ti-x"></i></button>' +
+                    '<div class="modal-topbar"><h2>Family photos</h2></div>' +
+                    '<div class="feature-body"><iframe src="' + embedUrl + '" frameborder="0" marginheight="0" marginwidth="0">Loading family photos...</iframe></div>' +
                     '</div>';
-
                 document.body.appendChild(viewPhotosModal);
                 document.body.style.overflow = 'hidden';
             } catch (error) {
@@ -1548,25 +1636,24 @@
         function closeViewPhotosModal() {
             try {
                 var viewPhotosModal = document.getElementById('viewPhotosModal');
-                if (viewPhotosModal) {
-                    viewPhotosModal.remove();
-                }
-                document.body.style.overflow = 'auto';
+                if (viewPhotosModal) viewPhotosModal.remove();
+                if (!anyModalOpen()) document.body.style.overflow = 'auto';
             } catch (error) {
                 document.body.style.overflow = 'auto';
             }
         }
 
-        window.onclick = function(event) {
+        // Tapping the dim backdrop closes the topmost screen
+        window.onclick = function (event) {
             try {
                 if (event.target.classList && event.target.classList.contains('modal')) {
                     event.target.style.display = 'none';
-                    document.body.style.overflow = 'auto';
+                    if (!anyModalOpen()) document.body.style.overflow = 'auto';
                 }
             } catch (error) {
                 // Ignore errors here
             }
-        }
+        };
     </script>
 </body>
 </html>
