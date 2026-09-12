@@ -26,6 +26,7 @@
             --line: #DCCFBA;
             --serif: 'Fraunces', Georgia, 'Times New Roman', serif;
             --sans: 'Nunito', 'Segoe UI', Tahoma, sans-serif;
+            --body-size: 17px;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -205,7 +206,7 @@
             margin-bottom: 22px;
         }
         .hero .photo-shade h2 { color: var(--paper); font-size: 1.9em; line-height: 1.1; }
-        .hero .photo-shade p { color: #EADFCB; font-size: 0.95em; margin-top: 4px; }
+        .hero .photo-shade p { color: #EADFCB; font-size: var(--body-size); margin-top: 4px; }
 
         .journal-card {
             display: none; /* shown once the guest journal exists (phase three) */
@@ -237,8 +238,8 @@
         .chapter .photo { width: 132px; flex-shrink: 0; min-height: 112px; }
         .chapter-text { padding: 16px 18px; flex: 1; min-width: 0; }
         .chapter-text h3 { font-size: 1.35em; line-height: 1.15; margin-bottom: 5px; }
-        .chapter-text p { color: var(--mute); font-size: 1.02em; line-height: 1.5; }
-        .chapter-text .who { color: var(--wood); font-size: 0.95em; margin-top: 7px; }
+        .chapter-text p { color: var(--ink); font-size: var(--body-size); line-height: 1.5; }
+        .chapter-text .who { color: var(--wood); font-size: var(--body-size); margin-top: 7px; }
 
         .footer-note {
             margin-top: 26px;
@@ -294,7 +295,7 @@
             align-items: center;
             justify-content: center;
             color: var(--ink);
-            z-index: 1002;
+            z-index: 1003;
         }
         .close-btn:hover { border-color: var(--wood-light); }
 
@@ -308,7 +309,7 @@
             margin: 0 auto;
             padding: 18px 16px 48px;
         }
-        .section-body .intro { color: var(--mute); margin: 4px 4px 18px; line-height: 1.55; font-size: 1.05em; }
+        .section-body .intro { color: var(--ink); margin: 4px 4px 18px; line-height: 1.55; font-size: var(--body-size); }
         .section-body h3.group { font-size: 1.3em; color: var(--wood); margin: 22px 4px 10px; }
 
         .action-row {
@@ -341,8 +342,8 @@
             flex-shrink: 0;
         }
         .action-row .txt { flex: 1; min-width: 0; }
-        .action-row .txt strong { display: block; font-size: 1.15em; }
-        .action-row .txt span { display: block; color: var(--mute); font-size: 1em; line-height: 1.45; }
+        .action-row .txt strong { display: block; font-size: 1.2em; }
+        .action-row .txt > span { display: block; color: var(--ink); font-size: var(--body-size); line-height: 1.45; }
         .action-row .chev { color: var(--mute); flex-shrink: 0; font-size: 18px; }
 
         /* ---------- Feature screens (tools that open on top of a section) ---------- */
@@ -572,8 +573,7 @@
             </div>
 
             <div class="footer-note">
-                <div id="managersLine">Family roles are listed in the directory.</div>
-                <div style="margin-top: 8px;"><button type="button" onclick="openModal('directoryModal')">Open the family directory</button></div>
+                <button type="button" onclick="openModal('directoryModal')">Open the family directory</button>
             </div>
         </div>
     </div>
@@ -597,10 +597,10 @@
                     <i class="ti ti-chevron-right chev" aria-hidden="true"></i>
                 </button>
                 <h3 class="group">While you're there</h3>
-                <p class="intro">The house always has a few things that need doing. If you have an hour, a day, or a skill to lend during your stay, let <span data-role-name="maintenance manager">the maintenance manager</span> know. The email opens in your mail app so you can say exactly what you're up for.</p>
+                <p class="intro">The house always has a few things that need doing. If you have an hour, a day, or a skill to lend during your stay, let <span data-role-name="maintenance manager">the maintenance manager</span> know. You can edit the note before it goes, so say exactly what you're up for.</p>
                 <button class="action-row" onclick="emailOfferHelp()">
                     <span class="ico"><i class="ti ti-hammer" aria-hidden="true"></i></span>
-                    <span class="txt"><strong>Offer to help with a project</strong><span>Starts an email to <span data-role-name="maintenance manager">the maintenance manager</span>. Edit it to fit your time and skills.</span></span>
+                    <span class="txt"><strong>Offer to help with a project</strong><span>Sends a note to <span data-role-name="maintenance manager">the maintenance manager</span>. Edit it to fit your time and skills.</span></span>
                     <i class="ti ti-chevron-right chev" aria-hidden="true"></i>
                 </button>
             </div>
@@ -672,7 +672,7 @@
                     <span class="txt"><strong>Maintenance log</strong><span>Repairs, recurring upkeep, and appliance records.</span></span>
                     <i class="ti ti-chevron-right chev" aria-hidden="true"></i>
                 </button>
-                <button class="action-row" onclick="openModal('contactModal')">
+                <button class="action-row" onclick="emailWebmaster()">
                     <span class="ico"><i class="ti ti-mail" aria-hidden="true"></i></span>
                     <span class="txt"><strong>Contact the webmaster</strong><span>Feedback or ideas for this site. Goes to <span data-role-name="webmaster">the webmaster</span>.</span></span>
                     <i class="ti ti-chevron-right chev" aria-hidden="true"></i>
@@ -769,33 +769,6 @@
         </div>
     </div>
 
-    <!-- ====================== Feature: Contact the webmaster ====================== -->
-    <div class="modal" id="contactModal">
-        <div class="modal-content" style="padding: 0;">
-            <button class="close-btn" onclick="closeModal('contactModal')" aria-label="Close"><i class="ti ti-x"></i></button>
-            <div class="modal-topbar"><h2>Contact the webmaster</h2></div>
-            <div class="feature-body padded">
-                <div class="contact-form">
-                    <p style="color: var(--mute); margin-bottom: 18px; line-height: 1.5;">Ideas, problems, or something that doesn't look right on the site. Your message opens in your mail app addressed to <span data-role-name="webmaster">the webmaster</span>.</p>
-                    <form id="contactForm" onsubmit="sendMessage(event)">
-                        <div class="form-group">
-                            <label for="senderName">Your name</label>
-                            <input type="text" id="senderName" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="messageSubject">Subject</label>
-                            <input type="text" id="messageSubject" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="messageBody">Message</label>
-                            <textarea id="messageBody" required placeholder="What's on your mind?"></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-forest btn-block">Open in my mail app</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
     <script>
         // ============================================================
         // LOGIN: verification happens on Google's servers, not in the
@@ -1138,15 +1111,6 @@
                 var r = getRole(els[i].getAttribute('data-role-name'));
                 if (r && r.name) els[i].textContent = r.name;
             }
-            var line = document.getElementById('managersLine');
-            if (line && ROLES) {
-                var parts = [];
-                Object.keys(ROLES).forEach(function (k) {
-                    var r = ROLES[k];
-                    if (r.name) parts.push(escapeHtml(r.role) + ': <strong>' + escapeHtml(r.name) + '</strong>');
-                });
-                if (parts.length) line.innerHTML = parts.join(' &nbsp;·&nbsp; ');
-            }
         }
 
         async function loadRoles() {
@@ -1167,9 +1131,12 @@
         }
 
         // ============================================================
-        // PRE-FILLED EMAILS: each opens in the person's own mail app so
-        // they can edit before sending. Addresses come from the Role
-        // column; if a role isn't filled in, the admin address is used.
+        // MESSAGES: every "email someone" button opens the same in-site
+        // form, pre-filled and editable. The service sends the message
+        // from reunionhill@gmail.com with the sender's address as
+        // reply-to, so no mail app is needed. The recipient is chosen
+        // by ROLE, never by address - the service looks the address up
+        // in the directory's Role column itself.
         // ============================================================
         function senderName() {
             var u = auth && auth.currentUser;
@@ -1177,53 +1144,130 @@
             return (u && u.email) ? u.email : 'a family member';
         }
 
-        function mailto(to, subject, body) {
-            window.location.href = 'mailto:' + to +
-                '?subject=' + encodeURIComponent(subject) +
-                '&body=' + encodeURIComponent(body);
+        function firstName(title) {
+            var r = getRole(title);
+            return (r && r.name) ? r.name.split(' ')[0] : '';
+        }
+
+        function greeting(title) {
+            var f = firstName(title);
+            return f ? ('Hi ' + f + ',\n\n') : 'Hello,\n\n';
+        }
+
+        function openMessageForm(cfg) {
+            var toName = (cfg.role === 'admin') ? 'the portal admin' : roleName(cfg.role);
+            var m = document.createElement('div');
+            m.className = 'modal';
+            m.id = 'messageModal';
+            m.style.display = 'block';
+            m.innerHTML = '<div class="modal-content" style="padding: 0;">' +
+                '<button class="close-btn" onclick="closeMessageForm()" aria-label="Close"><i class="ti ti-x"></i></button>' +
+                '<div class="modal-topbar"><h2>' + escapeHtml(cfg.title) + '</h2></div>' +
+                '<div class="feature-body padded"><div class="contact-form" id="messageFormBody">' +
+                '<p style="color: var(--ink); margin-bottom: 16px; line-height: 1.5;">' + escapeHtml(cfg.intro || '') + '</p>' +
+                '<div class="form-group"><label>To</label>' +
+                '<div style="padding: 10px 2px; font-weight: 700;">' + escapeHtml(toName) + '</div></div>' +
+                '<div class="form-group"><label for="msgSubject">Subject</label>' +
+                '<input type="text" id="msgSubject" value="' + escapeHtml(cfg.subject || '') + '"></div>' +
+                '<div class="form-group"><label for="msgBody">Message</label>' +
+                '<textarea id="msgBody" style="height: 260px;">' + escapeHtml(cfg.body || '') + '</textarea></div>' +
+                '<div class="login-error" id="msgError"></div>' +
+                '<button type="button" class="btn btn-forest btn-block" id="msgSendBtn" onclick="sendMessageForm(\'' + escapeHtml(cfg.role) + '\')">' +
+                '<i class="ti ti-send" style="font-size: 20px;" aria-hidden="true"></i>Send</button>' +
+                '</div></div></div>';
+            document.body.appendChild(m);
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeMessageForm() {
+            var m = document.getElementById('messageModal');
+            if (m) m.remove();
+            if (!anyModalOpen()) document.body.style.overflow = 'auto';
+        }
+
+        async function sendMessageForm(role) {
+            var subject = document.getElementById('msgSubject').value.trim();
+            var body = document.getElementById('msgBody').value.trim();
+            var err = document.getElementById('msgError');
+            var btn = document.getElementById('msgSendBtn');
+            err.style.display = 'none';
+            if (!body) {
+                err.textContent = 'Write a message first.';
+                err.style.display = 'block';
+                return;
+            }
+            btn.disabled = true;
+            btn.textContent = 'Sending...';
+            try {
+                var res = await callService('send', { role: role, subject: subject, body: body });
+                if (!res || !res.ok || !res.sent) throw new Error((res && res.error) || 'service error');
+                var box = document.getElementById('messageFormBody');
+                box.innerHTML = '<div style="text-align: center; padding: 30px 10px;">' +
+                    '<div class="feature-icon"><i class="ti ti-check" aria-hidden="true"></i></div>' +
+                    '<h3 style="margin-bottom: 12px; font-size: 1.35em;">Sent</h3>' +
+                    '<p style="color: var(--ink); line-height: 1.6; margin-bottom: 24px;">Your note is on its way to ' + escapeHtml(res.sent.to || 'them') +
+                    '. Any reply will come to your own email address.</p>' +
+                    '<button type="button" class="btn btn-forest" onclick="closeMessageForm()">Done</button></div>';
+            } catch (e) {
+                console.error('Send failed:', e);
+                err.textContent = 'Couldn\'t send just now. Please try again in a minute, or email reunionhill@gmail.com directly.';
+                err.style.display = 'block';
+                btn.disabled = false;
+                btn.innerHTML = '<i class="ti ti-send" style="font-size: 20px;" aria-hidden="true"></i>Send';
+            }
         }
 
         function emailOfferHelp() {
-            var body = 'Hi ' + roleName('maintenance manager').split(' ')[0] + ',\n\n' +
-                'I\'m planning a visit to Reunion Hill and would like to help with a project while I\'m there.\n\n' +
-                'When I\'ll be at the house: \n' +
-                'How much time I can give: \n' +
-                'What I\'m comfortable doing (tools, skills, or "anything simple"): \n\n' +
-                'Let me know what would be most useful.\n\n' +
-                'Thanks,\n' + senderName();
-            mailto(roleEmail('maintenance manager'), 'Offer to help at Reunion Hill', body);
+            openMessageForm({
+                role: 'maintenance manager',
+                title: 'Offer to help',
+                intro: 'Tell ' + (firstName('maintenance manager') || 'the maintenance manager') + ' when you\'ll be at the house and what you\'re up for. Edit anything below.',
+                subject: 'Offer to help at Reunion Hill',
+                body: greeting('maintenance manager') +
+                    'I\'m planning a visit to Reunion Hill and would like to help with a project while I\'m there.\n\n' +
+                    'When I\'ll be at the house: \n' +
+                    'How much time I can give: \n' +
+                    'What I\'m comfortable doing (tools, skills, or "anything simple"): \n\n' +
+                    'Let me know what would be most useful.\n\n' +
+                    'Thanks,\n' + senderName()
+            });
         }
 
         function emailReportProblem() {
-            var body = 'Hi ' + roleName('maintenance manager').split(' ')[0] + ',\n\n' +
-                'I noticed something at the house that needs attention.\n\n' +
-                'What I found: \n' +
-                'Where in the house: \n' +
-                'How urgent it seems (fine for now / soon / needs attention right away): \n\n' +
-                'Thanks,\n' + senderName();
-            mailto(roleEmail('maintenance manager'), 'Maintenance need at Reunion Hill', body);
+            openMessageForm({
+                role: 'maintenance manager',
+                title: 'Report a maintenance need',
+                intro: 'Describe what you found and where. It goes straight to ' + (firstName('maintenance manager') || 'the maintenance manager') + '.',
+                subject: 'Maintenance need at Reunion Hill',
+                body: greeting('maintenance manager') +
+                    'I noticed something at the house that needs attention.\n\n' +
+                    'What I found: \n' +
+                    'Where in the house: \n' +
+                    'How urgent it seems (fine for now / soon / needs attention right away): \n\n' +
+                    'Thanks,\n' + senderName()
+            });
         }
 
         function emailHouseManager() {
-            var body = 'Hi ' + roleName('house manager').split(' ')[0] + ',\n\n' +
-                'A quick note from my stay at Reunion Hill:\n\n\n' +
-                'Thanks,\n' + senderName();
-            mailto(roleEmail('house manager'), 'A note about the house', body);
+            openMessageForm({
+                role: 'house manager',
+                title: 'Note to the house manager',
+                intro: 'Supplies, linens, anything about how the house is kept. It goes to ' + (firstName('house manager') || 'the house manager') + '.',
+                subject: 'A note about the house',
+                body: greeting('house manager') +
+                    'A quick note from my stay at Reunion Hill:\n\n\n' +
+                    'Thanks,\n' + senderName()
+            });
         }
 
-        function sendMessage(event) {
-            try {
-                event.preventDefault();
-                var name = document.getElementById('senderName').value;
-                var subject = document.getElementById('messageSubject').value;
-                var message = document.getElementById('messageBody').value;
-                var email = (auth && auth.currentUser && auth.currentUser.email) ? auth.currentUser.email : '';
-                mailto(roleEmail('webmaster'), subject, 'From: ' + name + (email ? ' (' + email + ')' : '') + '\n\n' + message);
-                document.getElementById('contactForm').reset();
-                closeModal('contactModal');
-            } catch (error) {
-                alert('Error sending message. Please try again.');
-            }
+        function emailWebmaster() {
+            openMessageForm({
+                role: 'webmaster',
+                title: 'Contact the webmaster',
+                intro: 'Ideas, problems, or something that doesn\'t look right on the site.',
+                subject: 'Reunion Hill website',
+                body: greeting('webmaster') + '\n\nThanks,\n' + senderName()
+            });
         }
 
         // ============================================================
@@ -1397,7 +1441,13 @@
                 'TO ADD A NEW FAMILY MEMBER (a new baby, a spouse, etc.) - ' +
                 'here are their details (name, family, birthday, and any ' +
                 'contact info to list):\n\n\nThank you!';
-            mailto(ADMIN_EMAIL, 'Family directory update request', body);
+            openMessageForm({
+                role: 'admin',
+                title: 'Directory update',
+                intro: 'Your current listing is filled in below. Add what should change, or the details of a new family member.',
+                subject: 'Family directory update request',
+                body: body
+            });
         }
 
         function closeSheetModal() {
