@@ -27,6 +27,7 @@
             --serif: 'Fraunces', Georgia, 'Times New Roman', serif;
             --sans: 'Nunito', 'Segoe UI', Tahoma, sans-serif;
             --body-size: 17px;
+            --tile-size: 19px;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -202,11 +203,12 @@
 
         .hero {
             height: 250px;
+            background-position: center 22%;
             border-radius: 20px;
             margin-bottom: 22px;
         }
         .hero .photo-shade h2 { color: var(--paper); font-size: 1.9em; line-height: 1.1; }
-        .hero .photo-shade p { color: #EADFCB; font-size: var(--body-size); margin-top: 4px; }
+        .hero .photo-shade p { color: #EADFCB; font-size: var(--tile-size); margin-top: 4px; }
 
         .journal-card {
             display: none; /* shown once the guest journal exists (phase three) */
@@ -237,9 +239,9 @@
         .chapter:hover, .chapter:focus-visible { border-color: var(--wood-light); outline: none; }
         .chapter .photo { width: 132px; flex-shrink: 0; min-height: 112px; }
         .chapter-text { padding: 16px 18px; flex: 1; min-width: 0; }
-        .chapter-text h3 { font-size: 1.35em; line-height: 1.15; margin-bottom: 5px; }
-        .chapter-text p { color: var(--ink); font-size: var(--body-size); line-height: 1.5; }
-        .chapter-text .who { color: var(--wood); font-size: var(--body-size); margin-top: 7px; }
+        .chapter-text h3 { font-size: 1.5em; line-height: 1.15; margin-bottom: 6px; }
+        .chapter-text p { color: var(--ink); font-size: var(--tile-size); line-height: 1.45; }
+        .chapter-text .who { color: var(--wood); font-size: var(--tile-size); margin-top: 7px; }
 
         .footer-note {
             margin-top: 26px;
@@ -342,8 +344,9 @@
             flex-shrink: 0;
         }
         .action-row .txt { flex: 1; min-width: 0; }
-        .action-row .txt strong { display: block; font-size: 1.2em; }
-        .action-row .txt > span { display: block; color: var(--ink); font-size: var(--body-size); line-height: 1.45; }
+        .action-row .txt strong { display: block; font-size: 1.3em; margin-bottom: 2px; }
+        .action-row .txt > span { display: block; color: var(--ink); font-size: var(--tile-size); line-height: 1.45; }
+        .action-row .txt > .who { color: var(--wood); margin-top: 4px; }
         .action-row .chev { color: var(--mute); flex-shrink: 0; font-size: 18px; }
 
         /* ---------- Feature screens (tools that open on top of a section) ---------- */
@@ -479,7 +482,7 @@
             .hero { height: 210px; }
             .chapter .photo { width: 108px; }
             .chapter-text { padding: 13px 14px; }
-            .chapter-text h3 { font-size: 1.2em; }
+            .chapter-text h3 { font-size: 1.35em; }
             .section-photo { height: 160px; }
             .section-body { padding: 14px 12px 40px; }
         }
@@ -544,7 +547,7 @@
                     <div class="chapter-text">
                         <h3>Plan my visit</h3>
                         <p>Reserve dates, see who's coming, and offer a hand while you're there.</p>
-                        <div class="who">Calendar: <span data-role-name="calendar manager">the calendar manager</span></div>
+                        <div class="who">Calendar manager: <span data-role-name="calendar manager">the calendar manager</span></div>
                     </div>
                 </button>
                 <button class="chapter" onclick="openModal('visitModal')">
@@ -552,7 +555,7 @@
                     <div class="chapter-text">
                         <h3>Manage my visit</h3>
                         <p>Check in, house rules, report a problem, check out.</p>
-                        <div class="who">House: <span data-role-name="house manager">the house manager</span></div>
+                        <div class="who">House manager: <span data-role-name="house manager">the house manager</span></div>
                     </div>
                 </button>
                 <button class="chapter" onclick="openModal('memoriesModal')">
@@ -567,7 +570,7 @@
                     <div class="chapter-text">
                         <h3>LLC business</h3>
                         <p>Documents, the maintenance log, and a line to the webmaster.</p>
-                        <div class="who">Financials: <span data-role-name="financial manager">the financial manager</span></div>
+                        <div class="who">Financial manager: <span data-role-name="financial manager">the financial manager</span></div>
                     </div>
                 </button>
             </div>
@@ -588,7 +591,7 @@
             <div class="section-body">
                 <button class="action-row" onclick="openModal('reservationModal')">
                     <span class="ico"><i class="ti ti-calendar-plus" aria-hidden="true"></i></span>
-                    <span class="txt"><strong>Make a reservation</strong><span>Request your dates. <span data-role-name="calendar manager">The calendar manager</span> reviews each request and adds it to the calendar.</span></span>
+                    <span class="txt"><strong>Make a reservation</strong><span>Request your dates and get it added to the calendar.</span><span class="who">Calendar manager: <span data-role-name="calendar manager">the calendar manager</span></span></span>
                     <i class="ti ti-chevron-right chev" aria-hidden="true"></i>
                 </button>
                 <button class="action-row" onclick="openModal('calendarModal')">
@@ -600,7 +603,7 @@
                 <p class="intro">The house always has a few things that need doing. If you have an hour, a day, or a skill to lend during your stay, let <span data-role-name="maintenance manager">the maintenance manager</span> know. You can edit the note before it goes, so say exactly what you're up for.</p>
                 <button class="action-row" onclick="emailOfferHelp()">
                     <span class="ico"><i class="ti ti-hammer" aria-hidden="true"></i></span>
-                    <span class="txt"><strong>Offer to help with a project</strong><span>Sends a note to <span data-role-name="maintenance manager">the maintenance manager</span>. Edit it to fit your time and skills.</span></span>
+                    <span class="txt"><strong>Offer to help with a project</strong><span>Starts an email that you can edit to fit your time and skills.</span><span class="who">Maintenance manager: <span data-role-name="maintenance manager">the maintenance manager</span></span></span>
                     <i class="ti ti-chevron-right chev" aria-hidden="true"></i>
                 </button>
             </div>
@@ -619,12 +622,12 @@
                 <h3 class="group">Something needs attention?</h3>
                 <button class="action-row" onclick="emailReportProblem()">
                     <span class="ico"><i class="ti ti-tool" aria-hidden="true"></i></span>
-                    <span class="txt"><strong>Report a maintenance need</strong><span>A dripping faucet, a loose board, a light that's out. Goes to <span data-role-name="maintenance manager">the maintenance manager</span>.</span></span>
+                    <span class="txt"><strong>Report a maintenance need</strong><span>A dripping faucet, a loose board, a light that's out.</span><span class="who">Maintenance manager: <span data-role-name="maintenance manager">the maintenance manager</span></span></span>
                     <i class="ti ti-chevron-right chev" aria-hidden="true"></i>
                 </button>
                 <button class="action-row" onclick="emailHouseManager()">
                     <span class="ico"><i class="ti ti-home-heart" aria-hidden="true"></i></span>
-                    <span class="txt"><strong>Send a note to the house manager</strong><span>Supplies running low, worn linens, anything about how the house is kept. Goes to <span data-role-name="house manager">the house manager</span>.</span></span>
+                    <span class="txt"><strong>Send a note to the house manager</strong><span>Supplies running low, worn linens, anything about how the house is kept.</span><span class="who">House manager: <span data-role-name="house manager">the house manager</span></span></span>
                     <i class="ti ti-chevron-right chev" aria-hidden="true"></i>
                 </button>
             </div>
@@ -664,7 +667,7 @@
             <div class="section-body">
                 <button class="action-row" onclick="openLLCDocuments()">
                     <span class="ico"><i class="ti ti-file-text" aria-hidden="true"></i></span>
-                    <span class="txt"><strong>LLC documents</strong><span>Financials, meeting agendas, and minutes. Financials are kept by <span data-role-name="financial manager">the financial manager</span>.</span></span>
+                    <span class="txt"><strong>LLC documents</strong><span>Financials, meeting agendas, and minutes.</span><span class="who">Financial manager: <span data-role-name="financial manager">the financial manager</span></span></span>
                     <i class="ti ti-chevron-right chev" aria-hidden="true"></i>
                 </button>
                 <button class="action-row" onclick="openModal('maintenanceModal')">
@@ -674,7 +677,7 @@
                 </button>
                 <button class="action-row" onclick="emailWebmaster()">
                     <span class="ico"><i class="ti ti-mail" aria-hidden="true"></i></span>
-                    <span class="txt"><strong>Contact the webmaster</strong><span>Feedback or ideas for this site. Goes to <span data-role-name="webmaster">the webmaster</span>.</span></span>
+                    <span class="txt"><strong>Contact the webmaster</strong><span>Feedback or ideas for this site.</span><span class="who">Webmaster: <span data-role-name="webmaster">the webmaster</span></span></span>
                     <i class="ti ti-chevron-right chev" aria-hidden="true"></i>
                 </button>
             </div>
