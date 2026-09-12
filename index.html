@@ -239,7 +239,7 @@
         .chapter:hover, .chapter:focus-visible { border-color: var(--wood-light); outline: none; }
         .chapter .photo { width: 132px; flex-shrink: 0; min-height: 112px; }
         .chapter-text { padding: 16px 18px; flex: 1; min-width: 0; }
-        .chapter-text h3 { font-size: 1.5em; line-height: 1.15; margin-bottom: 6px; }
+        .chapter-text h3 { font-size: 1.7em; line-height: 1.15; margin-bottom: 6px; }
         .chapter-text p { color: var(--ink); font-size: var(--tile-size); line-height: 1.45; }
         .chapter-text .who { color: var(--wood); font-size: var(--tile-size); margin-top: 7px; }
 
@@ -482,7 +482,7 @@
             .hero { height: 210px; }
             .chapter .photo { width: 108px; }
             .chapter-text { padding: 13px 14px; }
-            .chapter-text h3 { font-size: 1.35em; }
+            .chapter-text h3 { font-size: 1.45em; }
             .section-photo { height: 160px; }
             .section-body { padding: 14px 12px 40px; }
         }
@@ -1213,7 +1213,8 @@
                     '<button type="button" class="btn btn-forest" onclick="closeMessageForm()">Done</button></div>';
             } catch (e) {
                 console.error('Send failed:', e);
-                err.textContent = 'Couldn\'t send just now. Please try again in a minute, or email reunionhill@gmail.com directly.';
+                err.innerHTML = 'Couldn\'t send just now. Please try again in a minute, or email reunionhill@gmail.com directly.' +
+                    '<br><span style="font-size: 0.85em; opacity: 0.8;">Technical detail: ' + escapeHtml(e && e.message ? e.message : e) + '</span>';
                 err.style.display = 'block';
                 btn.disabled = false;
                 btn.innerHTML = '<i class="ti ti-send" style="font-size: 20px;" aria-hidden="true"></i>Send';
