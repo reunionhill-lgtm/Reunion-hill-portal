@@ -27,9 +27,9 @@
             --serif: 'Fraunces', Georgia, 'Times New Roman', serif;
             --sans: 'Nunito', 'Segoe UI', Tahoma, sans-serif;
             --body-size: 17px;
-            --tile-title: 26px;   /* first line of every tile */
-            --tile-line2: 20px;   /* second line */
-            --tile-line3: 18px;   /* third (role) line */
+            --tile-title: 24px;   /* first line of every tile */
+            --tile-line2: 18px;   /* second line */
+            --tile-line3: 16px;   /* third (role) line */
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -213,13 +213,31 @@
         .hero .photo-shade p { color: #EADFCB; font-family: var(--serif); font-size: var(--tile-line2); margin-top: 4px; }
 
         .journal-card {
-            display: none; /* shown once the guest journal exists (phase three) */
+            display: none; /* shown once the journal has loaded */
             background: var(--paper);
             border: 1px solid var(--line);
             border-radius: 16px;
             padding: 16px 18px;
             margin-bottom: 22px;
+            cursor: pointer;
+            font-family: var(--serif);
         }
+        .journal-card:hover { border-color: var(--wood-light); }
+        .journal-card .kicker { color: var(--wood); font-size: var(--tile-line3); font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px; font-family: var(--sans); }
+        .journal-card .byline { font-size: var(--tile-line2); font-weight: 500; margin-bottom: 4px; }
+        .journal-card .snippet { font-size: var(--tile-line2); line-height: 1.45; color: var(--ink); }
+        .journal-card .more { color: var(--mute); font-size: var(--tile-line3); margin-top: 8px; font-family: var(--sans); }
+
+        .entry-card {
+            background: var(--paper); border: 1px solid var(--line); border-radius: 16px;
+            padding: 16px 18px; margin-bottom: 12px; font-family: var(--serif);
+        }
+        .entry-card .byline { font-size: var(--tile-line2); font-weight: 500; }
+        .entry-card .date { color: var(--mute); font-size: var(--tile-line3); font-family: var(--sans); margin-bottom: 8px; }
+        .entry-card .note { font-size: var(--tile-line2); line-height: 1.5; white-space: pre-wrap; }
+        .entry-card.seed { border-style: dashed; color: var(--mute); }
+        .char-count { text-align: right; color: var(--mute); font-size: 0.9em; margin-top: -10px; margin-bottom: 14px; }
+        .char-count.over { color: #7A2C21; font-weight: 700; }
 
         .chapters { display: flex; flex-direction: column; gap: 14px; }
 
@@ -510,7 +528,7 @@
             .hero { height: 210px; }
             .chapter .photo { width: 108px; }
             .chapter-text { padding: 13px 14px; }
-            :root { --tile-title: 23px; --tile-line2: 19px; --tile-line3: 17px; }
+            :root { --tile-title: 21px; --tile-line2: 17px; --tile-line3: 15px; }
             .section-photo { height: 160px; }
             .section-body { padding: 14px 12px 40px; }
         }
@@ -694,7 +712,17 @@
                     <span class="txt"><strong>Share a photo</strong><span>Add a picture from your stay to the family album.</span></span>
                     <i class="ti ti-chevron-right chev" aria-hidden="true"></i>
                 </button>
-                <p class="intro" style="margin-top: 18px;">A guest journal, where each family can leave a note about their stay, is coming soon.</p>
+                <h3 class="group">Guest journal</h3>
+                <button class="action-row" onclick="openJournal()">
+                    <span class="ico"><i class="ti ti-book" aria-hidden="true"></i></span>
+                    <span class="txt"><strong>Read the guest journal</strong><span>Notes from every family's stay, newest first.</span></span>
+                    <i class="ti ti-chevron-right chev" aria-hidden="true"></i>
+                </button>
+                <button class="action-row" onclick="openJournalPost()">
+                    <span class="ico"><i class="ti ti-pencil" aria-hidden="true"></i></span>
+                    <span class="txt"><strong>Leave a note in the guest journal</strong><span>Who was there, what you did, a moment worth keeping.</span></span>
+                    <i class="ti ti-chevron-right chev" aria-hidden="true"></i>
+                </button>
             </div>
         </div>
     </div>
@@ -902,6 +930,7 @@
             document.getElementById('signedInEmail').textContent = email;
             document.getElementById('userInfo').style.display = 'flex';
             loadRoles();
+            loadJournalCard();
         }
 
         function showLogin() {
@@ -1703,7 +1732,9 @@
                     '<div class="feature-icon"><i class="ti ti-check" aria-hidden="true"></i></div>' +
                     '<h3 style="margin-bottom: 12px; font-size: 1.35em;">Safe travels</h3>' +
                     '<p style="color: var(--ink); line-height: 1.6; margin-bottom: 24px;">' + escapeHtml(res.sent.to || 'The house manager') + ' has been notified. Thanks for closing up the house.</p>' +
-                    '<button type="button" class="btn btn-forest" onclick="closeSheetModal()">Done</button></div>');
+                    '<div class="check-actions" style="max-width: 420px; margin: 0 auto;">' +
+                    '<button type="button" class="btn btn-forest btn-block" onclick="closeSheetModal(); openJournalPost(\'memoriesModal\');"><i class="ti ti-pencil" aria-hidden="true"></i> Leave a note about your stay</button>' +
+                    '<button type="button" class="btn btn-quiet btn-block" onclick="closeSheetModal()">Done</button></div></div>');
             } catch (e) {
                 console.error('Check-out send failed:', e);
                 err.innerHTML = 'Couldn\'t send the notification just now. Please try again in a minute.' +
@@ -1714,15 +1745,144 @@
             }
         }
 
+        // ============================================================
+        // GUEST JOURNAL: entries live in a Restricted "Guest Journal"
+        // sheet that only the service writes to. Anyone on the family
+        // list can post; edits and deletions happen in the sheet.
+        // ============================================================
+        var JOURNAL_CACHE = null;
+        var JOURNAL_MAX = 1500;
+        var JOURNAL_SEED = {
+            name: 'The guest journal',
+            family: '',
+            date: '',
+            note: 'Who was there? What did you do? Share a special moment, or anything else you want to say. Be the first family to leave a note.'
+        };
+
+        async function loadJournal(force) {
+            if (JOURNAL_CACHE && !force) return JOURNAL_CACHE;
+            var res = await callService('journal-list');
+            if (!res || !res.ok || !res.entries) throw new Error((res && res.error) || 'service error');
+            JOURNAL_CACHE = res.entries;
+            return JOURNAL_CACHE;
+        }
+
+        function entryByline(e) {
+            var who = e.name || 'A family member';
+            if (e.family) who += ', ' + e.family + ' family';
+            return who;
+        }
+
+        async function loadJournalCard() {
+            var card = document.getElementById('journalCard');
+            if (!card) return;
+            try {
+                var entries = await loadJournal();
+                var e = entries.length ? entries[0] : JOURNAL_SEED;
+                var snippet = String(e.note || '');
+                if (snippet.length > 180) snippet = snippet.slice(0, 177).replace(/\s+\S*$/, '') + '...';
+                card.innerHTML = '<div class="kicker">From the guest journal</div>' +
+                    '<div class="byline">' + escapeHtml(entryByline(e)) + (e.date ? ' <span style="color: var(--mute); font-weight: 400;">&middot; ' + escapeHtml(e.date) + '</span>' : '') + '</div>' +
+                    '<div class="snippet">' + escapeHtml(snippet) + '</div>' +
+                    '<div class="more">' + (entries.length ? 'Read the journal or leave a note' : 'Tap to leave the first note') + ' <i class="ti ti-chevron-right" aria-hidden="true"></i></div>';
+                card.onclick = entries.length ? function () { openJournal('home'); } : function () { openJournalPost('home'); };
+                card.style.display = 'block';
+            } catch (e) {
+                // Journal unavailable - leave the card hidden.
+            }
+        }
+
+        async function openJournal(from) {
+            var returnTo = (from === 'home') ? '' : 'memoriesModal';
+            if (returnTo) closeModal(returnTo);
+            openTableViewer('Guest journal', returnTo);
+            try {
+                var entries = await loadJournal(true);
+                var html = '<div class="check-wrap">' +
+                    '<button type="button" class="btn btn-forest btn-block" style="margin-bottom: 16px;" onclick="closeSheetModal(); openJournalPost(\'' + (returnTo || 'home') + '\');"><i class="ti ti-pencil" aria-hidden="true"></i> Leave a note</button>';
+                if (entries.length === 0) {
+                    html += '<div class="entry-card seed"><div class="byline">' + escapeHtml(JOURNAL_SEED.name) + '</div><div class="note">' + escapeHtml(JOURNAL_SEED.note) + '</div></div>';
+                }
+                entries.forEach(function (e) {
+                    html += '<div class="entry-card"><div class="byline">' + escapeHtml(entryByline(e)) + '</div>' +
+                        '<div class="date">' + escapeHtml(e.date || '') + '</div>' +
+                        '<div class="note">' + escapeHtml(e.note || '') + '</div></div>';
+                });
+                setTableViewerContent(html + '</div>');
+            } catch (e) {
+                console.error('Journal:', e);
+                setTableViewerContent(VIEWER_ERROR_HTML);
+            }
+        }
+
+        function openJournalPost(from) {
+            var returnTo = (from === 'home') ? '' : (from || 'memoriesModal');
+            if (returnTo) closeModal(returnTo);
+            openTableViewer('Leave a note', returnTo);
+            var who = senderName();
+            setTableViewerContent('<div class="check-wrap"><div class="contact-form" id="journalFormBody">' +
+                '<p style="color: var(--ink); margin-bottom: 16px; line-height: 1.5;">Who was there? What did you do? Share a special moment, or anything else you want to say.</p>' +
+                '<div class="form-group"><label>Posting as</label><div style="padding: 6px 2px; font-weight: 700;">' + escapeHtml(who) + '</div></div>' +
+                '<div class="form-group"><label for="journalNote">Your note</label>' +
+                '<textarea id="journalNote" style="height: 220px;" maxlength="' + (JOURNAL_MAX + 200) + '" oninput="journalCount()"></textarea></div>' +
+                '<div class="char-count" id="journalCount">0 / ' + JOURNAL_MAX + '</div>' +
+                '<div class="login-error" id="journalError"></div>' +
+                '<button type="button" class="btn btn-forest btn-block" id="journalPostBtn" onclick="postJournal()"><i class="ti ti-send" aria-hidden="true"></i> Post to the journal</button>' +
+                '</div></div>');
+        }
+
+        function journalCount() {
+            var n = (document.getElementById('journalNote') || { value: '' }).value.length;
+            var c = document.getElementById('journalCount');
+            if (!c) return;
+            c.textContent = n + ' / ' + JOURNAL_MAX;
+            c.classList.toggle('over', n > JOURNAL_MAX);
+        }
+
+        async function postJournal() {
+            var note = (document.getElementById('journalNote') || { value: '' }).value.trim();
+            var err = document.getElementById('journalError');
+            var btn = document.getElementById('journalPostBtn');
+            err.style.display = 'none';
+            if (!note) { err.textContent = 'Write something first.'; err.style.display = 'block'; return; }
+            if (note.length > JOURNAL_MAX) { err.textContent = 'Please keep it under ' + JOURNAL_MAX + ' characters.'; err.style.display = 'block'; return; }
+            btn.disabled = true;
+            btn.textContent = 'Posting...';
+            try {
+                var res = await callService('journal-post', { note: note });
+                if (!res || !res.ok || !res.entry) throw new Error((res && res.error) || 'service error');
+                JOURNAL_CACHE = null;
+                loadJournalCard();
+                document.getElementById('journalFormBody').innerHTML = '<div style="text-align: center; padding: 30px 10px;">' +
+                    '<div class="feature-icon"><i class="ti ti-book" aria-hidden="true"></i></div>' +
+                    '<h3 style="margin-bottom: 12px; font-size: 1.35em;">Added to the journal</h3>' +
+                    '<p style="color: var(--ink); line-height: 1.6; margin-bottom: 24px;">Thank you for leaving a piece of your stay behind.</p>' +
+                    '<div class="check-actions" style="max-width: 360px; margin: 0 auto;">' +
+                    '<button type="button" class="btn btn-forest btn-block" onclick="closeSheetModal(); openJournal(\'home\');">Read the journal</button>' +
+                    '<button type="button" class="btn btn-quiet btn-block" onclick="closeSheetModal()">Done</button></div></div>';
+            } catch (e) {
+                console.error('Journal post failed:', e);
+                err.innerHTML = 'Couldn\'t post just now. Please try again in a minute.' +
+                    '<br><span style="font-size: 0.85em; opacity: 0.8;">Technical detail: ' + escapeHtml(e && e.message ? e.message : e) + '</span>';
+                err.style.display = 'block';
+                btn.disabled = false;
+                btn.innerHTML = '<i class="ti ti-send" aria-hidden="true"></i> Post to the journal';
+            }
+        }
+
         function closeSheetModal() {
             var returnTo = 'directoryModal';
             try {
                 var sheetModal = document.getElementById('sheetModal');
                 if (sheetModal) {
-                    returnTo = sheetModal.getAttribute('data-return-to') || returnTo;
+                    if (sheetModal.hasAttribute('data-return-to')) returnTo = sheetModal.getAttribute('data-return-to');
                     sheetModal.remove();
                 }
-                openModal(returnTo);
+                if (returnTo) {
+                    openModal(returnTo);
+                } else if (!anyModalOpen()) {
+                    document.body.style.overflow = 'auto';
+                }
             } catch (error) {
                 document.body.style.overflow = 'auto';
             }
