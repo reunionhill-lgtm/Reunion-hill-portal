@@ -914,7 +914,13 @@
         async function checkWithService() {
             try {
                 var res = await callService('check');
-                if (res && res.ok) return 'yes';
+                if (res && res.ok) {
+                    // The check reply carries the manager names and the
+                    // latest journal entry, so no separate calls are needed.
+                    if (res.roles) applyRolesFromService(res.roles); else if (!ROLES) loadRoles();
+                    if (res.journal !== undefined) applyJournalLatest(res.journal); else loadJournalCard();
+                    return 'yes';
+                }
                 if (res && (res.error === 'not-on-list' || res.error === 'bad-token')) return 'no';
                 return 'unreachable';
             } catch (e) {
@@ -929,8 +935,11 @@
             document.getElementById('mainContent').style.display = 'block';
             document.getElementById('signedInEmail').textContent = email;
             document.getElementById('userInfo').style.display = 'flex';
-            loadRoles();
-            loadJournalCard();
+            // Names and the journal card come from the device's memory
+            // instantly; the sign-in check that runs alongside refreshes
+            // both from the live directory.
+            applyCachedRoles();
+            applyCachedJournal();
         }
 
         function showLogin() {
@@ -1187,18 +1196,40 @@
             }
         }
 
-        async function loadRoles() {
+        var ROLES_CACHE_KEY = 'rh_portal_roles';
+
+        function applyRolesFromService(list) {
+            ROLES = {};
+            (list || []).forEach(function (r) {
+                var k = roleKey(r.role);
+                if (k && !ROLES[k]) ROLES[k] = r;
+            });
+            applyRoles();
+            try { localStorage.setItem(ROLES_CACHE_KEY, JSON.stringify(list || [])); } catch (e) { /* ignore */ }
+        }
+
+        function applyCachedRoles() {
             if (ROLES) { applyRoles(); return; }
             try {
-                var res = await callService('roles');
-                if (res && res.ok && res.roles) {
+                var cached = JSON.parse(localStorage.getItem(ROLES_CACHE_KEY) || 'null');
+                if (cached && cached.length) {
                     ROLES = {};
-                    res.roles.forEach(function (r) {
+                    cached.forEach(function (r) {
                         var k = roleKey(r.role);
                         if (k && !ROLES[k]) ROLES[k] = r;
                     });
                     applyRoles();
                 }
+            } catch (e) { /* ignore */ }
+        }
+
+        // Fallback for a device that has no cached roles and whose check
+        // reply didn't include them (older script version).
+        async function loadRoles() {
+            if (ROLES) { applyRoles(); return; }
+            try {
+                var res = await callService('roles');
+                if (res && res.ok && res.roles) applyRolesFromService(res.roles);
             } catch (e) {
                 console.warn('Roles not available right now:', e);
             }
@@ -1774,22 +1805,46 @@
             return who;
         }
 
+        var JOURNAL_CARD_KEY = 'rh_portal_journal_latest';
+
+        // latest: an entry object, or null when the journal is empty.
+        function applyJournalLatest(latest) {
+            renderJournalCard(latest, true);
+            try { localStorage.setItem(JOURNAL_CARD_KEY, JSON.stringify({ latest: latest || null })); } catch (e) { /* ignore */ }
+        }
+
+        function applyCachedJournal() {
+            try {
+                var cached = JSON.parse(localStorage.getItem(JOURNAL_CARD_KEY) || 'null');
+                if (cached && 'latest' in cached) renderJournalCard(cached.latest, true);
+            } catch (e) { /* ignore */ }
+        }
+
+        function renderJournalCard(latest, known) {
+            var card = document.getElementById('journalCard');
+            if (!card) return;
+            var e = latest || JOURNAL_SEED;
+            var hasEntries = !!latest;
+            var snippet = String(e.note || '');
+            if (snippet.length > 180) snippet = snippet.slice(0, 177).replace(/\s+\S*$/, '') + '...';
+            card.innerHTML = '<div class="kicker">From the guest journal</div>' +
+                (e.seed ? '' : '<div class="byline">' + escapeHtml(entryByline(e)) + (e.date ? ' <span style="color: var(--mute); font-weight: 400;">&middot; ' + escapeHtml(e.date) + '</span>' : '') + '</div>') +
+                '<div class="snippet">' + escapeHtml(snippet) + '</div>' +
+                '<div class="more">' + (hasEntries ? 'Read the journal or leave a note' : 'Tap to leave the first note') + ' <i class="ti ti-chevron-right" aria-hidden="true"></i></div>';
+            card.onclick = hasEntries ? function () { openJournal('home'); } : function () { openJournalPost('home'); };
+            card.style.display = 'block';
+        }
+
+        // Fallback: fetch the whole journal just to fill the card (only
+        // used after posting, or with an older script version).
         async function loadJournalCard() {
             var card = document.getElementById('journalCard');
             if (!card) return;
             try {
-                var entries = await loadJournal();
-                var e = entries.length ? entries[0] : JOURNAL_SEED;
-                var snippet = String(e.note || '');
-                if (snippet.length > 180) snippet = snippet.slice(0, 177).replace(/\s+\S*$/, '') + '...';
-                card.innerHTML = '<div class="kicker">From the guest journal</div>' +
-                    (e.seed ? '' : '<div class="byline">' + escapeHtml(entryByline(e)) + (e.date ? ' <span style="color: var(--mute); font-weight: 400;">&middot; ' + escapeHtml(e.date) + '</span>' : '') + '</div>') +
-                    '<div class="snippet">' + escapeHtml(snippet) + '</div>' +
-                    '<div class="more">' + (entries.length ? 'Read the journal or leave a note' : 'Tap to leave the first note') + ' <i class="ti ti-chevron-right" aria-hidden="true"></i></div>';
-                card.onclick = entries.length ? function () { openJournal('home'); } : function () { openJournalPost('home'); };
-                card.style.display = 'block';
+                var entries = await loadJournal(true);
+                applyJournalLatest(entries.length ? entries[0] : null);
             } catch (e) {
-                // Journal unavailable - leave the card hidden.
+                // Journal unavailable - leave the card as it is.
             }
         }
 
