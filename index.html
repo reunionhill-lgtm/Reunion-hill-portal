@@ -1753,10 +1753,11 @@
         var JOURNAL_CACHE = null;
         var JOURNAL_MAX = 1500;
         var JOURNAL_SEED = {
-            name: 'The guest journal',
+            seed: true,
+            name: '',
             family: '',
             date: '',
-            note: 'Who was there? What did you do? Share a special moment, or anything else you want to say. Be the first family to leave a note.'
+            note: 'Be the first visitor to leave a note about who was there and if there was a special moment or anything else you\'d like to share.'
         };
 
         async function loadJournal(force) {
@@ -1782,7 +1783,7 @@
                 var snippet = String(e.note || '');
                 if (snippet.length > 180) snippet = snippet.slice(0, 177).replace(/\s+\S*$/, '') + '...';
                 card.innerHTML = '<div class="kicker">From the guest journal</div>' +
-                    '<div class="byline">' + escapeHtml(entryByline(e)) + (e.date ? ' <span style="color: var(--mute); font-weight: 400;">&middot; ' + escapeHtml(e.date) + '</span>' : '') + '</div>' +
+                    (e.seed ? '' : '<div class="byline">' + escapeHtml(entryByline(e)) + (e.date ? ' <span style="color: var(--mute); font-weight: 400;">&middot; ' + escapeHtml(e.date) + '</span>' : '') + '</div>') +
                     '<div class="snippet">' + escapeHtml(snippet) + '</div>' +
                     '<div class="more">' + (entries.length ? 'Read the journal or leave a note' : 'Tap to leave the first note') + ' <i class="ti ti-chevron-right" aria-hidden="true"></i></div>';
                 card.onclick = entries.length ? function () { openJournal('home'); } : function () { openJournalPost('home'); };
@@ -1801,7 +1802,7 @@
                 var html = '<div class="check-wrap">' +
                     '<button type="button" class="btn btn-forest btn-block" style="margin-bottom: 16px;" onclick="closeSheetModal(); openJournalPost(\'' + (returnTo || 'home') + '\');"><i class="ti ti-pencil" aria-hidden="true"></i> Leave a note</button>';
                 if (entries.length === 0) {
-                    html += '<div class="entry-card seed"><div class="byline">' + escapeHtml(JOURNAL_SEED.name) + '</div><div class="note">' + escapeHtml(JOURNAL_SEED.note) + '</div></div>';
+                    html += '<div class="entry-card seed"><div class="note">' + escapeHtml(JOURNAL_SEED.note) + '</div></div>';
                 }
                 entries.forEach(function (e) {
                     html += '<div class="entry-card"><div class="byline">' + escapeHtml(entryByline(e)) + '</div>' +
