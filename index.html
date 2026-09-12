@@ -237,15 +237,15 @@
         .chapter .photo { width: 132px; flex-shrink: 0; min-height: 112px; }
         .chapter-text { padding: 16px 18px; flex: 1; min-width: 0; }
         .chapter-text h3 { font-size: 1.35em; line-height: 1.15; margin-bottom: 5px; }
-        .chapter-text p { color: var(--mute); font-size: 0.93em; line-height: 1.45; }
-        .chapter-text .who { color: var(--wood); font-size: 0.85em; margin-top: 7px; }
+        .chapter-text p { color: var(--mute); font-size: 1.02em; line-height: 1.5; }
+        .chapter-text .who { color: var(--wood); font-size: 0.95em; margin-top: 7px; }
 
         .footer-note {
             margin-top: 26px;
             padding: 18px 20px;
             border-top: 1px solid var(--line);
             color: var(--mute);
-            font-size: 0.9em;
+            font-size: 1em;
             line-height: 1.6;
             text-align: center;
         }
@@ -308,8 +308,8 @@
             margin: 0 auto;
             padding: 18px 16px 48px;
         }
-        .section-body .intro { color: var(--mute); margin: 4px 4px 18px; line-height: 1.55; }
-        .section-body h3.group { font-size: 1.1em; color: var(--wood); margin: 22px 4px 10px; }
+        .section-body .intro { color: var(--mute); margin: 4px 4px 18px; line-height: 1.55; font-size: 1.05em; }
+        .section-body h3.group { font-size: 1.3em; color: var(--wood); margin: 22px 4px 10px; }
 
         .action-row {
             display: flex;
@@ -341,8 +341,8 @@
             flex-shrink: 0;
         }
         .action-row .txt { flex: 1; min-width: 0; }
-        .action-row .txt strong { display: block; font-size: 1.02em; }
-        .action-row .txt span { display: block; color: var(--mute); font-size: 0.88em; line-height: 1.4; }
+        .action-row .txt strong { display: block; font-size: 1.15em; }
+        .action-row .txt span { display: block; color: var(--mute); font-size: 1em; line-height: 1.45; }
         .action-row .chev { color: var(--mute); flex-shrink: 0; font-size: 18px; }
 
         /* ---------- Feature screens (tools that open on top of a section) ---------- */
@@ -486,7 +486,7 @@
 </head>
 <body>
     <div class="container">
-        <div class="masthead">
+        <div class="masthead" id="masthead">
             <h1>Reunion Hill</h1>
             <p>Where the family gathers · Montreat, North Carolina</p>
         </div>
@@ -530,8 +530,8 @@
         <div class="main-content" id="mainContent">
             <div class="photo hero" data-img="home">
                 <div class="photo-shade">
-                    <h2>Welcome home</h2>
-                    <p>Plan a stay, settle in, and leave a memory behind.</p>
+                    <h2>Reunion Hill</h2>
+                    <p>Where the family gathers - Montreat NC</p>
                 </div>
             </div>
 
@@ -877,6 +877,7 @@
         }
 
         function showPortal(email) {
+            document.getElementById('masthead').style.display = 'none';
             document.getElementById('authChecking').style.display = 'none';
             document.getElementById('authSection').style.display = 'none';
             document.getElementById('mainContent').style.display = 'block';
@@ -886,6 +887,7 @@
         }
 
         function showLogin() {
+            document.getElementById('masthead').style.display = 'block';
             document.getElementById('authChecking').style.display = 'none';
             document.getElementById('authSection').style.display = 'block';
             document.getElementById('mainContent').style.display = 'none';
