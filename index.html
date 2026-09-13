@@ -284,6 +284,20 @@
             text-underline-offset: 3px;
         }
 
+        .manager-list {
+            margin-top: 18px;
+            padding: 18px 20px 4px;
+            border-top: 1px solid var(--line);
+            text-align: center;
+        }
+        .manager-list h3.group { font-size: 1.3em; color: var(--wood); margin: 0 0 10px; }
+        .manager-list .manager-row {
+            font-family: var(--serif);
+            font-size: var(--tile-line2);
+            color: var(--ink);
+            line-height: 1.7;
+        }
+
         /* ---------- Section pages (full-screen panels) ---------- */
         .modal {
             display: none;
@@ -615,8 +629,9 @@
                     <div class="photo" data-img="llc"></div>
                     <div class="chapter-text">
                         <h3>LLC business</h3>
-                        <p>Documents, the maintenance log, and a line to the webmaster.</p>
+                        <p>Documents, the maintenance log, and a line to the web manager.</p>
                         <div class="who">Financial manager: <span data-role-name="financial manager">the financial manager</span></div>
+                        <div class="who">Meeting manager: <span data-role-name="meeting manager">the meeting manager</span></div>
                     </div>
                 </button>
             </div>
@@ -624,6 +639,8 @@
             <div class="footer-note">
                 <button type="button" onclick="openModal('directoryModal')">Open the family directory</button>
             </div>
+
+            <div class="manager-list" id="managerList"></div>
         </div>
     </div>
 
@@ -745,9 +762,9 @@
                     <span class="txt"><strong>Maintenance log</strong><span>Repairs, recurring upkeep, and appliance records.</span></span>
                     <i class="ti ti-chevron-right chev" aria-hidden="true"></i>
                 </button>
-                <button class="action-row" onclick="emailWebmaster()">
+                <button class="action-row" onclick="emailWebManager()">
                     <span class="ico"><i class="ti ti-mail" aria-hidden="true"></i></span>
-                    <span class="txt"><strong>Contact the webmaster</strong><span>Feedback or ideas for this site.</span><span class="who">Webmaster: <span data-role-name="webmaster">the webmaster</span></span></span>
+                    <span class="txt"><strong>Contact the web manager</strong><span>Feedback or ideas for this site.</span><span class="who">Web manager: <span data-role-name="web manager">the web manager</span></span></span>
                     <i class="ti ti-chevron-right chev" aria-hidden="true"></i>
                 </button>
             </div>
@@ -1194,6 +1211,29 @@
                 var r = getRole(els[i].getAttribute('data-role-name'));
                 if (r && r.name) els[i].textContent = r.name;
             }
+            renderManagerList();
+        }
+
+        // Builds the "Who looks after what" list at the bottom of the
+        // home screen from every role found on the directory sheet.
+        // Add a Role to any family's tab and this list picks it up
+        // automatically - no code changes.
+        function renderManagerList() {
+            var el = document.getElementById('managerList');
+            if (!el || !ROLES) return;
+            var items = [];
+            Object.keys(ROLES).forEach(function (key) {
+                var r = ROLES[key];
+                if (r && r.role) items.push(r);
+            });
+            if (items.length === 0) { el.innerHTML = ''; return; }
+            items.sort(function (a, b) { return a.role.localeCompare(b.role); });
+            var html = '<h3 class="group">Who looks after what</h3>';
+            items.forEach(function (r) {
+                var label = r.role.charAt(0).toUpperCase() + r.role.slice(1);
+                html += '<div class="manager-row">' + escapeHtml(label) + ': ' + escapeHtml(r.name || '') + '</div>';
+            });
+            el.innerHTML = html;
         }
 
         var ROLES_CACHE_KEY = 'rh_portal_roles';
@@ -1366,13 +1406,13 @@
             });
         }
 
-        function emailWebmaster() {
+        function emailWebManager() {
             openMessageForm({
-                role: 'webmaster',
-                title: 'Contact the webmaster',
+                role: 'web manager',
+                title: 'Contact the web manager',
                 intro: 'Ideas, problems, or something that doesn\'t look right on the site.',
                 subject: 'Reunion Hill website',
-                body: greeting('webmaster') + '\n\nThanks,\n' + senderName()
+                body: greeting('web manager') + '\n\nThanks,\n' + senderName()
             });
         }
 
