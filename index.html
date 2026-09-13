@@ -437,7 +437,7 @@
         .code-card .code { font-family: var(--serif); font-size: 2em; color: var(--ink); letter-spacing: 0.08em; margin-top: 2px; }
         .rules-card { background: var(--paper); border: 1px solid var(--line); border-radius: 16px; padding: 14px 18px; margin-bottom: 16px; }
         .rules-card h3 { font-size: 1.2em; margin-bottom: 8px; }
-        .rules-card li { margin: 6px 0 6px 18px; line-height: 1.45; font-size: var(--body-size); }
+        .rules-card li { margin: 10px 0 10px 18px; line-height: 1.45; font-size: var(--body-size); }
         .check-item {
             display: flex; align-items: flex-start; gap: 14px;
             background: var(--paper); border: 1px solid var(--line); border-radius: 14px;
@@ -646,7 +646,7 @@
             </div>
 
             <div class="manager-list" id="managerList"></div>
-            <p class="role-invite">Want to help? There's room for more of these &mdash; organizing a family weekend at the house, or leading a workday on a project.</p>
+            <p class="role-invite">Want to help? There's room for more managers, such as someone to organize a maintenance weekend, plan family gatherings, or any other idea you're interested in.</p>
         </div>
     </div>
 
@@ -684,7 +684,7 @@
         <div class="modal-content">
             <button class="close-btn" onclick="closeModal('visitModal')" aria-label="Close"><i class="ti ti-x"></i></button>
             <div class="photo section-photo" data-img="visit">
-                <div class="photo-shade"><h2>Manage my visit</h2><p>Everything you need from the time you park in the driveway to the time you leave</p></div>
+                <div class="photo-shade"><h2>Manage my visit</h2><p>Everything you need to know from arrival to departure</p></div>
             </div>
             <div class="section-body">
                 <button class="action-row" onclick="openChecklist('checkin')">
@@ -1674,7 +1674,7 @@
             if (rules.length === 0) return '';
             var html = '<div class="rules-card">' + (withHeading ? '<h3>House rules</h3>' : '') + '<ul>';
             rules.forEach(function (r) {
-                html += '<li>' + escapeHtml(r.item) + (r.detail ? ' <span style="color: var(--mute);">' + escapeHtml(r.detail) + '</span>' : '') + '</li>';
+                html += '<li><strong>' + escapeHtml(r.item) + '</strong>' + (r.detail ? '<div style="color: var(--mute); font-size: 0.95em; margin-top: 2px;">' + escapeHtml(r.detail) + '</div>' : '') + '</li>';
             });
             return html + '</ul></div>';
         }
