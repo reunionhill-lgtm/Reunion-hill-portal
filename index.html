@@ -616,7 +616,6 @@
                     <div class="chapter-text">
                         <h3>Plan my visit</h3>
                         <p>Reserve dates, see who's coming, and offer a hand while you're there.</p>
-                        <div class="who">Calendar manager: <span data-role-name="calendar manager">the calendar manager</span></div>
                     </div>
                 </button>
                 <button class="chapter" onclick="openModal('visitModal')">
@@ -624,7 +623,6 @@
                     <div class="chapter-text">
                         <h3>Manage my visit</h3>
                         <p>Check in, house rules, report a problem, check out.</p>
-                        <div class="who">House manager: <span data-role-name="house manager">the house manager</span></div>
                     </div>
                 </button>
                 <button class="chapter" onclick="openModal('memoriesModal')">
@@ -639,8 +637,6 @@
                     <div class="chapter-text">
                         <h3>LLC business</h3>
                         <p>Documents, the maintenance log, and a line to the web manager.</p>
-                        <div class="who">Financial manager: <span data-role-name="financial manager">the financial manager</span></div>
-                        <div class="who">Meeting manager: <span data-role-name="meeting manager">the meeting manager</span></div>
                     </div>
                 </button>
             </div>
@@ -703,7 +699,7 @@
                 </button>
                 <button class="action-row" onclick="openChecklist('checkout')">
                     <span class="ico"><i class="ti ti-door-exit" aria-hidden="true"></i></span>
-                    <span class="txt"><strong>Check out</strong><span>Close up the house and let the house manager know you've left.</span><span class="who">House manager: <span data-role-name="house manager">the house manager</span></span></span>
+                    <span class="txt"><strong>Check out</strong><span>Close up the house and let the house manager know you've left.</span></span>
                     <i class="ti ti-chevron-right chev" aria-hidden="true"></i>
                 </button>
                 <h3 class="group">Something needs attention?</h3>
@@ -764,12 +760,12 @@
             <div class="section-body">
                 <button class="action-row" onclick="openLLCDocuments()">
                     <span class="ico"><i class="ti ti-file-text" aria-hidden="true"></i></span>
-                    <span class="txt"><strong>LLC documents</strong><span>Financials, meeting agendas, and minutes.</span><span class="who">Financial manager: <span data-role-name="financial manager">the financial manager</span></span></span>
+                    <span class="txt"><strong>LLC documents</strong><span>Financials, meeting agendas, and minutes.</span></span>
                     <i class="ti ti-chevron-right chev" aria-hidden="true"></i>
                 </button>
                 <button class="action-row" onclick="openModal('maintenanceModal')">
                     <span class="ico"><i class="ti ti-clipboard-list" aria-hidden="true"></i></span>
-                    <span class="txt"><strong>Maintenance log</strong><span>Repairs, recurring upkeep, and appliance records.</span></span>
+                    <span class="txt"><strong>Maintenance log</strong><span>Repairs, recurring upkeep, and appliance records.</span><span class="who">Maintenance manager: <span data-role-name="maintenance manager">the maintenance manager</span></span></span>
                     <i class="ti ti-chevron-right chev" aria-hidden="true"></i>
                 </button>
                 <button class="action-row" onclick="emailWebManager()">
@@ -2044,6 +2040,21 @@
             document.body.style.overflow = 'hidden';
         }
 
+        // Which manager to show under an LLC folder, matched by the
+        // folder's name: "financ..." -> financial manager; "meeting",
+        // "agenda", or "minutes" -> meeting manager. Rename a folder in
+        // Drive and the label follows; no code changes.
+        function llcFolderRole(folderName) {
+            var n = String(folderName || '').toLowerCase();
+            var title = null;
+            if (/financ/.test(n)) title = 'financial manager';
+            else if (/meeting|agenda|minute/.test(n)) title = 'meeting manager';
+            if (!title) return '';
+            var r = getRole(title);
+            if (!r || !r.name) return '';
+            return title.charAt(0).toUpperCase() + title.slice(1) + ': ' + r.name;
+        }
+
         function renderLlcBrowser() {
             var node = currentLlcNode();
             var titleEl = document.getElementById('llcTitle');
@@ -2056,9 +2067,11 @@
                 html += '<p style="text-align: center; color: var(--mute); padding: 40px; font-weight: 700;">This folder is empty.</p>';
             }
             node.folders.forEach(function (sub, i) {
+                var who = llcFolderRole(sub.name);
                 html += '<div class="list-card" onclick="llcOpenFolder(' + i + ')">' +
                     '<i class="ti ti-folder" style="font-size: 24px; color: var(--gold); flex-shrink: 0;" aria-hidden="true"></i>' +
-                    '<span style="font-weight: 700;">' + escapeHtml(sub.name) + '</span>' +
+                    '<span style="font-weight: 700;">' + escapeHtml(sub.name) +
+                    (who ? '<span style="display: block; font-weight: 500; color: var(--wood); font-size: var(--tile-line3); margin-top: 4px;">' + escapeHtml(who) + '</span>' : '') + '</span>' +
                     '<i class="ti ti-chevron-right" style="margin-left: auto; color: var(--mute); flex-shrink: 0;" aria-hidden="true"></i>' +
                     '</div>';
             });
