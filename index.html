@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reunion Hill Family Portal</title>
-    <!-- Last published: September 13, 2026 (rebuild) -->
+    <!-- Last published: October 28, 2026 -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
@@ -765,9 +765,9 @@
                     <span class="txt"><strong>LLC documents</strong><span>Financials, meeting agendas, and minutes.</span></span>
                     <i class="ti ti-chevron-right chev" aria-hidden="true"></i>
                 </button>
-                <button class="action-row" onclick="openModal('maintenanceModal')">
+                <button class="action-row" onclick="openMaintenance()">
                     <span class="ico"><i class="ti ti-clipboard-list" aria-hidden="true"></i></span>
-                    <span class="txt"><strong>Maintenance log</strong><span>Repairs, recurring upkeep, and appliance records.</span><span class="who">Maintenance manager: <span data-role-name="maintenance manager">the maintenance manager</span></span></span>
+                    <span class="txt"><strong>Maintenance log</strong><span>The house's repair and upkeep records.</span><span class="who">Maintenance manager: <span data-role-name="maintenance manager">the maintenance manager</span></span></span>
                     <i class="ti ti-chevron-right chev" aria-hidden="true"></i>
                 </button>
                 <button class="action-row" onclick="emailWebManager()">
@@ -849,18 +849,13 @@
             <button class="close-btn" onclick="closeModal('maintenanceModal')" aria-label="Close"><i class="ti ti-x"></i></button>
             <div class="modal-topbar"><h2>Maintenance log</h2></div>
             <div class="feature-body padded">
-                <div class="family-tabs">
-                    <button class="family-tab" onclick="showMaintenanceTab('repairs')">Repairs &amp; Updates</button>
-                    <button class="family-tab" onclick="showMaintenanceTab('recurring')">Recurring Maint</button>
-                    <button class="family-tab" onclick="showMaintenanceTab('appliances')">Appliances</button>
-                </div>
+                <!-- Buttons are built from the spreadsheet's own tab names (see openMaintenance). -->
+                <div class="family-tabs" id="maintenanceTabs"></div>
                 <div class="directory-content" id="maintenanceContent">
                     <div style="text-align: center; padding: 30px 10px;">
                         <div class="feature-icon"><i class="ti ti-tool" aria-hidden="true"></i></div>
                         <h3 style="margin-bottom: 14px; font-size: 1.3em;">The house's record</h3>
-                        <p style="color: var(--mute); line-height: 1.6;">
-                            Choose a tab above. Repairs and updates, the recurring upkeep schedule, and the appliance inventory each open here.
-                        </p>
+                        <p style="color: var(--mute); line-height: 1.6;" id="maintenanceHint">Loading the log...</p>
                     </div>
                 </div>
             </div>
@@ -885,12 +880,6 @@
         // ============================================================
         var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw0u8aFDoSuFFvfmSXcmkeFEbhU9kKo4Io_IUWWC15W-DqPHY9O7zIwFooQ1MGDYSnt/exec';
         var ADMIN_EMAIL = 'reunionhill@gmail.com';
-        // Maintenance log tab titles (the data itself arrives from the service)
-        var MAINTENANCE_TABS = {
-            'repairs': 'Repairs & Updates',
-            'recurring': 'Recurring Maint',
-            'appliances': 'Appliances'
-        };
         var CACHE_KEY = 'rh_portal_verified_email';
         var PENDING_EMAIL_KEY = 'rh_portal_pending_email';
         var IMAGES_CACHE_KEY = 'rh_portal_images';
@@ -1545,9 +1534,52 @@
             showSheetTab('directory', familyName, title, 'directoryModal');
         }
 
-        function showMaintenanceTab(tabKey) {
-            var title = MAINTENANCE_TABS[tabKey] || MAINTENANCE_TABS['repairs'];
-            showSheetTab('maintenance', title, title, 'maintenanceModal');
+        // ---- Maintenance log ----
+        // The buttons come from whatever tabs the ReunionHillMaintenanceLog
+        // spreadsheet has, in the sheet's own order. Rename, add, remove,
+        // or reorder tabs in the sheet and the site follows - no code
+        // changes. Blank tabs are skipped. The log is re-read each time
+        // this screen opens, so sheet edits show up right away.
+        function maintenanceTabHasData(t) {
+            return (t.rows || []).some(function (row) {
+                return row.some(function (cell) { return String(cell).trim() !== ''; });
+            });
+        }
+
+        async function openMaintenance() {
+            openModal('maintenanceModal');
+            var bar = document.getElementById('maintenanceTabs');
+            var hint = document.getElementById('maintenanceHint');
+            bar.innerHTML = '';
+            hint.textContent = 'Loading the log...';
+            hint.style.color = 'var(--mute)';
+            try {
+                var res = await callService('maintenance');
+                if (!res || !res.ok || !res.tabs) throw new Error((res && res.error) || 'service error');
+                MAINT_CACHE = res.tabs.filter(maintenanceTabHasData);
+                if (MAINT_CACHE.length === 0) {
+                    hint.textContent = 'Nothing in the log yet.';
+                    return;
+                }
+                var html = '';
+                MAINT_CACHE.forEach(function (t, i) {
+                    html += '<button class="family-tab" onclick="showMaintenanceTab(' + i + ')">' + escapeHtml(t.name) + '</button>';
+                });
+                bar.innerHTML = html;
+                hint.textContent = 'Choose a tab above to open that part of the log.';
+            } catch (e) {
+                console.error('Maintenance log:', e);
+                hint.textContent = 'Couldn\'t load the log right now. Please close this and try again.';
+                hint.style.color = '#7A2C21';
+            }
+        }
+
+        function showMaintenanceTab(i) {
+            var tab = MAINT_CACHE && MAINT_CACHE[i];
+            if (!tab) return;
+            closeModal('maintenanceModal');
+            openTableViewer(tab.name, 'maintenanceModal');
+            setTableViewerContent(renderDirectoryTable(tab.rows));
         }
 
         // Builds an email to the admin pre-filled with the signed-in
