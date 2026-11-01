@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Reunion Hill Family Portal</title>
-    <!-- Last published: October 28, 2026 -->
+    <!-- Last published: October 31, 2026 (check-in email) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
@@ -1776,7 +1776,10 @@
             }
             html += '<div class="check-actions">';
             if (isIn) {
-                html += '<button type="button" class="btn btn-forest btn-block" onclick="finishCheckin()"><i class="ti ti-check" aria-hidden="true"></i> I\'m checked in</button>';
+                html += '<div class="form-group" style="margin-top: 8px;"><label for="checkinNotes">Anything the house manager should know? (optional)</label>' +
+                    '<textarea id="checkinNotes" placeholder="House was chilly, out of paper towels, a light bulb is out..."></textarea></div>' +
+                    '<div class="login-error" id="checkinError"></div>' +
+                    '<button type="button" class="btn btn-forest btn-block" id="checkinBtn" onclick="finishCheckin()"><i class="ti ti-send" aria-hidden="true"></i> I\'m checked in - notify the house manager</button>';
             } else {
                 html += '<div class="form-group" style="margin-top: 8px;"><label for="checkoutNotes">Anything the house manager should know? (optional)</label>' +
                     '<textarea id="checkoutNotes" placeholder="Low on propane, a chair with a wobbly leg, leftovers in the fridge..."></textarea></div>' +
@@ -1803,13 +1806,51 @@
             renderChecklist(kind);
         }
 
-        function finishCheckin() {
-            clearCheckState('checkin');
-            setTableViewerContent('<div style="text-align: center; padding: 40px 20px;">' +
-                '<div class="feature-icon"><i class="ti ti-home-heart" aria-hidden="true"></i></div>' +
-                '<h3 style="margin-bottom: 12px; font-size: 1.35em;">Welcome to Reunion Hill</h3>' +
-                '<p style="color: var(--ink); line-height: 1.6; margin-bottom: 24px;">Enjoy your stay. House rules are one tap away if you need them.</p>' +
-                '<button type="button" class="btn btn-forest" onclick="closeSheetModal()">Done</button></div>');
+        // Sends the house manager a summary of the check-in list (what
+        // was done, what wasn't, and any notes), then shows the welcome.
+        async function finishCheckin() {
+            var items = houseRows(houseTab('checkin')).filter(function (r) { return !/door\s*code/i.test(r.item); });
+            var state = readCheckState('checkin');
+            var doneList = [], missedList = [];
+            items.forEach(function (r, i) { (state[i] ? doneList : missedList).push(r.item); });
+            var notes = (document.getElementById('checkinNotes') || { value: '' }).value.trim();
+            var err = document.getElementById('checkinError');
+            var btn = document.getElementById('checkinBtn');
+            if (err) err.style.display = 'none';
+            if (btn) { btn.disabled = true; btn.textContent = 'Sending...'; }
+            var who = senderName();
+            var body = greeting('house manager') +
+                who + ' has checked in at Reunion Hill.\n\n' +
+                (items.length === 0 ? '' :
+                    (missedList.length ? 'NOT DONE (' + missedList.length + '):\n- ' + missedList.join('\n- ') + '\n\n' : 'Everything on the check-in list was done.\n\n') +
+                    (doneList.length ? 'Done (' + doneList.length + '):\n- ' + doneList.join('\n- ') + '\n\n' : '')) +
+                (notes ? 'Notes from ' + who + ':\n' + notes + '\n\n' : '') +
+                'Sent automatically from the portal\'s check-in screen.';
+            try {
+                var res = await callService('send', {
+                    role: 'house manager',
+                    subject: 'Check-in: ' + who + (missedList.length ? ' (' + missedList.length + ' item' + (missedList.length > 1 ? 's' : '') + ' not done)' : ''),
+                    body: body
+                });
+                if (!res || !res.ok || !res.sent) throw new Error((res && res.error) || 'service error');
+                clearCheckState('checkin');
+                setTableViewerContent('<div style="text-align: center; padding: 40px 20px;">' +
+                    '<div class="feature-icon"><i class="ti ti-home-heart" aria-hidden="true"></i></div>' +
+                    '<h3 style="margin-bottom: 12px; font-size: 1.35em;">Welcome to Reunion Hill</h3>' +
+                    '<p style="color: var(--ink); line-height: 1.6; margin-bottom: 24px;">' + escapeHtml(res.sent.to || 'The house manager') + ' knows you\'ve arrived. Enjoy your stay. House rules are one tap away if you need them.</p>' +
+                    '<button type="button" class="btn btn-forest" onclick="closeSheetModal()">Done</button></div>');
+            } catch (e) {
+                console.error('Check-in send failed:', e);
+                if (err) {
+                    err.innerHTML = 'Couldn\'t send the notification just now. Please try again in a minute.' +
+                        '<br><span style="font-size: 0.85em; opacity: 0.8;">Technical detail: ' + escapeHtml(e && e.message ? e.message : e) + '</span>';
+                    err.style.display = 'block';
+                }
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="ti ti-send" aria-hidden="true"></i> I\'m checked in - notify the house manager';
+                }
+            }
         }
 
         async function finishCheckout() {
