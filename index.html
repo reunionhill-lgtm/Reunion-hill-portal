@@ -1459,21 +1459,57 @@
                 .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
         }
 
-        function renderDirectoryTable(rows) {
-            var cleaned = (rows || []).filter(function (row) {
-                return row.some(function (cell) { return String(cell).trim() !== ''; });
+        // Draws a sheet tab as a table. The service sends plain text in
+        // tab.rows, plus optional formatting copied from the sheet:
+        // tab.bold (whole-cell bold), tab.fill (cell fill colour, '' for
+        // none) and tab.runs (cells where only some words are bold, as
+        // [text, 1/0] pairs). Formatting arrives as data, never as HTML,
+        // and every piece of text is escaped here.
+        function cellFill(tab, r, c) {
+            var f = tab && tab.fill && tab.fill[r] ? String(tab.fill[r][c] || '') : '';
+            return /^#[0-9a-fA-F]{6}$/.test(f) ? f : '';
+        }
+
+        function isDarkFill(hex) {
+            var n = parseInt(hex.slice(1), 16);
+            var lum = 0.299 * ((n >> 16) & 255) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255);
+            return lum < 140;
+        }
+
+        function cellHtml(tab, r, c, text) {
+            var runs = tab && tab.runs && tab.runs[r] ? tab.runs[r][c] : null;
+            if (Array.isArray(runs) && runs.length) {
+                return runs.map(function (part) {
+                    var t = escapeHtml(part && part[0] != null ? part[0] : '');
+                    return (part && part[1]) ? '<strong>' + t + '</strong>' : t;
+                }).join('');
+            }
+            var bold = tab && tab.bold && tab.bold[r] ? !!tab.bold[r][c] : false;
+            return bold ? '<strong>' + escapeHtml(text) + '</strong>' : escapeHtml(text);
+        }
+
+        function renderDirectoryTable(rows, tab) {
+            var kept = [];
+            (rows || []).forEach(function (row, r) {
+                if (row.some(function (cell) { return String(cell).trim() !== ''; })) kept.push(r);
             });
-            if (cleaned.length === 0) {
+            if (kept.length === 0) {
                 return '<p style="padding: 20px; color: var(--mute);">Nothing here yet.</p>';
             }
             var html = '<div style="overflow-x: auto;"><table style="border-collapse: collapse; width: 100%; font-size: 0.95em; background: var(--paper);">';
-            cleaned.forEach(function (row, i) {
+            kept.forEach(function (r, i) {
                 html += '<tr>';
-                row.forEach(function (cell) {
+                rows[r].forEach(function (cell, c) {
                     var tag = (i === 0) ? 'th' : 'td';
-                    html += '<' + tag + ' style="border: 1px solid var(--line); padding: 9px 12px; text-align: left; vertical-align: top;' +
-                        (i === 0 ? ' background: var(--cream); color: var(--wood);' : '') + '">' +
-                        escapeHtml(cell) + '</' + tag + '>';
+                    var fill = cellFill(tab, r, c);
+                    var colours = '';
+                    if (fill) {
+                        colours = ' background: ' + fill + '; color: ' + (isDarkFill(fill) ? '#FFFFFF' : '#1F1A14') + ';';
+                    } else if (i === 0) {
+                        colours = ' background: var(--cream); color: var(--wood);';
+                    }
+                    html += '<' + tag + ' style="border: 1px solid var(--line); padding: 9px 12px; text-align: left; vertical-align: top; white-space: pre-wrap;' +
+                        colours + '">' + cellHtml(tab, r, c, cell) + '</' + tag + '>';
                 });
                 html += '</tr>';
             });
@@ -1522,7 +1558,7 @@
                     if (String(t.name).toLowerCase().indexOf(matchName.toLowerCase()) !== -1) tab = t;
                 });
                 if (!tab) throw new Error('tab not found: ' + matchName);
-                setTableViewerContent(renderDirectoryTable(tab.rows));
+                setTableViewerContent(renderDirectoryTable(tab.rows, tab));
             } catch (error) {
                 console.error('Error loading ' + kind + ':', error);
                 setTableViewerContent(VIEWER_ERROR_HTML);
@@ -1579,7 +1615,7 @@
             if (!tab) return;
             closeModal('maintenanceModal');
             openTableViewer(tab.name, 'maintenanceModal');
-            setTableViewerContent(renderDirectoryTable(tab.rows));
+            setTableViewerContent(renderDirectoryTable(tab.rows, tab));
         }
 
         // Builds an email to the admin pre-filled with the signed-in
